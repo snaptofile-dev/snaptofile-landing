@@ -38,9 +38,6 @@
 <script>
   const KIT_FORM_ID     = "9341868";                     // Kit form: SnapToFile Trial
   const KIT_ACCOUNT_UID = "89da877a42";                  // Kit account UID
-  // Direct download fallback — served after successful submit so user can start right away.
-  // Host the current trial build at this URL (e.g. on your CDN or Vercel /public).
-  const DIRECT_DOWNLOAD_URL = "https://snaptofile.com/download/SnapToFile_Trial_2026-04.html";
   const TRIAL_BUILD_LABEL   = "Build 2026-04";
   const TRIAL_EXPIRES_LABEL = "Valid through June 1, 2026";
 </script>
@@ -937,8 +934,8 @@ footer{
         <div class="eyebrow gate-eyebrow">Free trial · No credit card</div>
         <h2>Send me the <em>trial build</em>.</h2>
         <p class="gate-sub">
-          Drop your email and we'll send the current SnapToFile trial.
-          You'll also get the download link on-screen right away — no waiting.
+          Drop your email and we'll send the current SnapToFile trial to your inbox.
+          One-click confirm, then download — usually arrives within a minute.
         </p>
 
         <div class="gate-meta">
@@ -985,18 +982,15 @@ footer{
         <div class="gate-check">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h3>You're on the list. <em>Here's your trial.</em></h3>
+        <h3>Check your inbox. <em>Your trial is on its way.</em></h3>
         <p>
-          Click below to download SnapToFile right now. We've also sent a copy of the link to
-          <b id="gate-success-email">your inbox</b> for later — check your spam folder if you don't see it in a minute.
+          We just sent the download link to <b id="gate-success-email">your inbox</b>.
+          Click the confirmation button in that email to get SnapToFile.
+          It usually arrives within a minute — peek at your spam folder if it doesn't.
         </p>
-        <a id="gate-download-link" href="#" class="gate-btn" download>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          <span id="gate-download-label">Download the trial</span>
-        </a>
         <div class="gate-success-mail">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <span>Not seeing the email? Look for sender <b>SnapToFile</b>. Add us to contacts so future builds land in your inbox.</span>
+          <span>Look for sender <b>SnapToFile</b>. Add us to contacts so future builds land in your inbox.</span>
         </div>
       </div>
     </div>
@@ -1114,7 +1108,6 @@ footer{
 document.getElementById('gate-build').textContent    = TRIAL_BUILD_LABEL;
 document.getElementById('gate-expires').textContent  = TRIAL_EXPIRES_LABEL;
 document.getElementById('foot-build').textContent    = TRIAL_BUILD_LABEL + ' · ' + TRIAL_EXPIRES_LABEL;
-document.getElementById('gate-download-link').href   = DIRECT_DOWNLOAD_URL;
 
 /* ──────────────────────────────────────────────────────────────
    Smooth scroll for in-page anchors
@@ -1218,18 +1211,6 @@ form.addEventListener('submit', async (e) => {
     successEm.textContent = email;
     formWrap.style.display = 'none';
     successEl.classList.add('show');
-
-    // Fire the download automatically so the user gets the file
-    // even if they don't click the button. Many browsers allow
-    // this because we're inside a user-gesture-initiated handler.
-    setTimeout(() => {
-      const a = document.createElement('a');
-      a.href = DIRECT_DOWNLOAD_URL;
-      a.download = '';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }, 600);
 
     // Scroll success card into view
     document.getElementById('download').scrollIntoView({behavior:'smooth',block:'start'});
