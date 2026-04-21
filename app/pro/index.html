@@ -899,7 +899,7 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-04-21 15:30 UTC · dial';
+const BUILD_STAMP       = '2026-04-21 17:30 UTC · xform-pan';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
@@ -1015,6 +1015,7 @@ let cropDrag=false, cropDType=null, cropDStart=null, cropSnap=null;
 let panActive=false, panStart=null, panOrig=null;
 let spacePan=false; // true while Space is held — temporarily pans from any tool
 let prePanTool=null; // tool to restore after space-pan
+let xformPan=false; // Pan mode toggle for the Transform tab (Pro only)
 let txtPend=null;
 const COLORS=['#ff0000','#ff6600','#ffdd00','#00dd44','#0099ff','#ff00cc','#ffffff','#000000'];
 const CLEV = IS_PRO
@@ -2035,10 +2036,29 @@ document.querySelectorAll('.lbtab').forEach(t=>{
     lbTab=t.dataset.tab;
     document.querySelectorAll('.lbtab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
     cropping=false;clearCropCanvas();
-    $('lb-dc').style.cursor=lbTab==='annot'?'crosshair':'default';
+    xformPan=false; // any tab change exits Transform pan mode
+    $('lb-dc').style.cursor=lbCursorForState();
     renderPanel();
   }
 });
+
+/* Single source of truth for the lightbox draw-canvas cursor.
+   Called from tab-switch, mouseup, keyup, and tool-toggle handlers
+   so cursor restoration is consistent across all interaction modes. */
+function lbCursorForState(){
+  if(spacePan) return 'grab';
+  if(lbTab==='annot'){
+    if(lbTool==='pan') return 'grab';
+    if(lbTool==='text') return 'text';
+    return 'crosshair';
+  }
+  if(lbTab==='xform'){
+    if(xformPan) return 'grab';
+    if(cropping) return 'crosshair';
+    return 'default';
+  }
+  return 'default';
+}
 
 function renderPanel(){
   const p=$('lb-panel');
@@ -2089,7 +2109,7 @@ function buildXformPanel(){
   <button class="lp-cta" data-upgrade="xform">Upgrade to Pro</button>
 </div>`;
   }
-  return`<div class="tg"><div class="tg-lbl">Zoom</div><div class="tr"><button class="ltool" id="xz-out">➖</button><button class="ltool" id="xz-fit">⊞ Fit</button><button class="ltool" id="xz-100">1:1</button><button class="ltool" id="xz-in">➕</button></div></div>
+  return`<div class="tg"><div class="tg-lbl">View</div><div class="tr"><button class="ltool${xformPan?' on':''}" id="xp-tog">✋ Pan</button><button class="ltool" id="xz-out">➖</button><button class="ltool" id="xz-fit">⊞ Fit</button><button class="ltool" id="xz-100">1:1</button><button class="ltool" id="xz-in">➕</button></div></div>
 <div class="ldiv"></div>
 <div class="tg"><div class="tg-lbl">Crop Tool</div>
 <div style="font-size:11px;color:var(--slatel);margin-bottom:8px;line-height:1.55">Draw a selection box on the photo, drag handles to adjust, then click Apply.<br><em style="color:#f59e0b">Note: applying crop clears annotations.</em></div>
@@ -2097,7 +2117,8 @@ function buildXformPanel(){
 ${lbPh()?.cropSrc?`<button class="btn btn-danger btn-sm" id="xc-reset" style="width:100%;justify-content:center;margin-top:8px">↩ Reset to Original</button>`:''}
 </div>
 <div class="ldiv"></div>
-<div class="tg"><div class="tg-lbl">Rotate</div><div class="tr"><button class="ltool" id="xr-l">↺ 90° Left</button><button class="ltool" id="xr-r">↻ 90° Right</button></div></div>`
+<div class="tg"><div class="tg-lbl">Rotate</div><div class="tr"><button class="ltool" id="xr-l">↺ 90° Left</button><button class="ltool" id="xr-r">↻ 90° Right</button></div></div>
+<div style="margin-top:9px;font-size:10px;color:var(--slatel);line-height:1.6">Scroll to zoom · Two-finger drag on mobile<br>✋ Pan tool or <kbd style="background:#334155;padding:1px 4px;border-radius:3px;font-size:9px">Space</kbd>+drag to pan · Alt+drag also pans</div>`
 }
 
 function buildInfoPanel(){
@@ -2140,15 +2161,27 @@ function bindPanel(){
   // Xform
   const xzo=$('xz-out'),xzf=$('xz-fit'),xz1=$('xz-100'),xzi=$('xz-in');
   if(xzo)xzo.onclick=()=>setZ(lbZoom*.75);if(xzf)xzf.onclick=()=>fitZoom();if(xz1)xz1.onclick=()=>setZ(1);if(xzi)xzi.onclick=()=>setZ(lbZoom*1.33);
+  // Pan toggle (Pro Transform tab) — mutually exclusive with Crop
+  const xpt=$('xp-tog');if(xpt)xpt.onclick=()=>{
+    xformPan=!xformPan;
+    if(xformPan && cropping){
+      // Entering Pan exits Crop
+      cropping=false;
+      const dc=$('lb-dc');if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height);}
+    }
+    $('lb-dc').style.cursor=lbCursorForState();
+    renderPanel();
+  };
   const xct=$('xc-tog');if(xct)xct.onclick=()=>{
     cropping=!cropping;
     if(cropping){
+      xformPan=false; // Entering Crop exits Pan
       initCrop();
       $('lb-dc').style.cursor='crosshair';
     } else {
       // Clear the crop overlay from draw canvas
       const dc=$('lb-dc');if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height);}
-      $('lb-dc').style.cursor='default';
+      $('lb-dc').style.cursor=lbCursorForState();
     }
     renderPanel();
   };
@@ -2313,15 +2346,7 @@ window.addEventListener('mousemove',e=>{
 window.addEventListener('mouseup',()=>{
   if(!panActive)return;
   panActive=false;
-  // Restore correct cursor
-  if(spacePan){
-    $('lb-dc').style.cursor='grab';
-  } else if(lbTool==='pan'){
-    $('lb-dc').style.cursor='grab';
-  } else {
-    const cursors={text:'text'};
-    $('lb-dc').style.cursor=cursors[lbTool]||'crosshair';
-  }
+  $('lb-dc').style.cursor=lbCursorForState();
 });
 
 /* ─── DRAW ────────────────────────────────────────────── */
@@ -2334,7 +2359,7 @@ window.addEventListener('mouseup',()=>{
     const p=gp(e);
 
     // ── PAN TOOL or SPACE+drag ──
-    if(lbTab==='annot'&&(lbTool==='pan'||spacePan)){
+    if((lbTab==='annot'&&(lbTool==='pan'||spacePan)) || (lbTab==='xform'&&!cropping&&(xformPan||spacePan))){
       e.preventDefault();
       panActive=true;
       panStart={x:e.clientX,y:e.clientY};
@@ -2434,20 +2459,23 @@ window.addEventListener('mouseup',()=>{
   // Touch support — pan tool or two-finger touch = pan; single finger = draw
   let touchPanStart=null, touchPanOrig=null;
   dc.addEventListener('touchstart',e=>{
-    if(lbTab!=='annot')return;
-    // Two fingers OR pan tool = pan
-    if(e.touches.length===2||(lbTool==='pan')){
+    // Two-finger always pans; single-finger pans when a pan-mode is active.
+    // Crop mode in Transform tab takes precedence over Pan.
+    const wantPan = e.touches.length===2
+      || (lbTab==='annot' && lbTool==='pan')
+      || (lbTab==='xform' && xformPan && !cropping);
+    if(wantPan){
       e.preventDefault();
       const t=e.touches[0];
       touchPanStart={x:t.clientX,y:t.clientY};
       const a=$('lb-area');touchPanOrig={x:a.scrollLeft,y:a.scrollTop};
       return;
     }
+    if(lbTab!=='annot')return; // single-finger drawing only in Annotate
     e.preventDefault();
     const p=gp(e);lbDrawing=true;lbDStart=p;lbDCur=p;if(lbTool==='freehand')lbDPts=[p];
   },{passive:false});
   dc.addEventListener('touchmove',e=>{
-    if(lbTab!=='annot')return;
     if(touchPanStart){
       e.preventDefault();
       const t=e.touches[0];
@@ -2456,6 +2484,7 @@ window.addEventListener('mouseup',()=>{
       a.scrollTop=touchPanOrig.y-(t.clientY-touchPanStart.y);
       return;
     }
+    if(lbTab!=='annot')return;
     if(!lbDrawing)return;
     e.preventDefault();
     const p=gp(e);lbDCur=p;if(lbTool==='freehand')lbDPts.push(p);
@@ -3433,16 +3462,7 @@ function buildReport(pds,meta){
       +'</div>';
   }
 
-  // ── Pages 2+ — 2 photos per page; last page with 1 photo leaves bottom blank ──
-  const remaining=pds.slice(1);
-  const pages=[];
-  for(let i=0;i<remaining.length;i+=2) pages.push(remaining.slice(i,i+2));
-
-  // Total page count: cover + however many photo pages we ended up with.
-  // Known before rendering, so we can stamp "Page N of M" on every page.
-  const totalPages = 1 + pages.length;
-
-  // ── Page 1 (cover) ──
+  // ── Page 1 ──
   // Fixed page height. Photo 1 is absolutely pinned to the bottom.
   // Notes section fills all space between the header and the photo.
   const page1='<div class="pg-wrap pg-cover">'
@@ -3462,11 +3482,14 @@ function buildReport(pds,meta){
     +coverPhotoBlock
     +'</div>'
     +(IS_PRO ? '' : '<div class="stf-wm stf-wm-cover">'+PRO_WATERMARK+'</div>')
-    +'<div class="pg-num pg-num-cover">Page 1 of '+totalPages+'</div>'
     +'</div>';
 
-  const photoPageCards=pages.map(function(pair, pIdx){
-    const pageNum = pIdx + 2;  // cover is page 1; first photo page is page 2
+  // ── Pages 2+ — 2 photos per page; last page with 1 photo leaves bottom blank ──
+  const remaining=pds.slice(1);
+  const pages=[];
+  for(let i=0;i<remaining.length;i+=2) pages.push(remaining.slice(i,i+2));
+
+  const photoPageCards=pages.map(function(pair){
     const runHdr='<div class="pg-header">'
       +(meta.rptName?'<strong>'+esc(meta.rptName)+'</strong>':'<span>Photo Documentation Report</span>')
       +'<span>'+(meta.claim?refLabel+' '+esc(meta.claim):'')+(ds?' &nbsp;·&nbsp; '+ds:'')+'</span>'
@@ -3482,11 +3505,7 @@ function buildReport(pds,meta){
         +'</div></div>';
     }).join('');
     // Last page with 1 photo: bottom is simply blank — no filler
-    return '<div class="pg-wrap pg-photo">'
-      +runHdr+rows
-      +(IS_PRO ? '' : '<div class="stf-wm">'+PRO_WATERMARK+'</div>')
-      +'<div class="pg-num">Page '+pageNum+' of '+totalPages+'</div>'
-      +'</div>';
+    return '<div class="pg-wrap pg-photo">'+runHdr+rows+(IS_PRO ? '' : '<div class="stf-wm">'+PRO_WATERMARK+'</div>')+'</div>';
   }).join('');
 
   // ── Report CSS ──
@@ -3501,8 +3520,7 @@ function buildReport(pds,meta){
     +'.co-tag{font-size:10px;color:rgba(255,255,255,.65);margin-top:1px}'
     +'.co-contact{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px;font-size:9px;color:rgba(255,255,255,.75)}'
     // Standard page wrapper — no padding on cover (cover-body handles its own)
-    // position:relative is a positioning context for the absolute .pg-num.
-    +'.pg-wrap{padding:14px 18px;position:relative}'
+    +'.pg-wrap{padding:14px 18px}'
     // Cover page: fixed height = one printed page. Photo pinned to bottom via absolute positioning.
     +'.pg-cover{position:relative;height:10.2in;overflow:hidden;padding:0}'
     // Upper body: from top to just above the photo. Padding applied here.
@@ -3544,12 +3562,6 @@ function buildReport(pds,meta){
     +'.stf-wm-ico{width:11px;height:11px;flex-shrink:0;opacity:.7;display:inline-block}'
     +'.stf-wm-txt{line-height:1}'
     +'.stf-wm-cover{position:absolute;bottom:'+PHOTO_H+';left:0;right:0;padding:4px 0;background:#fff;border-top:1px solid #e2e8f0;border-bottom:none;margin:0;z-index:2}'
-    // Page number — bottom-right of each page. Coexists with the center
-    // watermark (free tier) and stands alone on Pro. Tier-agnostic.
-    +'.pg-num{font-family:\'Inter Tight\',sans-serif;font-size:9px;font-weight:500;color:#64748b;letter-spacing:.02em;position:absolute;right:18px;bottom:12px;z-index:3}'
-    // Cover: sit on the same baseline as .stf-wm-cover (above the pinned photo).
-    // Match its bottom/padding so watermark and page number share one baseline.
-    +'.pg-num-cover{bottom:'+PHOTO_H+';padding:5px 0 3px}'
     +'.pg-photo{display:flex;flex-direction:column}'
     +'.pg-photo .stf-wm{margin-top:auto}'
     // Print
@@ -3595,12 +3607,16 @@ document.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight'&&!e.target.matches('input,textarea'))$('lb-next').click();
     if(e.key==='='||e.key==='+')setZ(lbZoom*1.15);
     if(e.key==='-')setZ(lbZoom*.87);
-    // Space = temporary pan mode from any annotation tool
-    if(e.code==='Space'&&!e.target.matches('input,textarea')&&lbTab==='annot'&&!spacePan&&lbTool!=='pan'){
-      e.preventDefault();
-      spacePan=true;
-      prePanTool=lbTool;
-      $('lb-dc').style.cursor='grab';
+    // Space = temporary pan mode from any annotation tool, or any non-cropping Transform state
+    if(e.code==='Space'&&!e.target.matches('input,textarea')&&!spacePan){
+      const allowAnnot = lbTab==='annot' && lbTool!=='pan';
+      const allowXform = lbTab==='xform' && !xformPan && !cropping;
+      if(allowAnnot || allowXform){
+        e.preventDefault();
+        spacePan=true;
+        prePanTool=lbTool;
+        $('lb-dc').style.cursor='grab';
+      }
     }
   }
   if((e.ctrlKey||e.metaKey)&&e.key==='a'&&document.activeElement.tagName==='BODY'){e.preventDefault();photos.forEach(p=>selected.add(p.id));lastSelectedId=photos[0]?.id??null;render()}
@@ -3609,8 +3625,7 @@ document.addEventListener('keyup',e=>{
   if(e.code==='Space'&&spacePan){
     spacePan=false;
     if(prePanTool){lbTool=prePanTool;prePanTool=null;}
-    const cursors={text:'text'};
-    $('lb-dc').style.cursor=cursors[lbTool]||'crosshair';
+    $('lb-dc').style.cursor=lbCursorForState();
   }
 });
 
