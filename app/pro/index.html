@@ -3433,7 +3433,16 @@ function buildReport(pds,meta){
       +'</div>';
   }
 
-  // ── Page 1 ──
+  // ── Pages 2+ — 2 photos per page; last page with 1 photo leaves bottom blank ──
+  const remaining=pds.slice(1);
+  const pages=[];
+  for(let i=0;i<remaining.length;i+=2) pages.push(remaining.slice(i,i+2));
+
+  // Total page count: cover + however many photo pages we ended up with.
+  // Known before rendering, so we can stamp "Page N of M" on every page.
+  const totalPages = 1 + pages.length;
+
+  // ── Page 1 (cover) ──
   // Fixed page height. Photo 1 is absolutely pinned to the bottom.
   // Notes section fills all space between the header and the photo.
   const page1='<div class="pg-wrap pg-cover">'
@@ -3453,14 +3462,11 @@ function buildReport(pds,meta){
     +coverPhotoBlock
     +'</div>'
     +(IS_PRO ? '' : '<div class="stf-wm stf-wm-cover">'+PRO_WATERMARK+'</div>')
+    +'<div class="pg-num pg-num-cover">Page 1 of '+totalPages+'</div>'
     +'</div>';
 
-  // ── Pages 2+ — 2 photos per page; last page with 1 photo leaves bottom blank ──
-  const remaining=pds.slice(1);
-  const pages=[];
-  for(let i=0;i<remaining.length;i+=2) pages.push(remaining.slice(i,i+2));
-
-  const photoPageCards=pages.map(function(pair){
+  const photoPageCards=pages.map(function(pair, pIdx){
+    const pageNum = pIdx + 2;  // cover is page 1; first photo page is page 2
     const runHdr='<div class="pg-header">'
       +(meta.rptName?'<strong>'+esc(meta.rptName)+'</strong>':'<span>Photo Documentation Report</span>')
       +'<span>'+(meta.claim?refLabel+' '+esc(meta.claim):'')+(ds?' &nbsp;·&nbsp; '+ds:'')+'</span>'
@@ -3476,7 +3482,11 @@ function buildReport(pds,meta){
         +'</div></div>';
     }).join('');
     // Last page with 1 photo: bottom is simply blank — no filler
-    return '<div class="pg-wrap pg-photo">'+runHdr+rows+(IS_PRO ? '' : '<div class="stf-wm">'+PRO_WATERMARK+'</div>')+'</div>';
+    return '<div class="pg-wrap pg-photo">'
+      +runHdr+rows
+      +(IS_PRO ? '' : '<div class="stf-wm">'+PRO_WATERMARK+'</div>')
+      +'<div class="pg-num">Page '+pageNum+' of '+totalPages+'</div>'
+      +'</div>';
   }).join('');
 
   // ── Report CSS ──
@@ -3491,7 +3501,8 @@ function buildReport(pds,meta){
     +'.co-tag{font-size:10px;color:rgba(255,255,255,.65);margin-top:1px}'
     +'.co-contact{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px;font-size:9px;color:rgba(255,255,255,.75)}'
     // Standard page wrapper — no padding on cover (cover-body handles its own)
-    +'.pg-wrap{padding:14px 18px}'
+    // position:relative is a positioning context for the absolute .pg-num.
+    +'.pg-wrap{padding:14px 18px;position:relative}'
     // Cover page: fixed height = one printed page. Photo pinned to bottom via absolute positioning.
     +'.pg-cover{position:relative;height:10.2in;overflow:hidden;padding:0}'
     // Upper body: from top to just above the photo. Padding applied here.
@@ -3533,6 +3544,12 @@ function buildReport(pds,meta){
     +'.stf-wm-ico{width:11px;height:11px;flex-shrink:0;opacity:.7;display:inline-block}'
     +'.stf-wm-txt{line-height:1}'
     +'.stf-wm-cover{position:absolute;bottom:'+PHOTO_H+';left:0;right:0;padding:4px 0;background:#fff;border-top:1px solid #e2e8f0;border-bottom:none;margin:0;z-index:2}'
+    // Page number — bottom-right of each page. Coexists with the center
+    // watermark (free tier) and stands alone on Pro. Tier-agnostic.
+    +'.pg-num{font-family:\'Inter Tight\',sans-serif;font-size:9px;font-weight:500;color:#64748b;letter-spacing:.02em;position:absolute;right:18px;bottom:12px;z-index:3}'
+    // Cover: sit on the same baseline as .stf-wm-cover (above the pinned photo).
+    // Match its bottom/padding so watermark and page number share one baseline.
+    +'.pg-num-cover{bottom:'+PHOTO_H+';padding:5px 0 3px}'
     +'.pg-photo{display:flex;flex-direction:column}'
     +'.pg-photo .stf-wm{margin-top:auto}'
     // Print
