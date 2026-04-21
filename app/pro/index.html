@@ -4,13 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>SnapToFile</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M10 8 H50 L66 24 V72 H10 Z' fill='%230f172a'/%3E%3Cpath d='M50 8 V24 H66' stroke='%23fff' stroke-width='3' fill='none'/%3E%3Ccircle cx='37' cy='46' r='14' fill='%238a9678'/%3E%3Ccircle cx='37' cy='46' r='5' fill='%23fff'/%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%230f172a'/%3E%3Cpath d='M12 10 H50 L66 24 V72 H12 Z' fill='none' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M50 10 V24 H66' fill='none' stroke='%23fff' stroke-width='3'/%3E%3Ccircle cx='37' cy='46' r='14' fill='none' stroke='%238a9678' stroke-width='3'/%3E%3Ccircle cx='37' cy='46' r='4' fill='%238a9678'/%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;
-  --blue:#1d4ed8;--blue2:#3b82f6;--blue3:#bfdbfe;--blue4:#eff6ff;
+  --blue:#4a5c3f;--blue2:#5a7048;--blue3:#d6dfd0;--blue4:#f0f1ea;
   --slate:#64748b;--slatel:#94a3b8;--border:#e2e8f0;
   --bg:#f1f5f9;--white:#fff;
   --red:#dc2626;--green:#16a34a;--amber:#d97706;--indigo:#4f46e5;
@@ -30,8 +32,9 @@ img{max-width:100%;height:auto}
   display:flex;align-items:center;justify-content:space-between;
   padding:0 clamp(12px,4vw,20px);height:52px;
   border-bottom:1px solid rgba(255,255,255,.07);gap:8px}
-.brand{display:flex;align-items:center;gap:9px;min-width:0}
-.brand-ico{width:30px;height:30px;background:var(--blue);border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-ico{width:30px;height:30px;display:grid;place-items:center;flex-shrink:0}
+.brand-ico svg{display:block}
 .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:-.02em;white-space:nowrap}
 .brand-sub{font-size:10px;color:var(--slatel);margin-top:1px;white-space:nowrap}
 .top-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
@@ -42,7 +45,7 @@ img{max-width:100%;height:auto}
   border:1px solid transparent;cursor:pointer;transition:all .14s;white-space:nowrap;
   line-height:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-primary:hover:not(:disabled){background:#1e40af}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-primary:hover:not(:disabled){background:#33432b}
 .btn-ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.14)}.btn-ghost:hover{background:rgba(255,255,255,.16)}
 .btn-light{background:var(--white);color:var(--navy2);border-color:var(--border)}.btn-light:hover{background:var(--bg)}
 .btn-danger{background:#fef2f2;color:var(--red);border-color:#fecaca}.btn-danger:hover{background:#fee2e2}
@@ -63,7 +66,7 @@ img{max-width:100%;height:auto}
 #co-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
   margin-bottom:12px;box-shadow:var(--sh);overflow:hidden}
 #co-banner{
-  background:linear-gradient(135deg,var(--navy) 0%,#1e3a8a 100%);
+  background:linear-gradient(135deg,var(--navy) 0%,#33432b 100%);
   padding:18px clamp(14px,4vw,24px) 14px;
   display:flex;align-items:center;gap:16px;
   position:relative;
@@ -123,9 +126,9 @@ img{max-width:100%;height:auto}
 /* ── PAGE-WIDE DROP OVERLAY ── */
 #drop-overlay{
   position:fixed;inset:0;z-index:999;
-  background:rgba(29,78,216,.12);
+  background:rgba(74,92,63,.12);
   backdrop-filter:blur(2px);
-  border:3px dashed #3b82f6;
+  border:3px dashed #5a7048;
   pointer-events:none;
   opacity:0;transition:opacity .15s ease;
   display:flex;align-items:center;justify-content:center;
@@ -165,8 +168,8 @@ img{max-width:100%;height:auto}
 .act-hint{font-size:10px;color:var(--slatel);margin-left:auto;display:none}
 
 /* ── DROPZONE ── */
-#dz{display:block;border:2px dashed #93c5fd;border-radius:var(--r);padding:clamp(14px,4vw,22px);text-align:center;cursor:pointer;margin-bottom:14px;background:linear-gradient(135deg,#eff6ff,#f8faff);transition:background .18s,border-color .18s;-webkit-tap-highlight-color:transparent}
-#dz.dragover{background:#dbeafe;border-color:var(--blue2)}
+#dz{display:block;border:2px dashed #b5c0a8;border-radius:var(--r);padding:clamp(14px,4vw,22px);text-align:center;cursor:pointer;margin-bottom:14px;background:linear-gradient(135deg,#f0f1ea,#f6f7f1);transition:background .18s,border-color .18s;-webkit-tap-highlight-color:transparent}
+#dz.dragover{background:#dde3d2;border-color:var(--blue2)}
 #dz h3{font-family:'Syne',sans-serif;font-size:14px;color:var(--blue);margin:7px 0 6px}
 #dz p{font-size:11px;color:var(--slate);margin-bottom:12px}
 .dz-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
@@ -272,7 +275,7 @@ img{max-width:100%;height:auto}
 .cdot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid #475569;transition:all .12s;flex-shrink:0}
 .cdot[data-c="#ffffff"]{border-color:#94a3b8}
 .cdot[data-c="#000000"]{border-color:#64748b}
-.cdot.on{border-color:#60a5fa;transform:scale(1.2);box-shadow:0 0 0 2px var(--navy2),0 0 0 4px #60a5fa}
+.cdot.on{border-color:#8a9678;transform:scale(1.2);box-shadow:0 0 0 2px var(--navy2),0 0 0 4px #8a9678}
 .lslider{width:100%;accent-color:var(--blue2);cursor:pointer;height:20px}
 .lf{margin-bottom:10px}
 .lf label{display:block;font-size:11px;font-weight:600;color:var(--slatel);margin-bottom:3px}
@@ -307,7 +310,7 @@ img{max-width:100%;height:auto}
 .modal input:focus,.modal textarea:focus{outline:none;border-color:var(--blue2);background:#fff}
 .mact{display:flex;gap:8px;margin-top:4px}.mact .btn{flex:1;height:46px;font-size:13px}
 .copt{display:flex;align-items:center;justify-content:space-between;padding:12px 13px;border-radius:8px;cursor:pointer;border:2px solid var(--border);background:#fafafa;margin-bottom:7px;transition:all .13s;-webkit-tap-highlight-color:transparent}
-.copt:hover,.copt:active{border-color:#93c5fd}.copt.on{border-color:var(--blue);background:var(--blue4)}
+.copt:hover,.copt:active{border-color:#b5c0a8}.copt.on{border-color:var(--blue);background:var(--blue4)}
 .coL{display:flex;align-items:center;gap:9px}
 .cor{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;transition:all .12s;flex-shrink:0}
 .copt.on .cor{background:var(--blue);border-color:var(--blue)}
@@ -316,7 +319,7 @@ img{max-width:100%;height:auto}
 
 /* ── PROJECTS ── */
 .proj-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);transition:border-color .13s}
-.proj-item:hover{border-color:#93c5fd}
+.proj-item:hover{border-color:#b5c0a8}
 .proj-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:8px;display:grid;place-items:center;flex-shrink:0}
 .proj-info{flex:1;min-width:0}
 .proj-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--navy2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -330,7 +333,7 @@ img{max-width:100%;height:auto}
 /* ── DAMAGE SUMMARY BUILDER ── */
 .ds-checks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
 .ds-check{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;color:var(--navy2);cursor:pointer;background:var(--bg);transition:all .13s;-webkit-tap-highlight-color:transparent;user-select:none}
-.ds-check:hover{border-color:var(--blue2);background:#eff6ff}
+.ds-check:hover{border-color:var(--blue2);background:#f0f1ea}
 .ds-check input{accent-color:var(--blue);width:14px;height:14px;cursor:pointer;flex-shrink:0;margin:0}
 /* Selected state — visually obvious so users know multi-select works */
 .ds-check:has(input:checked){background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
@@ -338,7 +341,7 @@ img{max-width:100%;height:auto}
 /* Radios get round corners to differentiate from rectangular multi-select checkboxes */
 .ds-check.ds-radio{border-radius:20px}
 /* Multi-select hint */
-.ds-multi-hint{display:inline-block;margin-left:6px;font-size:10px;font-weight:600;color:var(--blue);background:#eff6ff;padding:2px 7px;border-radius:10px;letter-spacing:.02em;text-transform:uppercase}
+.ds-multi-hint{display:inline-block;margin-left:6px;font-size:10px;font-weight:600;color:var(--blue);background:#f0f1ea;padding:2px 7px;border-radius:10px;letter-spacing:.02em;text-transform:uppercase}
 
 /* ── COMPANY PROFILE SAVE/LOAD ── */
 #co-profile-bar{display:flex;align-items:center;gap:8px;padding:8px clamp(14px,4vw,24px);border-top:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.15)}
@@ -403,13 +406,13 @@ img{max-width:100%;height:auto}
 #upgrade-modal.open{display:flex}
 #upgrade-modal .um-card{background:#fff;border-radius:14px;padding:32px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,.4);animation:um-in .22s ease-out}
 @keyframes um-in{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
-#upgrade-modal .um-icon{width:54px;height:54px;margin:0 auto 14px;background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px}
+#upgrade-modal .um-icon{width:54px;height:54px;margin:0 auto 14px;background:linear-gradient(135deg,#dde3d2 0%,#d6dfd0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px}
 #upgrade-modal .um-title{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#0f172a;margin-bottom:8px;letter-spacing:-.02em}
 #upgrade-modal .um-sub{font-size:13px;color:#475569;line-height:1.55;margin-bottom:20px}
 #upgrade-modal .um-actions{display:flex;flex-direction:column;gap:8px}
 #upgrade-modal .um-btn{display:block;padding:12px 18px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;border:none;transition:transform .12s,box-shadow .12s;font-family:inherit}
-#upgrade-modal .um-btn-primary{background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#fff;box-shadow:0 4px 12px rgba(29,78,216,.25)}
-#upgrade-modal .um-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(29,78,216,.35)}
+#upgrade-modal .um-btn-primary{background:linear-gradient(135deg,#4a5c3f 0%,#5a7048 100%);color:#fff;box-shadow:0 4px 12px rgba(74,92,63,.25)}
+#upgrade-modal .um-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(74,92,63,.35)}
 #upgrade-modal .um-btn-secondary{background:#f1f5f9;color:#334155}
 #upgrade-modal .um-btn-secondary:hover{background:#e2e8f0}
 #upgrade-modal .um-foot{margin-top:14px;font-size:11px;color:#94a3b8}
@@ -437,7 +440,7 @@ img{max-width:100%;height:auto}
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="brand">
-    <div class="brand-ico"><svg width="17" height="17" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+    <div class="brand-ico"><svg width="28" height="28" viewBox="0 0 80 80" fill="none" aria-label="SnapToFile"><path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#fff" stroke-width="3.2" stroke-linejoin="miter"/><path d="M50 8 V24 H66" stroke="#fff" stroke-width="3.2" stroke-linejoin="miter"/><path d="M50 8 L66 24" stroke="#fff" stroke-width="3.2"/><g transform="translate(37 46)"><circle r="15" stroke="#8a9678" stroke-width="3" fill="none"/><g stroke="#8a9678" stroke-width="3" stroke-linecap="round" fill="none"><path d="M 0 -15 L 5 -3"/><path d="M 13 -7.5 L 5 3"/><path d="M 13 7.5 L 0 6"/><path d="M 0 15 L -5 3"/><path d="M -13 7.5 L -5 -3"/><path d="M -13 -7.5 L 0 -6"/></g></g></svg></div>
     <div><div class="brand-name">SnapToFile</div><div class="brand-sub">Photo Documentation Generator</div></div>
   </div>
   <div class="top-right">
@@ -561,7 +564,7 @@ img{max-width:100%;height:auto}
 
   <!-- DROPZONE -->
   <div id="dz">
-    <svg width="32" height="32" fill="none" stroke="#93c5fd" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    <svg width="32" height="32" fill="none" stroke="#b5c0a8" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
     <h3>Tap to choose photos or drop files here</h3>
     <p>JPG · PNG · WEBP · HEIC · Multiple files supported</p>
     <div class="dz-btns">
@@ -652,7 +655,7 @@ img{max-width:100%;height:auto}
     <div class="sect-lbl" style="margin-bottom:7px">Image Compression</div>
     <div id="copts">
       <div class="copt on" data-lv="1"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 1 — Maximum Quality</div><div class="csp">3000px · 100% · Original size</div></div></div><span class="cbadge" style="background:#dcfce7;color:#16a34a">Original</span></div>
-      <div class="copt" data-lv="2"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 2 — High Quality</div><div class="csp">2000px · 90% · ~20% smaller</div></div></div><span class="cbadge" style="background:#dbeafe;color:#1d4ed8">~20% off</span></div>
+      <div class="copt" data-lv="2"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 2 — High Quality</div><div class="csp">2000px · 90% · ~20% smaller</div></div></div><span class="cbadge" style="background:#dde3d2;color:#4a5c3f">~20% off</span></div>
       <div class="copt" data-lv="3"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 3 — Balanced</div><div class="csp">1200px · 75% · ~50% smaller</div></div></div><span class="cbadge" style="background:#fef9c3;color:#a16207">~50% off</span></div>
       <div class="copt" data-lv="4"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 4 — Compressed</div><div class="csp">800px · 55% · ~70% smaller</div></div></div><span class="cbadge" style="background:#ffedd5;color:#ea580c">~70% off</span></div>
       <div class="copt" data-lv="5"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 5 — Max Compression</div><div class="csp">600px · 35% · ~85% smaller</div></div></div><span class="cbadge" style="background:#fee2e2;color:#dc2626">~85% off</span></div>
@@ -663,7 +666,7 @@ img{max-width:100%;height:auto}
       Set <strong>Destination → Save as PDF</strong> (Chrome/Edge) or <strong>PDF → Save as PDF</strong> (Safari/Firefox).
     </div>
     <!-- STF save prompt -->
-    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:11px 14px;margin-top:10px;font-size:11px;color:#1e3a8a;line-height:1.55">
+    <div style="background:#f0f1ea;border:1px solid #d6dfd0;border-radius:8px;padding:11px 14px;margin-top:10px;font-size:11px;color:#33432b;line-height:1.55">
       <strong>📁 Want to edit this report later?</strong> Save a <code style="background:rgba(30,58,138,.08);padding:1px 5px;border-radius:3px;font-size:10px">.stf</code> project file alongside your PDF. It keeps every photo, annotation, and field exactly as you have them now — reopen it anytime, on any computer, to pick up where you left off.
     </div>
     <div class="mact" style="margin-top:12px">
@@ -851,15 +854,15 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-04-21 02:00 UTC';
+const BUILD_STAMP       = '2026-04-21 04:30 UTC';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
-const PRO_WATERMARK     = 'Made with SnapToFile — snaptofile.com';
+const PRO_WATERMARK     = '<svg class="stf-wm-ico" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 V24 H66" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 L66 24" stroke="#64748b" stroke-width="5"/><circle cx="37" cy="46" r="12" stroke="#64748b" stroke-width="5" fill="none"/><circle cx="37" cy="46" r="4" fill="#64748b"/></svg><span class="stf-wm-txt">Documented with <b>SnapToFile</b> &middot; snaptofile.com</span>';
 
 /* Compression levels — Pro gets 5, Free gets 3 evenly-spaced shrink levels */
 const FREE_CLEV = [
-  { q: 0.85, mw: 1800, label: 'Light Compression',  desc: '1800px · 85% quality', badge: '~25% smaller', badgeBg: '#dbeafe', badgeFg: '#1d4ed8' },
+  { q: 0.85, mw: 1800, label: 'Light Compression',  desc: '1800px · 85% quality', badge: '~25% smaller', badgeBg: '#dde3d2', badgeFg: '#4a5c3f' },
   { q: 0.72, mw: 1200, label: 'Medium Compression', desc: '1200px · 72% quality', badge: '~50% smaller', badgeBg: '#fef9c3', badgeFg: '#a16207' },
   { q: 0.50, mw:  900, label: 'Heavy Compression',  desc: '900px · 50% quality',  badge: '~75% smaller', badgeBg: '#ffedd5', badgeFg: '#ea580c' }
 ];
@@ -1643,7 +1646,7 @@ $('dz').onclick=e=>{if(e.target===$('dz')||e.target.tagName==='H3'||e.target.tag
   // Create full-page overlay element
   const overlay=document.createElement('div');
   overlay.id='drop-overlay';
-  overlay.innerHTML='<div class="drop-overlay-inner"><svg width="48" height="48" fill="none" stroke="#93c5fd" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><div class="drop-overlay-text">Drop photos anywhere</div></div>';
+  overlay.innerHTML='<div class="drop-overlay-inner"><svg width="48" height="48" fill="none" stroke="#b5c0a8" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><div class="drop-overlay-text">Drop photos anywhere</div></div>';
   document.body.appendChild(overlay);
 
   let dragCounter=0; // track enter/leave pairs to avoid flicker
@@ -2607,7 +2610,7 @@ function drawCropOverlay(){
   // Corner handles
   ctx.save();
   ctx.fillStyle='#fff';
-  ctx.strokeStyle='#1d4ed8';
+  ctx.strokeStyle='#4a5c3f';
   ctx.lineWidth=2;
   [[bx,by],[bx+bw,by],[bx,by+bh],[bx+bw,by+bh]].forEach(([hx,hy])=>{
     ctx.beginPath();ctx.arc(hx,hy,6,0,Math.PI*2);ctx.fill();ctx.stroke();
@@ -2917,7 +2920,7 @@ function buildReport(pds,meta){
     +'<div class="cover-photo-pin">'
     +coverPhotoBlock
     +'</div>'
-    +(IS_PRO ? '' : '<div class="stf-wm stf-wm-cover">'+esc(PRO_WATERMARK)+'</div>')
+    +(IS_PRO ? '' : '<div class="stf-wm stf-wm-cover">'+PRO_WATERMARK+'</div>')
     +'</div>';
 
   // ── Pages 2+ — 2 photos per page; last page with 1 photo leaves bottom blank ──
@@ -2941,7 +2944,7 @@ function buildReport(pds,meta){
         +'</div></div>';
     }).join('');
     // Last page with 1 photo: bottom is simply blank — no filler
-    return '<div class="pg-wrap pg-photo">'+runHdr+rows+(IS_PRO ? '' : '<div class="stf-wm">'+esc(PRO_WATERMARK)+'</div>')+'</div>';
+    return '<div class="pg-wrap pg-photo">'+runHdr+rows+(IS_PRO ? '' : '<div class="stf-wm">'+PRO_WATERMARK+'</div>')+'</div>';
   }).join('');
 
   // ── Report CSS ──
@@ -2949,7 +2952,7 @@ function buildReport(pds,meta){
   const css='*{box-sizing:border-box;margin:0;padding:0}'
     +'body{font-family:\'Instrument Sans\',sans-serif;background:#fff;color:#1e293b;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
     // Company header
-    +'.co-hdr{display:flex;align-items:center;gap:14px;padding:10px 14px;background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);border-radius:7px;margin-bottom:10px}'
+    +'.co-hdr{display:flex;align-items:center;gap:14px;padding:10px 14px;background:linear-gradient(135deg,#0f172a 0%,#33432b 100%);border-radius:7px;margin-bottom:10px}'
     +'.co-logo{max-width:80px;max-height:50px;width:auto;height:auto;object-fit:contain;border-radius:4px;flex-shrink:0}'
     +'.co-text{flex:1;color:#fff;min-width:0}'
     +'.co-name{font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
@@ -2977,8 +2980,8 @@ function buildReport(pds,meta){
     +'.pg-header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #e2e8f0;padding-bottom:5px;margin-bottom:10px;font-size:10px;color:#64748b;flex-shrink:0}'
     +'.pg-header strong{color:#334155}'
     // Report header block
-    +'.rh{border-bottom:3px solid #1d4ed8;padding-bottom:9px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}'
-    +'.rt{font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:#1d4ed8;letter-spacing:-.02em}'
+    +'.rh{border-bottom:3px solid #4a5c3f;padding-bottom:9px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}'
+    +'.rt{font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:#4a5c3f;letter-spacing:-.02em}'
     +'.rpt-name{font-size:11px;color:#334155;font-weight:600;margin-top:2px}'
     +'.ra{font-size:10px;color:#64748b;margin-top:1px;line-height:1.5}'
     +'.rm{text-align:right;font-size:10px;color:#334155;line-height:1.8;flex-shrink:0}'
@@ -2992,9 +2995,12 @@ function buildReport(pds,meta){
     +'.photo-num{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;flex-shrink:0}'
     +'.photo-hdr{font-family:\'Syne\',sans-serif;font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;flex-shrink:0}'
     +'.photo-desc{font-size:11px;color:#475569;line-height:1.55;overflow:hidden}'
-    // SnapToFile watermark — visible, professional. Removed for Pro users.
-    +'.stf-wm{font-family:\'Inter Tight\',sans-serif;font-size:8px;color:#94a3b8;text-align:center;letter-spacing:.04em;padding:4px 0 2px;border-top:1px dashed #e2e8f0;margin-top:8px}'
-    +'.stf-wm-cover{position:absolute;bottom:'+PHOTO_H+';left:0;right:0;padding:3px 0;background:#fff;border-top:1px dashed #e2e8f0;border-bottom:none;margin:0;z-index:2}'
+    // SnapToFile watermark — icon + branded text. Removed for Pro users.
+    +'.stf-wm{display:flex;align-items:center;justify-content:center;gap:5px;font-family:\'Inter Tight\',sans-serif;font-size:8px;color:#94a3b8;text-align:center;letter-spacing:.06em;text-transform:uppercase;padding:5px 0 3px;border-top:1px solid #e2e8f0;margin-top:8px}'
+    +'.stf-wm b{font-weight:700;color:#475569;letter-spacing:0;text-transform:none;font-size:9px}'
+    +'.stf-wm-ico{width:11px;height:11px;flex-shrink:0;opacity:.7;display:inline-block}'
+    +'.stf-wm-txt{line-height:1}'
+    +'.stf-wm-cover{position:absolute;bottom:'+PHOTO_H+';left:0;right:0;padding:4px 0;background:#fff;border-top:1px solid #e2e8f0;border-bottom:none;margin:0;z-index:2}'
     +'.pg-photo{display:flex;flex-direction:column}'
     +'.pg-photo .stf-wm{margin-top:auto}'
     // Print
