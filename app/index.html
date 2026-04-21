@@ -430,7 +430,7 @@ img{max-width:100%;height:auto}
     <div class="um-title" id="um-title">Go Pro</div>
     <div class="um-sub" id="um-sub">Unlock unlimited photos, custom branding, and watermark-free PDFs.</div>
     <div class="um-actions">
-      <a class="um-btn um-btn-primary" id="um-waitlist-btn" href="mailto:hello@snaptofile.com?subject=Join%20the%20Pro%20Waitlist&amp;body=Hi%2C%0A%0APlease%20add%20me%20to%20the%20SnapToFile%20Pro%20waitlist.%0A%0AName%3A%0ACompany%20%2F%20Role%3A%0AWhat%20I%27d%20use%20Pro%20for%3A%0A%0AThanks!">Join the Pro waitlist</a>
+      <a class="um-btn um-btn-primary" id="um-waitlist-btn" href="https://snaptofile.com/pro" target="_blank" rel="noopener">Join the Pro waitlist</a>
       <button class="um-btn um-btn-secondary" id="um-close-btn" type="button">Not right now</button>
     </div>
     <div class="um-foot">Pro launches soon — waitlist members get early pricing.</div>
@@ -538,7 +538,7 @@ img{max-width:100%;height:auto}
     <div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
         <label style="display:block;font-size:11px;font-weight:600;color:var(--slate)">📝 Notes / Comments <span style="font-weight:400;color:var(--slatel)">(appears on page 1 of report)</span></label>
-        <button class="btn btn-indigo btn-sm" id="btn-ai-summary" style="margin-left:auto;white-space:nowrap" title="Build a damage summary from your inspection details">
+        <button class="btn btn-primary btn-sm" id="btn-ai-summary" style="margin-left:auto;white-space:nowrap" title="Build a damage summary from your inspection details">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           📋 Build Summary
         </button>
@@ -555,9 +555,13 @@ img{max-width:100%;height:auto}
     <span style="font-size:12px;font-weight:700;color:var(--navy2)" id="selcnt"></span>
     <button class="btn btn-light btn-sm" id="btn-selall">Select All</button>
     <button class="btn btn-light btn-sm" id="btn-selnone" style="display:none">Clear</button>
-    <button class="btn btn-indigo btn-sm" id="btn-bulk" style="display:none">
+    <button class="btn btn-primary btn-sm" id="btn-bulk" style="display:none">
       <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>
       Bulk Edit
+    </button>
+    <button class="btn btn-danger btn-sm" id="btn-bulk-del" style="display:none" title="Delete the currently selected photos">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V3h6v3"/></svg>
+      Delete Selected
     </button>
     <span class="act-hint">Click photo to open · Shift+Click to multi-select · Drag to reorder</span>
   </div>
@@ -854,8 +858,8 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'free';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-04-21 15:45 UTC';
-const WAITLIST_URL      = 'mailto:hello@snaptofile.com?subject=Join%20the%20Pro%20Waitlist&body=Hi%2C%0A%0APlease%20add%20me%20to%20the%20SnapToFile%20Pro%20waitlist.%0A%0AName%3A%0ACompany%20%2F%20Role%3A%0AWhat%20I%27d%20use%20Pro%20for%3A%0A%0AThanks!';   // Interim waitlist — emails land in Google Workspace inbox until Phase 2 form ships
+const BUILD_STAMP       = '2026-04-21 18:15 UTC · pdf-name·ui';
+const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
 const PRO_WATERMARK     = '<svg class="stf-wm-ico" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 V24 H66" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 L66 24" stroke="#64748b" stroke-width="5"/><circle cx="37" cy="46" r="12" stroke="#64748b" stroke-width="5" fill="none"/><circle cx="37" cy="46" r="4" fill="#64748b"/></svg><span class="stf-wm-txt">Documented with <b>SnapToFile</b> &middot; snaptofile.com</span>';
@@ -1927,6 +1931,7 @@ function updateSelUI(){
   $('selcnt').textContent=n>0?`${n} selected`:`${photos.length} photo${photos.length!==1?'s':''}`;
   $('btn-selnone').style.display=n>0?'':'none';
   $('btn-bulk').style.display=n>1?'':'none';
+  $('btn-bulk-del').style.display=n>0?'':'none';
 }
 $('btn-selall').onclick=()=>{photos.forEach(p=>selected.add(p.id));lastSelectedId=photos[0]?.id??null;render()};
 $('btn-selnone').onclick=()=>{selected.clear();lastSelectedId=null;render()};
@@ -2765,6 +2770,17 @@ $('btn-bulk').onclick=()=>{
   const n=selected.size;$('bulk-sub').textContent=`Applying to ${n} selected photos. Leave blank to keep existing.`;
   $('bh').value='';$('bd').value='';$('mod-bulk').classList.add('open');setTimeout(()=>$('bh').focus(),40);
 };
+$('btn-bulk-del').onclick=()=>{
+  const n=selected.size;
+  if(!n) return;
+  if(!confirm(`Delete ${n} selected photo${n>1?'s':''}? This cannot be undone.`)) return;
+  photos = photos.filter(p=>!selected.has(p.id));
+  selected.clear();
+  lastSelectedId = null;
+  markDirty();
+  render();
+  toast(`Deleted ${n} photo${n>1?'s':''}`);
+};
 $('bulk-no').onclick=()=>$('mod-bulk').classList.remove('open');
 $('bulk-yes').onclick=()=>{
   const h=$('bh').value.trim(),d=$('bd').value.trim(),targets=[...selected];
@@ -3019,7 +3035,23 @@ function buildReport(pds,meta){
     +'.stf-wm{break-inside:avoid}'
     +'}';
 
-  const titleStr=(meta.rptName?esc(meta.rptName):'Photo Report')+(meta.claim?' — '+meta.claim:'');
+  // PDF filename — browsers use document.title as the suggested name when
+  // "Save as PDF" is chosen from the print dialog. Format requested:
+  //   CUSTOMER NAME-PHOTO SHEET-YYYY-MM-DD HHMM   (all caps)
+  const _pdfClean = s => String(s||'').trim().toUpperCase()
+    .replace(/[^A-Z0-9\- ]+/g,'')   // strip filesystem-unsafe chars (keep letters, digits, dash, space)
+    .replace(/\s+/g,' ')             // collapse whitespace
+    .trim()
+    .slice(0,80);                    // cap length
+  const _pdfName = _pdfClean(meta.rptName);
+  const _pdfNow  = new Date();
+  const _pdfPad  = n => String(n).padStart(2,'0');
+  const _pdfDt   = _pdfNow.getFullYear()+'-'+_pdfPad(_pdfNow.getMonth()+1)+'-'+_pdfPad(_pdfNow.getDate())
+                 +' '+_pdfPad(_pdfNow.getHours())+_pdfPad(_pdfNow.getMinutes());
+  const _pdfParts = [];
+  if(_pdfName) _pdfParts.push(_pdfName);
+  _pdfParts.push('PHOTO SHEET', _pdfDt);
+  const titleStr = esc(_pdfParts.join('-'));
 
   return '<!DOCTYPE html><html lang="en"><head>'
     +'<meta charset="UTF-8"/>'
