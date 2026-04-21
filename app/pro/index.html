@@ -903,7 +903,7 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-04-21 18:15 UTC · pdf-name·ui';
+const BUILD_STAMP       = '2026-04-21 18:15 UTC · pdf-name·ui (fix)';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
@@ -1028,6 +1028,22 @@ const CLEV = IS_PRO
 
 function uid(){return Math.random().toString(36).slice(2,9)}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* Build the PDF filename: CUSTOMER NAME-PHOTO SHEET-YYYY-MM-DD HHMM (all caps).
+   Used both as the print-window <title> and explicitly as document.title
+   before win.print() so Chrome/Safari reliably suggest this filename in
+   the "Save as PDF" dialog. Returns the raw (non-escaped) string. */
+function buildPdfFilename(rptName){
+  const clean = String(rptName||'').trim().toUpperCase()
+    .replace(/[^A-Z0-9\- ]+/g,'')
+    .replace(/\s+/g,' ')
+    .trim()
+    .slice(0,80);
+  const d = new Date(), pad = n => String(n).padStart(2,'0');
+  const dt = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())
+           +' '+pad(d.getHours())+pad(d.getMinutes());
+  return (clean ? clean+'-' : '') + 'PHOTO SHEET-' + dt;
+}
 
 // Load a file and convert it to a JPEG data URL via canvas.
 // Handles HEIC/HEIF from iPhone and guarantees the stored src is always renderable.
@@ -3384,6 +3400,10 @@ $('exp-yes').onclick=async()=>{
     win.document.write(html);
     win.document.close();
     setTimeout(()=>{
+      // Explicitly set document.title on the print window so Chrome/Safari
+      // reliably use it as the suggested "Save as PDF" filename. Setting
+      // <title> via document.write alone is unreliable across browsers.
+      try { win.document.title = buildPdfFilename(rptName); } catch(_){}
       win.focus();
       win.print();
       btn.disabled=false;
@@ -3597,22 +3617,10 @@ function buildReport(pds,meta){
     +'}';
 
   // PDF filename — browsers use document.title as the suggested name when
-  // "Save as PDF" is chosen from the print dialog. Format requested:
-  //   CUSTOMER NAME-PHOTO SHEET-YYYY-MM-DD HHMM   (all caps)
-  const _pdfClean = s => String(s||'').trim().toUpperCase()
-    .replace(/[^A-Z0-9\- ]+/g,'')   // strip filesystem-unsafe chars (keep letters, digits, dash, space)
-    .replace(/\s+/g,' ')             // collapse whitespace
-    .trim()
-    .slice(0,80);                    // cap length
-  const _pdfName = _pdfClean(meta.rptName);
-  const _pdfNow  = new Date();
-  const _pdfPad  = n => String(n).padStart(2,'0');
-  const _pdfDt   = _pdfNow.getFullYear()+'-'+_pdfPad(_pdfNow.getMonth()+1)+'-'+_pdfPad(_pdfNow.getDate())
-                 +' '+_pdfPad(_pdfNow.getHours())+_pdfPad(_pdfNow.getMinutes());
-  const _pdfParts = [];
-  if(_pdfName) _pdfParts.push(_pdfName);
-  _pdfParts.push('PHOTO SHEET', _pdfDt);
-  const titleStr = esc(_pdfParts.join('-'));
+  // "Save as PDF" is chosen from the print dialog. (Also set explicitly on
+  // win.document.title right before win.print() — see exp-yes handler —
+  // because some browsers don't reliably pick up <title> from document.write.)
+  const titleStr = esc(buildPdfFilename(meta.rptName));
 
   return '<!DOCTYPE html><html lang="en"><head>'
     +'<meta charset="UTF-8"/>'
