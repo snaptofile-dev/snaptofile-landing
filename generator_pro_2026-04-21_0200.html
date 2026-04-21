@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SnapToFile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;
+  --blue:#1d4ed8;--blue2:#3b82f6;--blue3:#bfdbfe;--blue4:#eff6ff;
+  --slate:#64748b;--slatel:#94a3b8;--border:#e2e8f0;
+  --bg:#f1f5f9;--white:#fff;
+  --red:#dc2626;--green:#16a34a;--amber:#d97706;--indigo:#4f46e5;
+  --r:10px;--sh:0 1px 3px rgba(15,23,42,.08),0 4px 12px rgba(15,23,42,.05);
+  --shlg:0 12px 40px rgba(15,23,42,.22);
+  /* touch targets */
+  --tap:44px;
+}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Instrument Sans',system-ui,sans-serif;background:var(--bg);color:var(--navy2);min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+input,textarea,select,button{font-family:inherit;-webkit-appearance:none;border-radius:0}
+img{max-width:100%;height:auto}
+
+/* ── TOPBAR ── */
+#topbar{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(12px,4vw,20px);height:52px;
+  border-bottom:1px solid rgba(255,255,255,.07);gap:8px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand-ico{width:30px;height:30px;background:var(--blue);border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+.brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:-.02em;white-space:nowrap}
+.brand-sub{font-size:10px;color:var(--slatel);margin-top:1px;white-space:nowrap}
+.top-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  padding:0 13px;height:36px;border-radius:7px;font-size:12px;font-weight:600;
+  border:1px solid transparent;cursor:pointer;transition:all .14s;white-space:nowrap;
+  line-height:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-primary:hover:not(:disabled){background:#1e40af}
+.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.14)}.btn-ghost:hover{background:rgba(255,255,255,.16)}
+.btn-light{background:var(--white);color:var(--navy2);border-color:var(--border)}.btn-light:hover{background:var(--bg)}
+.btn-danger{background:#fef2f2;color:var(--red);border-color:#fecaca}.btn-danger:hover{background:#fee2e2}
+.btn-indigo{background:var(--indigo);color:#fff}.btn-indigo:hover{background:#4338ca}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#15803d}
+.btn-amber{background:var(--amber);color:#fff}.btn-amber:hover{background:#b45309}
+.btn-dark{background:var(--navy3);color:#e2e8f0;border-color:#475569}.btn-dark:hover{background:#475569}
+.btn-sm{height:32px;padding:0 10px;font-size:11px;border-radius:6px}
+.btn-xs{height:26px;padding:0 8px;font-size:10px;border-radius:5px}
+.btn-icon{width:36px;padding:0;border-radius:6px}
+.btn-icon.btn-sm{width:32px}
+.btn-on{background:var(--blue)!important;color:#fff!important;border-color:var(--blue)!important}
+
+/* ── MAIN ── */
+#main{max-width:1200px;margin:0 auto;padding:14px clamp(12px,4vw,20px) 100px}
+
+/* ── COMPANY HEADER CARD ── */
+#co-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  margin-bottom:12px;box-shadow:var(--sh);overflow:hidden}
+#co-banner{
+  background:linear-gradient(135deg,var(--navy) 0%,#1e3a8a 100%);
+  padding:18px clamp(14px,4vw,24px) 14px;
+  display:flex;align-items:center;gap:16px;
+  position:relative;
+}
+#co-logo-wrap{
+  /* Flexible container — grows to fit any logo shape, max 120×80 */
+  max-width:120px;max-height:80px;min-width:50px;min-height:40px;
+  border-radius:8px;background:rgba(255,255,255,.08);
+  border:2px dashed rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:background .18s;overflow:hidden;position:relative;
+  padding:6px;
+}
+#co-logo-wrap:hover{background:rgba(255,255,255,.18)}
+/* Logo image: natural dimensions, constrained to container */
+#co-logo-wrap img{
+  max-width:108px;max-height:68px;
+  width:auto;height:auto;
+  object-fit:contain;display:none;
+}
+#co-logo-wrap img.loaded{display:block}
+#co-logo-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;padding:4px}
+#co-logo-placeholder svg{opacity:.55}
+#co-logo-placeholder span{font-size:9px;color:rgba(255,255,255,.55);font-weight:600;text-transform:uppercase;letter-spacing:.06em;text-align:center;white-space:nowrap}
+#co-logo-input{display:none}
+#co-logo-clear{position:absolute;top:3px;right:3px;width:18px;height:18px;background:rgba(220,38,38,.85);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:11px;line-height:18px;text-align:center;display:none;z-index:2}
+#co-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;overflow:hidden}
+/* Company name — no stretching: fixed max font size, no width:100% abuse */
+#co-name-input{
+  background:transparent;border:none;border-bottom:1.5px solid rgba(255,255,255,.25);
+  color:#fff;font-family:'Syne',sans-serif;
+  font-size:clamp(14px,2.5vw,20px);font-weight:800;
+  width:100%;max-width:100%;
+  padding:2px 0 4px;letter-spacing:-.01em;
+  transition:border-color .15s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#co-name-input::placeholder{color:rgba(255,255,255,.35)}
+#co-name-input:focus{outline:none;border-bottom-color:var(--blue2);white-space:normal;overflow:visible}
+#co-tagline-input{background:transparent;border:none;border-bottom:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:12px;width:100%;padding:2px 0 3px;transition:border-color .15s}
+#co-tagline-input::placeholder{color:rgba(255,255,255,.25)}
+#co-tagline-input:focus{outline:none;border-bottom-color:var(--blue2)}
+#co-details{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px clamp(14px,4vw,24px);border-top:1px solid var(--border)}
+.co-det input{width:100%;padding:6px 9px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;color:var(--navy2);background:var(--bg);transition:border-color .14s}
+.co-det input:focus{outline:none;border-color:var(--blue2);background:#fff}
+.co-det label{display:block;font-size:10px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+
+/* ── REPORT META CARD ── */
+.meta-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:12px clamp(12px,4vw,18px);margin-bottom:12px;box-shadow:var(--sh)}
+.sect-lbl{font-size:10px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px}
+.meta-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.mf label{display:block;font-size:11px;font-weight:600;color:var(--slate);margin-bottom:3px}
+.mf input{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;color:var(--navy2);background:var(--bg);transition:border-color .14s;height:var(--tap);min-height:auto}
+.mf input:focus{outline:none;border-color:var(--blue2);background:#fff}
+
+/* ── PAGE-WIDE DROP OVERLAY ── */
+#drop-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:rgba(29,78,216,.12);
+  backdrop-filter:blur(2px);
+  border:3px dashed #3b82f6;
+  pointer-events:none;
+  opacity:0;transition:opacity .15s ease;
+  display:flex;align-items:center;justify-content:center;
+}
+#drop-overlay.active{opacity:1;pointer-events:none}
+.drop-overlay-inner{
+  background:rgba(255,255,255,.95);
+  border-radius:16px;padding:28px 40px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  box-shadow:0 20px 60px rgba(15,23,42,.2);
+  pointer-events:none;
+}
+.drop-overlay-text{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  color:var(--blue);letter-spacing:-.01em;
+}
+
+/* ── FLOATING UPLOAD BUTTON ── */
+#fab-upload{
+  position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:20px;
+  z-index:50;display:none;
+  background:var(--blue);color:#fff;
+  border:none;border-radius:50px;
+  padding:0 18px;height:48px;
+  font-size:13px;font-weight:700;font-family:inherit;
+  box-shadow:0 4px 20px rgba(37,99,235,.45);
+  cursor:pointer;gap:8px;align-items:center;
+  transition:transform .15s,box-shadow .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+#fab-upload.visible{display:flex}
+#fab-upload:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(37,99,235,.55)}
+
+/* ── ACTION BAR ── */
+#abar{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:8px clamp(10px,3vw,14px);margin-bottom:12px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;box-shadow:var(--sh);position:sticky;top:52px;z-index:20;transition:box-shadow .2s}
+#abar.stuck{box-shadow:0 4px 18px rgba(15,23,42,.13);border-color:#cbd5e1}
+.act-hint{font-size:10px;color:var(--slatel);margin-left:auto;display:none}
+
+/* ── DROPZONE ── */
+#dz{display:block;border:2px dashed #93c5fd;border-radius:var(--r);padding:clamp(14px,4vw,22px);text-align:center;cursor:pointer;margin-bottom:14px;background:linear-gradient(135deg,#eff6ff,#f8faff);transition:background .18s,border-color .18s;-webkit-tap-highlight-color:transparent}
+#dz.dragover{background:#dbeafe;border-color:var(--blue2)}
+#dz h3{font-family:'Syne',sans-serif;font-size:14px;color:var(--blue);margin:7px 0 6px}
+#dz p{font-size:11px;color:var(--slate);margin-bottom:12px}
+.dz-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.dz-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--white);border:1.5px solid var(--border);color:var(--navy2);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.dz-btn:hover{border-color:var(--blue2);color:var(--blue)}
+.dz-btn-cam{background:var(--blue);border-color:var(--blue);color:#fff}
+.dz-btn-cam:hover{background:var(--blue2);border-color:var(--blue2)}
+
+/* ── FLOATING CAMERA FAB ── */
+#fab-camera{
+  position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:76px;
+  z-index:50;display:none;
+  background:var(--navy2);color:#fff;
+  border:none;border-radius:50%;
+  width:48px;height:48px;
+  box-shadow:0 4px 20px rgba(15,23,42,.35);
+  cursor:pointer;align-items:center;justify-content:center;
+  transition:transform .15s,box-shadow .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+#fab-camera.visible{display:flex}
+#fab-camera:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(15,23,42,.45)}
+
+/* ── PHOTO GRID ── */
+#pgrid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:clamp(8px,2vw,12px)}
+
+/* ── PHOTO CARD ── */
+.pcard{background:var(--white);border:2px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);transition:box-shadow .18s,border-color .18s;position:relative}
+.pcard:hover{box-shadow:0 4px 20px rgba(15,23,42,.12);border-color:#cbd5e1}
+.pcard.selected{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue3)}
+.pcard.dragging{opacity:.4}.pcard.drag-over{border-color:var(--blue2);background:var(--blue4)}
+
+.cimg{position:relative;background:#f1f5f9;overflow:hidden;cursor:pointer}
+.cimg img{display:block;width:100%;height:clamp(120px,25vw,200px);object-fit:cover;transition:transform .18s}
+.cimg:hover img,.cimg:active img{transform:scale(1.03)}
+/* Overlay always visible on touch, hover on desktop */
+.cov{position:absolute;inset:0;background:rgba(15,23,42,0);display:flex;align-items:center;justify-content:center;transition:background .18s;gap:7px}
+@media(hover:hover){.cimg:hover .cov{background:rgba(15,23,42,.4)}}
+@media(hover:none){.cov{background:rgba(15,23,42,.18)}}
+.cov-btn{background:rgba(255,255,255,.95);color:var(--navy2);border:none;border-radius:6px;padding:7px 11px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.cov-btn{opacity:0;transform:translateY(5px);transition:all .15s}}
+@media(hover:hover){.cimg:hover .cov-btn{opacity:1;transform:none}}
+.cidx{position:absolute;top:7px;right:7px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;pointer-events:none}
+.csel{position:absolute;top:7px;left:7px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid #cbd5e1;display:grid;place-items:center;cursor:pointer;transition:all .14s;z-index:2;-webkit-tap-highlight-color:transparent}
+.csel.on{background:var(--blue);border-color:var(--blue)}.csel.on svg{display:block}.csel svg{display:none;color:#fff}
+.abadge{position:absolute;bottom:6px;background:rgba(99,102,241,.9);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;pointer-events:none}
+
+.cbody{padding:8px 10px}
+.chtxt{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--navy2);margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chtxt.empty{color:var(--slatel);font-weight:400;font-style:italic}
+.cdtxt{font-size:11px;color:var(--slate);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:20px}
+.cdtxt.empty{color:#cbd5e1;font-style:italic}
+.cact{display:flex;gap:4px;margin-top:7px}
+.cact .btn{flex:1;height:30px;font-size:10px;padding:0 4px}
+
+/* LIGHTBOX */
+#lb{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;background:rgba(8,14,28,.9);backdrop-filter:blur(4px)}
+#lb.open{display:flex}
+
+#lb-top{background:var(--navy);display:flex;align-items:center;padding:0 14px;height:52px;gap:9px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.08)}
+#lb-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lb-nav{display:flex;gap:4px;align-items:center}
+#lb-navlbl{font-size:11px;color:var(--slatel);margin:0 4px}
+
+#lb-body{display:flex;flex:1;overflow:hidden;min-height:0}
+
+#lb-area{flex:1;position:relative;overflow:auto;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
+#lb-wrap{position:relative;display:inline-block;cursor:crosshair;flex-shrink:0}
+#lb-img{display:block;image-rendering:auto}
+#lb-ac{position:absolute;top:0;left:0;pointer-events:none;z-index:1}
+#lb-dc{position:absolute;top:0;left:0;z-index:2}
+
+
+#zoom-ind{position:absolute;bottom:14px;left:50%;transform:translateX(-50%) translateY(0);background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
+#zoom-ind.show{opacity:1}
+
+#lb-side{width:290px;background:var(--navy2);border-left:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+/* ── LIGHTBOX ── */
+#lb{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;background:rgba(8,14,28,.92);backdrop-filter:blur(4px)}
+#lb.open{display:flex}
+#lb-top{background:var(--navy);display:flex;align-items:center;padding:0 12px;height:50px;gap:8px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.08)}
+#lb-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lb-nav{display:flex;gap:3px;align-items:center}
+#lb-navlbl{font-size:11px;color:var(--slatel);margin:0 3px}
+#lb-body{display:flex;flex:1;overflow:hidden;min-height:0}
+#lb-area{flex:1;position:relative;overflow:auto;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
+#lb-wrap{position:relative;display:inline-block;cursor:crosshair;flex-shrink:0}
+#lb-img{display:block;image-rendering:auto}
+#lb-ac{position:absolute;top:0;left:0;pointer-events:none;z-index:1}
+#lb-dc{position:absolute;top:0;left:0;z-index:2}
+#zoom-ind{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
+#zoom-ind.show{opacity:1}
+#lb-side{width:280px;background:var(--navy2);border-left:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+#lb-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.lbtab{flex:1;padding:12px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slatel);background:none;border:none;cursor:pointer;transition:all .14s;border-bottom:2px solid transparent;-webkit-tap-highlight-color:transparent}
+.lbtab.on{color:#fff;border-bottom-color:var(--blue2)}
+#lb-panel{flex:1;overflow-y:auto;padding:13px;-webkit-overflow-scrolling:touch}
+.tg-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--slatel);margin-bottom:6px}
+.tg{margin-bottom:13px}
+.tr{display:flex;gap:5px;flex-wrap:wrap}
+.ltool{display:inline-flex;align-items:center;gap:4px;padding:0 9px;height:32px;border-radius:6px;font-size:11px;font-weight:600;background:#334155;color:#94a3b8;border:1.5px solid #475569;cursor:pointer;transition:all .13s;-webkit-tap-highlight-color:transparent}
+.ltool:hover,.ltool:active{background:#475569;color:#e2e8f0}.ltool.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.cdot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid #475569;transition:all .12s;flex-shrink:0}
+.cdot[data-c="#ffffff"]{border-color:#94a3b8}
+.cdot[data-c="#000000"]{border-color:#64748b}
+.cdot.on{border-color:#60a5fa;transform:scale(1.2);box-shadow:0 0 0 2px var(--navy2),0 0 0 4px #60a5fa}
+.lslider{width:100%;accent-color:var(--blue2);cursor:pointer;height:20px}
+.lf{margin-bottom:10px}
+.lf label{display:block;font-size:11px;font-weight:600;color:var(--slatel);margin-bottom:3px}
+.lf input,.lf textarea{width:100%;background:#334155;color:#e2e8f0;border:1.5px solid #475569;border-radius:6px;padding:8px 9px;font-size:14px;resize:vertical;transition:border-color .14s}
+.lf input:focus,.lf textarea:focus{outline:none;border-color:var(--blue2)}
+.ldiv{height:1px;background:rgba(255,255,255,.07);margin:11px 0}
+#lb-bot{background:var(--navy);border-top:1px solid rgba(255,255,255,.08);padding:8px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0}
+#lb-zc{display:flex;align-items:center;gap:4px}
+#lb-zval{font-size:11px;color:var(--slatel);min-width:36px;text-align:center}
+@media(max-width:640px){
+  #lb-body{flex-direction:column}
+  #lb-side{width:100%;border-left:none;border-top:1px solid rgba(255,255,255,.08);max-height:45vh}
+  #lb-area{min-height:0;flex:1}
+  #lb-bot{flex-wrap:wrap;gap:6px}
+  #lb-zc{flex:1}
+}
+
+/* ── MODALS (bottom-sheet on mobile) ── */
+.mbd{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
+.mbd.open{display:flex}
+.modal{background:var(--white);border-radius:18px 18px 0 0;padding:8px clamp(16px,5vw,24px) calc(16px + env(safe-area-inset-bottom));width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:var(--shlg)}
+.modal-handle{width:36px;height:4px;background:#e2e8f0;border-radius:99px;margin:0 auto 14px}
+@media(min-width:600px){
+  .mbd{align-items:center;padding:20px}
+  .modal{border-radius:14px;max-width:480px;padding:24px}
+  .modal-handle{display:none}
+}
+.modal h2{font-family:'Syne',sans-serif;font-size:17px;color:var(--navy);margin-bottom:4px}
+.modal .msub{font-size:12px;color:var(--slate);margin-bottom:16px}
+.modal label{display:block;font-size:11px;font-weight:600;color:var(--slate);margin-bottom:3px}
+.modal input,.modal textarea{width:100%;padding:10px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:16px;color:var(--navy2);margin-bottom:12px;background:var(--bg);-webkit-appearance:none}
+.modal input:focus,.modal textarea:focus{outline:none;border-color:var(--blue2);background:#fff}
+.mact{display:flex;gap:8px;margin-top:4px}.mact .btn{flex:1;height:46px;font-size:13px}
+.copt{display:flex;align-items:center;justify-content:space-between;padding:12px 13px;border-radius:8px;cursor:pointer;border:2px solid var(--border);background:#fafafa;margin-bottom:7px;transition:all .13s;-webkit-tap-highlight-color:transparent}
+.copt:hover,.copt:active{border-color:#93c5fd}.copt.on{border-color:var(--blue);background:var(--blue4)}
+.coL{display:flex;align-items:center;gap:9px}
+.cor{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;transition:all .12s;flex-shrink:0}
+.copt.on .cor{background:var(--blue);border-color:var(--blue)}
+.cnm{font-size:12px;font-weight:700;color:var(--navy2)}.csp{font-size:10px;color:var(--slate)}
+.cbadge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+
+/* ── PROJECTS ── */
+.proj-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);transition:border-color .13s}
+.proj-item:hover{border-color:#93c5fd}
+.proj-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.proj-info{flex:1;min-width:0}
+.proj-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--navy2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-meta{font-size:10px;color:var(--slatel);margin-top:2px}
+.proj-actions{display:flex;gap:5px;flex-shrink:0}
+.storage-bar-wrap{background:var(--border);border-radius:99px;height:6px;overflow:hidden;margin-top:4px}
+.storage-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--blue2));transition:width .3s}
+.storage-bar-fill.warn{background:linear-gradient(90deg,var(--amber),#f97316)}
+.storage-bar-fill.danger{background:linear-gradient(90deg,var(--red),#ef4444)}
+
+/* ── DAMAGE SUMMARY BUILDER ── */
+.ds-checks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.ds-check{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;color:var(--navy2);cursor:pointer;background:var(--bg);transition:all .13s;-webkit-tap-highlight-color:transparent;user-select:none}
+.ds-check:hover{border-color:var(--blue2);background:#eff6ff}
+.ds-check input{accent-color:var(--blue);width:14px;height:14px;cursor:pointer;flex-shrink:0;margin:0}
+/* Selected state — visually obvious so users know multi-select works */
+.ds-check:has(input:checked){background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.ds-check:has(input:checked):hover{background:var(--blue);border-color:var(--blue)}
+/* Radios get round corners to differentiate from rectangular multi-select checkboxes */
+.ds-check.ds-radio{border-radius:20px}
+/* Multi-select hint */
+.ds-multi-hint{display:inline-block;margin-left:6px;font-size:10px;font-weight:600;color:var(--blue);background:#eff6ff;padding:2px 7px;border-radius:10px;letter-spacing:.02em;text-transform:uppercase}
+
+/* ── COMPANY PROFILE SAVE/LOAD ── */
+#co-profile-bar{display:flex;align-items:center;gap:8px;padding:8px clamp(14px,4vw,24px);border-top:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.15)}
+#co-profile-bar .profile-msg{font-size:11px;color:rgba(255,255,255,.6);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#co-profile-bar .profile-msg.saved{color:#86efac}
+.btn-profile-save{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:11px;height:28px;padding:0 10px;border-radius:5px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:background .14s;white-space:nowrap;font-family:inherit;font-weight:600}
+.btn-profile-save:hover{background:rgba(255,255,255,.22)}
+.btn-profile-clear{background:rgba(220,38,38,.25);color:#fca5a5;border:1px solid rgba(220,38,38,.3);font-size:11px;height:28px;padding:0 10px;border-radius:5px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:background .14s;white-space:nowrap;font-family:inherit;font-weight:600}
+.btn-profile-clear:hover{background:rgba(220,38,38,.4)}
+#toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 18px;border-radius:30px;font-size:12px;font-weight:600;z-index:999;transition:transform .22s;pointer-events:none;white-space:nowrap;box-shadow:var(--shlg)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── EMPTY ── */
+#empty{text-align:center;padding:60px 20px;color:var(--slatel)}
+#empty p{margin-top:10px;font-size:14px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){.meta-row{grid-template-columns:1fr 1fr}#lb-side{width:240px}#co-details{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.meta-row{grid-template-columns:1fr 1fr}#co-details{grid-template-columns:1fr 1fr}#pgrid{--cols:2!important}.act-hint{display:none}.brand-sub{display:none}}
+@media(max-width:420px){#pgrid{--cols:1!important}.meta-row{grid-template-columns:1fr}#co-details{grid-template-columns:1fr}#co-banner{flex-direction:column;align-items:center;text-align:center}#co-info{width:100%}.cact{flex-wrap:wrap}.cact .btn{min-width:calc(50% - 2px)}}
+@supports(padding:env(safe-area-inset-left)){#topbar{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}#main{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}}
+
+/* ─── BUILD STAMP (subtle, bottom-left, always visible) ─── */
+/* z-index must sit BELOW the lightbox (#lb is z-index 100), modals (.mbd is 200),
+   and the upgrade modal (10000), so it can never block edit-photo buttons.
+   Also force-hidden when the lightbox is open as a safety net on narrow screens
+   where the bottom toolbar overlaps the corner. */
+#build-stamp{position:fixed;bottom:8px;left:10px;z-index:25;font-family:'Inter Tight',sans-serif;font-size:10px;color:#94a3b8;background:rgba(255,255,255,.82);padding:3px 8px;border-radius:4px;border:1px solid rgba(148,163,184,.22);letter-spacing:.02em;pointer-events:none;user-select:none;backdrop-filter:blur(4px)}
+#lb.open ~ #build-stamp,body.lb-open #build-stamp{display:none}
+@media(max-width:640px){#build-stamp{font-size:9px;padding:2px 6px;bottom:6px;left:6px}}
+@media print{#build-stamp{display:none}}
+
+/* ─── LOCKED TOOL / LOCKED PANEL (free-tier Pro teasers) ─── */
+/* Used on magnify tool in annotate panel, and for the whole xform panel.
+   Visual language: warm amber/gold so it reads as "premium", not broken. */
+.ltool.locked{position:relative;background:#3e3a2a;color:#fcd34d;border-color:#78583a}
+.ltool.locked:hover,.ltool.locked:active{background:#4a4230;color:#fde68a}
+.ltool.locked::after{content:'';position:absolute;top:-3px;right:-3px;width:14px;height:14px;background:linear-gradient(135deg,#f59e0b,#d97706);border:1.5px solid var(--navy2);border-radius:50%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3'%3E%3Crect x='5' y='11' width='14' height='10' rx='1'/%3E%3Cpath d='M8 11V7a4 4 0 018 0v4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:8px}
+
+.locked-panel{padding:18px 16px;text-align:center}
+.locked-panel .lp-icon{width:48px;height:48px;margin:4px auto 12px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(217,119,6,.4)}
+.locked-panel .lp-icon svg{width:22px;height:22px;color:#fff}
+.locked-panel .lp-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fde68a;margin-bottom:5px;letter-spacing:-.01em}
+.locked-panel .lp-sub{font-size:11px;color:#94a3b8;line-height:1.55;margin-bottom:14px}
+.locked-panel .lp-feats{text-align:left;margin:0 4px 14px;font-size:11px;color:#cbd5e1;line-height:1.7}
+.locked-panel .lp-feats li{list-style:none;padding-left:18px;position:relative}
+.locked-panel .lp-feats li::before{content:'✓';position:absolute;left:0;color:#fbbf24;font-weight:700}
+.locked-panel .lp-cta{display:block;width:100%;padding:10px 14px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .12s,box-shadow .12s;box-shadow:0 3px 10px rgba(217,119,6,.35)}
+.locked-panel .lp-cta:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(217,119,6,.45)}
+
+/* Locked compression-wheel teaser shown in export modal on free */
+.wheel-teaser{margin-top:14px;padding:14px 16px;border-radius:10px;background:linear-gradient(135deg,#fff7ed 0%,#fef3c7 100%);border:1.5px dashed #f59e0b;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.wheel-teaser:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(217,119,6,.2)}
+.wheel-teaser-icon{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(217,119,6,.3)}
+.wheel-teaser-body{flex:1;min-width:0}
+.wheel-teaser-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:#78350f;letter-spacing:-.01em}
+.wheel-teaser-sub{font-size:10px;color:#92400e;line-height:1.5;margin-top:2px}
+.wheel-teaser-lock{font-size:16px;color:#d97706;flex-shrink:0}
+
+/* ─── UPGRADE MODAL (shown when user hits a gated feature) ─── */
+#upgrade-modal{position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:20px;font-family:'Inter Tight',sans-serif;backdrop-filter:blur(3px)}
+#upgrade-modal.open{display:flex}
+#upgrade-modal .um-card{background:#fff;border-radius:14px;padding:32px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,.4);animation:um-in .22s ease-out}
+@keyframes um-in{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+#upgrade-modal .um-icon{width:54px;height:54px;margin:0 auto 14px;background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px}
+#upgrade-modal .um-title{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#0f172a;margin-bottom:8px;letter-spacing:-.02em}
+#upgrade-modal .um-sub{font-size:13px;color:#475569;line-height:1.55;margin-bottom:20px}
+#upgrade-modal .um-actions{display:flex;flex-direction:column;gap:8px}
+#upgrade-modal .um-btn{display:block;padding:12px 18px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;border:none;transition:transform .12s,box-shadow .12s;font-family:inherit}
+#upgrade-modal .um-btn-primary{background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#fff;box-shadow:0 4px 12px rgba(29,78,216,.25)}
+#upgrade-modal .um-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(29,78,216,.35)}
+#upgrade-modal .um-btn-secondary{background:#f1f5f9;color:#334155}
+#upgrade-modal .um-btn-secondary:hover{background:#e2e8f0}
+#upgrade-modal .um-foot{margin-top:14px;font-size:11px;color:#94a3b8}
+</style>
+</head>
+<body>
+
+<!-- BUILD STAMP (populated by script on load) -->
+<div id="build-stamp">Build <span id="bs-value">—</span></div>
+
+<!-- UPGRADE MODAL (shown on gated-feature prompts) -->
+<div id="upgrade-modal" role="dialog" aria-modal="true" aria-labelledby="um-title">
+  <div class="um-card">
+    <div class="um-icon" id="um-icon">✨</div>
+    <div class="um-title" id="um-title">Go Pro</div>
+    <div class="um-sub" id="um-sub">Unlock unlimited photos, custom branding, and watermark-free PDFs.</div>
+    <div class="um-actions">
+      <a class="um-btn um-btn-primary" id="um-waitlist-btn" href="https://snaptofile.com/pro" target="_blank" rel="noopener">Join the Pro waitlist</a>
+      <button class="um-btn um-btn-secondary" id="um-close-btn" type="button">Not right now</button>
+    </div>
+    <div class="um-foot">Pro launches soon — waitlist members get early pricing.</div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="brand">
+    <div class="brand-ico"><svg width="17" height="17" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+    <div><div class="brand-name">SnapToFile</div><div class="brand-sub">Photo Documentation Generator</div></div>
+  </div>
+  <div class="top-right">
+    <button class="btn btn-ghost btn-sm" id="btn-projects">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+      Save / Open
+    </button>
+    <button class="btn btn-ghost btn-sm" id="btn-cols">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span id="colslbl">3-up</span>
+    </button>
+    <button class="btn btn-primary btn-sm" id="btn-exp" style="display:none">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Export
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- COMPANY HEADER CARD -->
+  <div id="co-card">
+    <div id="co-banner">
+      <div id="co-logo-wrap">
+        <div id="co-logo-placeholder">
+          <svg width="26" height="26" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Tap to add logo</span>
+        </div>
+        <img id="co-logo-img" src="" alt="Company logo"/>
+        <button id="co-logo-clear" title="Remove logo">✕</button>
+      </div>
+      <input type="file" id="co-logo-input" accept="image/*"/>
+      <div id="co-info">
+        <input type="text" id="co-name-input" placeholder="Your Company Name" maxlength="80"/>
+        <input type="text" id="co-tagline-input" placeholder="Tagline or department (optional)" maxlength="100"/>
+      </div>
+    </div>
+    <div id="co-details">
+      <div class="co-det">
+        <label>📍 Address</label>
+        <input type="text" id="co-addr" placeholder="123 Business Ave, City, ST"/>
+      </div>
+      <div class="co-det">
+        <label>📞 Phone</label>
+        <input type="tel" id="co-phone" placeholder="(555) 000-0000"/>
+      </div>
+      <div class="co-det">
+        <label>🌐 Website / Email</label>
+        <input type="text" id="co-web" placeholder="www.company.com"/>
+      </div>
+    </div>
+    <!-- Profile save/load bar -->
+    <div id="co-profile-bar">
+      <span class="profile-msg" id="co-profile-msg">Company info is not saved — it will be lost when you close the browser.</span>
+      <button class="btn-profile-save" id="btn-save-profile">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Profile
+      </button>
+      <button class="btn-profile-clear" id="btn-clear-profile" style="display:none">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Clear Saved
+      </button>
+    </div>
+  </div>
+
+  <!-- REPORT META CARD -->
+  <!-- REPORT META CARD -->
+  <div class="meta-card">
+    <div class="sect-lbl">Report Information</div>
+    <!-- Row 1: Report name + Date -->
+    <div class="meta-row" style="margin-bottom:8px">
+      <div class="mf" style="grid-column:span 2"><label>📋 Report / Project Name</label><input type="text" id="m-name" placeholder="e.g. Storm Damage Inspection — Smith Residence"/></div>
+      <div class="mf"><label>📅 Inspection Date</label><input type="date" id="m-date"/></div>
+    </div>
+    <!-- Row 2: Address line 1 + Address line 2 + Claim/Project toggle -->
+    <div class="meta-row" style="margin-bottom:10px">
+      <div class="mf"><label>📍 Property Address — Line 1</label><input type="text" id="m-addr" placeholder="123 Main St"/></div>
+      <div class="mf"><label>📍 Address — Line 2</label><input type="text" id="m-addr2" placeholder="City, State 00000"/></div>
+      <div class="mf">
+        <label id="m-ref-label" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <span id="m-ref-text">🔖 Claim Number</span>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--slatel);font-weight:500">
+            Claim
+            <span id="ref-toggle" style="width:28px;height:16px;background:#94a3b8;border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s" onclick="toggleRefType()">
+              <span id="ref-knob" style="position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:left .2s"></span>
+            </span>
+            Project
+          </span>
+        </label>
+        <input type="text" id="m-claim" placeholder="CLM-2026-XXXXX"/>
+      </div>
+    </div>
+    <!-- Row 3: Notes / Comments -->
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--slate)">📝 Notes / Comments <span style="font-weight:400;color:var(--slatel)">(appears on page 1 of report)</span></label>
+        <button class="btn btn-indigo btn-sm" id="btn-ai-summary" style="margin-left:auto;white-space:nowrap" title="Build a damage summary from your inspection details">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          📋 Build Summary
+        </button>
+      </div>
+      <div id="ai-status" style="display:none;font-size:11px;color:var(--blue);margin-bottom:5px;align-items:center;gap:6px">
+        <span id="ai-status-text"></span>
+      </div>
+      <textarea id="m-notes" rows="4" placeholder="General notes, scope of damage summary, adjuster observations, special conditions, access notes…" style="width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:11px;color:var(--navy2);background:var(--bg);resize:vertical;line-height:1.4;font-family:inherit;transition:border-color .14s"></textarea>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div id="abar" style="display:none">
+    <span style="font-size:12px;font-weight:700;color:var(--navy2)" id="selcnt"></span>
+    <button class="btn btn-light btn-sm" id="btn-selall">Select All</button>
+    <button class="btn btn-light btn-sm" id="btn-selnone" style="display:none">Clear</button>
+    <button class="btn btn-indigo btn-sm" id="btn-bulk" style="display:none">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>
+      Bulk Edit
+    </button>
+    <span class="act-hint">Click photo to open · Shift+Click to multi-select · Drag to reorder</span>
+  </div>
+
+  <!-- DROPZONE -->
+  <div id="dz">
+    <svg width="32" height="32" fill="none" stroke="#93c5fd" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    <h3>Tap to choose photos or drop files here</h3>
+    <p>JPG · PNG · WEBP · HEIC · Multiple files supported</p>
+    <div class="dz-btns">
+      <button type="button" class="dz-btn" id="btn-gallery">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Choose from Gallery
+      </button>
+      <button type="button" class="dz-btn dz-btn-cam" id="btn-camera">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Take Photo
+      </button>
+    </div>
+  </div>
+  <!-- File inputs — hidden, triggered programmatically -->
+  <input type="file" id="fi" accept="image/*,image/heic,image/heif" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/>
+  <input type="file" id="fi-cam" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/>
+
+  <div id="pgrid" style="--cols:3"></div>
+  <div id="empty">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <p>No photos yet — tap above to get started</p>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lb">
+  <div id="lb-top">
+    <button class="btn btn-ghost btn-sm btn-icon" id="lb-x"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <div id="lb-title">Photo</div>
+    <div id="lb-scroll-btns" style="display:flex;gap:3px;margin-right:4px">
+      <button class="btn btn-ghost btn-sm btn-icon" id="lb-scroll-top" title="Scroll to top of image"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button>
+      <button class="btn btn-ghost btn-sm btn-icon" id="lb-scroll-bot" title="Scroll to bottom of image"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+    </div>
+    <div id="lb-nav">
+      <button class="btn btn-ghost btn-sm btn-icon" id="lb-prev"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <span id="lb-navlbl" style="font-size:11px;color:var(--slatel);margin:0 3px">1/1</span>
+      <button class="btn btn-ghost btn-sm btn-icon" id="lb-next"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+  </div>
+  <div id="lb-body">
+    <div id="lb-area">
+      <div id="lb-wrap">
+        <img id="lb-img" src="" alt=""/>
+        <canvas id="lb-ac"></canvas>
+        <canvas id="lb-dc"></canvas>
+      </div>
+      <div id="zoom-ind">100%</div>
+    </div>
+    <div id="lb-side">
+      <div id="lb-tabs">
+        <button class="lbtab on" data-tab="annot">✏️ Annotate</button>
+        <button class="lbtab" data-tab="xform">✂️ Transform</button>
+        <button class="lbtab" data-tab="info">📝 Info</button>
+      </div>
+      <div id="lb-panel"></div>
+    </div>
+  </div>
+  <div id="lb-bot">
+    <div id="lb-zc">
+      <button class="btn btn-dark btn-sm btn-icon" id="lz-out"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg></button>
+      <span id="lb-zval">100%</span>
+      <button class="btn btn-dark btn-sm btn-icon" id="lz-in"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg></button>
+      <button class="btn btn-dark btn-sm" id="lz-fit">Fit</button>
+      <button class="btn btn-dark btn-sm" id="lz-100">1:1</button>
+    </div>
+    <div style="flex:1"></div>
+    <button class="btn btn-danger btn-sm" id="lb-del"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> Delete</button>
+    <button class="btn btn-green btn-sm" id="lb-saveclose"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Save &amp; Close</button>
+  </div>
+</div>
+
+<!-- BULK MODAL -->
+<div class="mbd" id="mod-bulk">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Bulk Edit</h2><p class="msub" id="bulk-sub">Leave blank to keep existing values.</p>
+    <label>Header</label><input type="text" id="bh" placeholder="e.g. Storm Damage — Roof"/>
+    <label>Description</label><textarea id="bd" rows="4" placeholder="Shared description…"></textarea>
+    <div class="mact"><button class="btn btn-light" id="bulk-no">Cancel</button><button class="btn btn-indigo" id="bulk-yes">Apply</button></div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="mbd" id="mod-exp">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-handle"></div>
+    <h2>Export &amp; Print Report</h2><p class="msub" id="exp-sub">2 photos per page · photo on left, info on right</p>
+    <div class="sect-lbl" style="margin-bottom:7px">Image Compression</div>
+    <div id="copts">
+      <div class="copt on" data-lv="1"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 1 — Maximum Quality</div><div class="csp">3000px · 100% · Original size</div></div></div><span class="cbadge" style="background:#dcfce7;color:#16a34a">Original</span></div>
+      <div class="copt" data-lv="2"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 2 — High Quality</div><div class="csp">2000px · 90% · ~20% smaller</div></div></div><span class="cbadge" style="background:#dbeafe;color:#1d4ed8">~20% off</span></div>
+      <div class="copt" data-lv="3"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 3 — Balanced</div><div class="csp">1200px · 75% · ~50% smaller</div></div></div><span class="cbadge" style="background:#fef9c3;color:#a16207">~50% off</span></div>
+      <div class="copt" data-lv="4"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 4 — Compressed</div><div class="csp">800px · 55% · ~70% smaller</div></div></div><span class="cbadge" style="background:#ffedd5;color:#ea580c">~70% off</span></div>
+      <div class="copt" data-lv="5"><div class="coL"><div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div><div class="cnm">Level 5 — Max Compression</div><div class="csp">600px · 35% · ~85% smaller</div></div></div><span class="cbadge" style="background:#fee2e2;color:#dc2626">~85% off</span></div>
+    </div>
+    <!-- Print to PDF instructions -->
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 14px;margin-top:14px;font-size:11px;color:#166534;line-height:1.6">
+      <strong>💡 To save as PDF:</strong> After clicking Generate, the print dialog will open.<br>
+      Set <strong>Destination → Save as PDF</strong> (Chrome/Edge) or <strong>PDF → Save as PDF</strong> (Safari/Firefox).
+    </div>
+    <!-- STF save prompt -->
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:11px 14px;margin-top:10px;font-size:11px;color:#1e3a8a;line-height:1.55">
+      <strong>📁 Want to edit this report later?</strong> Save a <code style="background:rgba(30,58,138,.08);padding:1px 5px;border-radius:3px;font-size:10px">.stf</code> project file alongside your PDF. It keeps every photo, annotation, and field exactly as you have them now — reopen it anytime, on any computer, to pick up where you left off.
+    </div>
+    <div class="mact" style="margin-top:12px">
+      <button class="btn btn-light" id="exp-no" style="flex:0 0 auto;padding:0 16px">Cancel</button>
+      <button class="btn btn-light" id="exp-stf-save" title="Save a .stf project file so you can reopen and edit this report later">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Project
+      </button>
+      <button class="btn btn-primary" id="exp-yes">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+        Generate &amp; Print / Save PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS MODAL — Save/Open .stf files -->
+<div class="mbd" id="mod-projects">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <h2 style="flex:1">📁 Save &amp; Open Projects</h2>
+    </div>
+    <p class="msub">Save your work as a <strong>.stf</strong> file to keep editing later — on any computer.</p>
+
+    <!-- Explainer card -->
+    <div style="background:#f4f7fb;border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin:10px 0 14px;font-size:12px;line-height:1.55;color:var(--slate)">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <svg width="18" height="18" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <div style="font-weight:600;color:var(--navy2);margin-bottom:4px">What is a .stf file?</div>
+          A SnapToFile project file — your entire report (photos, annotations, company info, and notes) saved into one file you can email, back up, or keep on your computer, USB drive, or cloud storage (Dropbox, OneDrive, Google Drive). Open it anytime to pick up where you left off.
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-primary" id="btn-stf-save" style="flex:1;min-width:180px;justify-content:center">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Project (.stf)
+      </button>
+      <button class="btn btn-light" id="btn-stf-open" style="flex:1;min-width:180px;justify-content:center">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        Open Project (.stf)
+      </button>
+      <input type="file" id="stf-file-input" accept=".stf,application/json" style="display:none"/>
+    </div>
+
+    <!-- Filename preview -->
+    <div id="stf-filename-preview" style="font-size:11px;color:var(--slatel);line-height:1.6;background:#fafbfc;border:1px dashed var(--border);border-radius:7px;padding:10px 12px;margin-bottom:12px">
+      <div style="font-weight:600;color:var(--slate);margin-bottom:3px">Next save will be named:</div>
+      <div id="stf-filename-display" style="font-family:ui-monospace,'SF Mono',Menlo,monospace;color:var(--navy2);word-break:break-all">—</div>
+      <div style="margin-top:6px;opacity:.75">Uses the insured/customer name, <span id="stf-ref-label">claim number</span>, and current date/time.</div>
+    </div>
+
+    <!-- New project button -->
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <button class="btn btn-ghost btn-sm" id="btn-stf-new" style="width:100%;justify-content:center;color:var(--slate)">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        Start New Project
+      </button>
+    </div>
+
+    <div style="margin-top:12px;font-size:10px;color:var(--slatel);line-height:1.6">
+      <strong>Tip:</strong> You can also drag &amp; drop a <code>.stf</code> file anywhere on the app to open it.
+    </div>
+  </div>
+</div>
+
+<!-- DAMAGE SUMMARY BUILDER MODAL -->
+<div class="mbd" id="mod-summary">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-handle"></div>
+    <h2>📋 Build Damage Summary</h2>
+    <p class="msub">Answer a few questions — we'll write the paragraph for you.</p>
+
+    <label>Damage Type <span class="ds-multi-hint">Select multiple</span></label>
+    <div class="ds-checks" id="ds-type">
+      <label class="ds-check"><input type="checkbox" value="hail"/> Hail</label>
+      <label class="ds-check"><input type="checkbox" value="wind"/> Wind</label>
+      <label class="ds-check"><input type="checkbox" value="impact"/> Impact / Falling Object</label>
+      <label class="ds-check"><input type="checkbox" value="water"/> Water / Moisture</label>
+      <label class="ds-check"><input type="checkbox" value="fire"/> Fire / Smoke</label>
+      <label class="ds-check"><input type="checkbox" value="hail storm"/> Hail + Wind (Storm)</label>
+    </div>
+
+    <label style="margin-top:10px;display:block">Areas Affected <span class="ds-multi-hint">Select multiple</span></label>
+    <div class="ds-checks" id="ds-areas">
+      <label class="ds-check"><input type="checkbox" value="roof shingles"/> Roof Shingles</label>
+      <label class="ds-check"><input type="checkbox" value="gutters and downspouts"/> Gutters &amp; Downspouts</label>
+      <label class="ds-check"><input type="checkbox" value="roof flashing"/> Flashing</label>
+      <label class="ds-check"><input type="checkbox" value="siding"/> Siding</label>
+      <label class="ds-check"><input type="checkbox" value="windows"/> Windows</label>
+      <label class="ds-check"><input type="checkbox" value="skylights"/> Skylights</label>
+      <label class="ds-check"><input type="checkbox" value="HVAC and mechanical equipment"/> HVAC / Mechanical</label>
+      <label class="ds-check"><input type="checkbox" value="fascia and soffit"/> Fascia &amp; Soffit</label>
+      <label class="ds-check"><input type="checkbox" value="decking and flat roof membrane"/> Flat Roof / Membrane</label>
+    </div>
+
+    <label style="margin-top:10px;display:block">Severity</label>
+    <div class="ds-checks" id="ds-severity">
+      <label class="ds-check ds-radio"><input type="radio" name="ds-sev" value="minor"/> Minor — Cosmetic only</label>
+      <label class="ds-check ds-radio"><input type="radio" name="ds-sev" value="moderate" checked/> Moderate — Functional damage present</label>
+      <label class="ds-check ds-radio"><input type="radio" name="ds-sev" value="severe"/> Severe — Immediate repair required</label>
+      <label class="ds-check ds-radio"><input type="radio" name="ds-sev" value="total loss"/> Total Loss — Full replacement required</label>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div>
+        <label>Hail Size (optional)</label>
+        <select id="ds-hail" style="width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;background:var(--bg);color:var(--navy2)">
+          <option value="">— not applicable —</option>
+          <option value="pea-size (¼ inch)">Pea — ¼ inch</option>
+          <option value="dime-size (¾ inch)">Dime — ¾ inch</option>
+          <option value="penny-size (¾ inch)">Penny — ¾ inch</option>
+          <option value="nickel-size (⅞ inch)">Nickel — ⅞ inch</option>
+          <option value="quarter-size (1 inch)">Quarter — 1 inch</option>
+          <option value="half-dollar-size (1¼ inch)">Half Dollar — 1¼ inch</option>
+          <option value="golf ball-size (1¾ inch)">Golf Ball — 1¾ inch</option>
+          <option value="baseball-size (2¾ inch)">Baseball — 2¾ inch</option>
+        </select>
+      </div>
+      <div>
+        <label>Approx. Roof Squares Affected</label>
+        <input type="number" id="ds-squares" min="0" placeholder="e.g. 24" style="width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;background:var(--bg);color:var(--navy2)"/>
+      </div>
+    </div>
+
+    <label style="margin-top:10px;display:block">Recommendation</label>
+    <div class="ds-checks" id="ds-rec">
+      <label class="ds-check ds-radio"><input type="radio" name="ds-rec" value="repair"/> Repair</label>
+      <label class="ds-check ds-radio"><input type="radio" name="ds-rec" value="partial replacement"/> Partial Replacement</label>
+      <label class="ds-check ds-radio"><input type="radio" name="ds-rec" value="full replacement" checked/> Full Replacement</label>
+      <label class="ds-check ds-radio"><input type="radio" name="ds-rec" value="further evaluation"/> Further Evaluation Needed</label>
+    </div>
+
+    <div class="mact" style="margin-top:14px">
+      <button class="btn btn-light" id="sum-cancel">Cancel</button>
+      <button class="btn btn-indigo" id="sum-generate">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Generate Summary
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TEXT ANNOTATION MODAL -->
+<div class="mbd" id="mod-txt">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-handle"></div>
+    <h2>Add Text Label</h2><p class="msub">Type the annotation label</p>
+    <label>Text</label><input type="text" id="txt-in" placeholder="e.g. Crack, Water stain…"/>
+    <div class="mact"><button class="btn btn-light" id="txt-no">Cancel</button><button class="btn btn-primary" id="txt-yes">Place</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- FLOATING UPLOAD BUTTON — appears when dropzone scrolls out of view -->
+<button type="button" id="fab-upload">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+  Add Photos
+</button>
+<button type="button" id="fab-camera">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+</button>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   BUILD + TIER CONFIG — single source of truth
+   ───────────────────────────────────────────────────────
+   BUILD_STAMP: shown in the corner of the app UI. When a user
+   reports a bug, this tells us exactly which build they're on.
+   Update on every deploy.
+
+   TIER: flip this ONE constant to produce either deliverable.
+     'pro'  → the full Pro build (unlocked, no watermark)
+     'free' → the free build (12-photo cap, no company header,
+              3-level compression, locked crop/rotate/zoom/
+              magnify, watermarked PDFs)
+   Everything else in the app reads from IS_PRO below, so the
+   single flip above controls the entire tier behavior.
+   ─────────────────────────────────────────────────────── */
+const TIER              = 'pro';                              // 'pro' | 'free'
+const BUILD_STAMP       = '2026-04-21 02:00 UTC';
+const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
+const IS_PRO            = (TIER === 'pro');
+const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
+const PRO_WATERMARK     = 'Made with SnapToFile — snaptofile.com';
+
+/* Compression levels — Pro gets 5, Free gets 3 evenly-spaced shrink levels */
+const FREE_CLEV = [
+  { q: 0.85, mw: 1800, label: 'Light Compression',  desc: '1800px · 85% quality', badge: '~25% smaller', badgeBg: '#dbeafe', badgeFg: '#1d4ed8' },
+  { q: 0.72, mw: 1200, label: 'Medium Compression', desc: '1200px · 72% quality', badge: '~50% smaller', badgeBg: '#fef9c3', badgeFg: '#a16207' },
+  { q: 0.50, mw:  900, label: 'Heavy Compression',  desc: '900px · 50% quality',  badge: '~75% smaller', badgeBg: '#ffedd5', badgeFg: '#ea580c' }
+];
+
+/* ─── BUILD STAMP DISPLAY (bottom-left corner chip) ─── */
+(function initBuildStamp(){
+  const el = document.getElementById('bs-value');
+  if(el) el.textContent = BUILD_STAMP;
+})();
+
+/* ─── UPGRADE MODAL HELPER ───────────────────────────── */
+// Call showUpgrade({title, sub, icon}) whenever a gated feature is hit.
+// Opens a non-blocking modal with a waitlist CTA. User can dismiss freely.
+function showUpgrade(opts){
+  opts = opts || {};
+  const modal = document.getElementById('upgrade-modal');
+  const title = document.getElementById('um-title');
+  const sub   = document.getElementById('um-sub');
+  const icon  = document.getElementById('um-icon');
+  const wl    = document.getElementById('um-waitlist-btn');
+  if(title) title.textContent = opts.title || 'Go Pro';
+  if(sub)   sub.textContent   = opts.sub   || 'Unlock unlimited photos, custom branding, and watermark-free PDFs.';
+  if(icon)  icon.textContent  = opts.icon  || '✨';
+  if(wl)    wl.href           = WAITLIST_URL;
+  if(modal) modal.classList.add('open');
+}
+(function wireUpgradeModal(){
+  const modal = document.getElementById('upgrade-modal');
+  const close = document.getElementById('um-close-btn');
+  if(close) close.onclick = function(){ if(modal) modal.classList.remove('open'); };
+  if(modal) modal.addEventListener('click', function(e){
+    if(e.target === modal) modal.classList.remove('open');
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && modal && modal.classList.contains('open')){
+      modal.classList.remove('open');
+    }
+  });
+})();
+
+/* ─── APPLY TIER GATES (free only) ──────────────────────
+   Runs once at parse time, AFTER the DOM is in place (this script
+   is at end of <body>). Non-destructive: if any element is missing,
+   skip that gate rather than throw.
+   ─────────────────────────────────────────────────────── */
+(function applyTierGates(){
+  if(IS_PRO) return; // Pro tier: nothing to gate
+
+  // 1. Hide the entire company header card — free PDFs have no branding
+  const coCard = document.getElementById('co-card');
+  if(coCard) coCard.style.display = 'none';
+
+  // 2. Rewrite the compression options to the 3 free levels
+  const copts = document.getElementById('copts');
+  if(copts){
+    copts.innerHTML = FREE_CLEV.map(function(lv, i){
+      const onClass = i === 0 ? ' on' : '';
+      return '<div class="copt'+onClass+'" data-lv="'+(i+1)+'">'
+        +'<div class="coL">'
+          +'<div class="cor"><svg width="8" height="8" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>'
+          +'<div><div class="cnm">'+lv.label+'</div><div class="csp">'+lv.desc+'</div></div>'
+        +'</div>'
+        +'<span class="cbadge" style="background:'+lv.badgeBg+';color:'+lv.badgeFg+'">'+lv.badge+'</span>'
+      +'</div>';
+    }).join('');
+
+    // 3. Append the locked "Precision Compression Dial" teaser right after the options
+    const teaser = document.createElement('div');
+    teaser.className = 'wheel-teaser';
+    teaser.innerHTML =
+      '<div class="wheel-teaser-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M6.3 17.7l2.8-2.8M14.9 9.1l2.8-2.8"/></svg></div>'
+    + '<div class="wheel-teaser-body">'
+    +   '<div class="wheel-teaser-title">Precision Compression Dial — Pro</div>'
+    +   '<div class="wheel-teaser-sub">Dial in the exact size to fit any carrier inbox. Live file-size preview.</div>'
+    + '</div>'
+    + '<div class="wheel-teaser-lock">🔒</div>';
+    teaser.addEventListener('click', function(){
+      showUpgrade({
+        title: 'Precision Compression Dial',
+        sub:   'Dial in the exact file size you need to fit under any carrier email limit. Live preview shows estimated PDF size as you turn. Included with SnapToFile Pro.',
+        icon:  '🎯'
+      });
+    });
+    if(copts.parentNode){
+      copts.parentNode.insertBefore(teaser, copts.nextSibling);
+    }
+  }
+})();
+
+/* ─── GLOBAL ERROR REPORTER ───────────────────────────── */
+// If anything in this script throws at parse-or-init time, log it loudly
+// instead of silently breaking later handlers. Open DevTools (F12) to see.
+window.addEventListener('error', function(ev){
+  console.error('[SnapToFile] Uncaught error:', ev.message, 'at', ev.filename+':'+ev.lineno+':'+ev.colno);
+  if(ev.error && ev.error.stack) console.error(ev.error.stack);
+});
+/* ─── STATE ───────────────────────────────────────────── */
+let photos=[], selected=new Set(), gridCols=3, compLv=1, dragSrc=null, dragGroup=[];
+// Lightbox
+let lbId=null, lbTab='annot', lbZoom=1;
+let lbDrawing=false, lbDStart=null, lbDCur=null, lbDPts=[];
+let lbTool='arrow', lbColor='#ff0000', lbStroke=3, lbMagnifyZoom=2.5;
+let cropping=false, cropBox={x:0,y:0,w:0,h:0};
+let cropDrag=false, cropDType=null, cropDStart=null, cropSnap=null;
+let panActive=false, panStart=null, panOrig=null;
+let spacePan=false; // true while Space is held — temporarily pans from any tool
+let prePanTool=null; // tool to restore after space-pan
+let txtPend=null;
+const COLORS=['#ff0000','#ff6600','#ffdd00','#00dd44','#0099ff','#ff00cc','#ffffff','#000000'];
+const CLEV = IS_PRO
+  ? [{q:1.0,mw:3000},{q:0.9,mw:2000},{q:0.75,mw:1200},{q:0.55,mw:800},{q:0.35,mw:600}]
+  : FREE_CLEV.map(x=>({q:x.q,mw:x.mw}));
+
+function uid(){return Math.random().toString(36).slice(2,9)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// Load a file and convert it to a JPEG data URL via canvas.
+// Handles HEIC/HEIF from iPhone and guarantees the stored src is always renderable.
+//
+// EXIF auto-orientation: iPhone photos often come in sideways because the orientation
+// is stored as metadata instead of physically rotated pixels. We use createImageBitmap
+// with imageOrientation:'from-image' when available so sideways photos come in right-
+// side-up on upload — applied to ALL tiers (this is a correction, not a feature).
+// Falls back to the legacy <img> path on older browsers that will typically auto-orient
+// on their own anyway.
+async function readURL(f){
+  const MAX=2400; // Cap dimensions — prevents mobile memory crashes on 12MP+ camera files
+
+  // ── Preferred path: createImageBitmap with orientation correction ──
+  if(typeof createImageBitmap==='function'){
+    try{
+      const bmp=await createImageBitmap(f,{imageOrientation:'from-image'});
+      const sc=Math.min(1,MAX/Math.max(bmp.width,bmp.height,1));
+      const w=Math.round(bmp.width*sc), h=Math.round(bmp.height*sc);
+      const cv=document.createElement('canvas');
+      cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(bmp,0,0,w,h);
+      try{bmp.close();}catch(_){}
+      return cv.toDataURL('image/jpeg',0.92);
+    } catch(_){ /* fall through to legacy path for HEIC etc. */ }
+  }
+
+  // ── Legacy fallback: <img> via blob URL (browsers typically auto-orient here too) ──
+  return new Promise((resolve,reject)=>{
+    const blobURL=URL.createObjectURL(f);
+    const img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(blobURL);
+      const sc=Math.min(1,MAX/Math.max(img.naturalWidth,img.naturalHeight,1));
+      const w=Math.round(img.naturalWidth*sc);
+      const h=Math.round(img.naturalHeight*sc);
+      const cv=document.createElement('canvas');
+      cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(cv.toDataURL('image/jpeg',0.92));
+    };
+    img.onerror=()=>{
+      URL.revokeObjectURL(blobURL);
+      // FileReader fallback for HEIC and other formats
+      const fr=new FileReader();
+      fr.onload=e=>{
+        const img2=new Image();
+        img2.onload=()=>{
+          const sc=Math.min(1,MAX/Math.max(img2.naturalWidth,img2.naturalHeight,1));
+          const w=Math.round(img2.naturalWidth*sc);
+          const h=Math.round(img2.naturalHeight*sc);
+          const cv=document.createElement('canvas');
+          cv.width=w; cv.height=h;
+          cv.getContext('2d').drawImage(img2,0,0,w,h);
+          resolve(cv.toDataURL('image/jpeg',0.92));
+        };
+        img2.onerror=()=>reject(new Error('Cannot decode '+f.name));
+        img2.src=e.target.result;
+      };
+      fr.onerror=()=>reject(new Error('Cannot read '+f.name));
+      fr.readAsDataURL(f);
+    };
+    img.src=blobURL;
+  });
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+const $=id=>document.getElementById(id);
+
+/* ─── INIT ────────────────────────────────────────────── */
+$('m-date').value=new Date().toISOString().slice(0,10);
+
+/* ─── CLAIM / PROJECT TOGGLE ──────────────────────────── */
+let refType='claim'; // 'claim' | 'project'
+function toggleRefType(){
+  refType = refType==='claim'?'project':'claim';
+  const tog=$('ref-toggle'), knob=$('ref-knob'), lbl=$('m-ref-text'), inp=$('m-claim');
+  if(refType==='project'){
+    tog.style.background='var(--blue)';
+    knob.style.left='14px';
+    lbl.textContent='📁 Project Number';
+    inp.placeholder='PRJ-2026-XXXXX';
+  } else {
+    tog.style.background='#94a3b8';
+    knob.style.left='2px';
+    lbl.textContent='🔖 Claim Number';
+    inp.placeholder='CLM-2026-XXXXX';
+  }
+}
+let coLogoDataUrl=null;
+$('co-logo-wrap').onclick = function(e){
+  // Don't intercept clicks on the clear (✕) button
+  if(e.target && e.target.id === 'co-logo-clear') return;
+  $('co-logo-input').click();
+};
+$('co-logo-input').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  coLogoDataUrl=await readURL(f);
+  const img=$('co-logo-img');img.src=coLogoDataUrl;img.classList.add('loaded');
+  $('co-logo-placeholder').style.display='none';
+  $('co-logo-clear').style.display='block';
+};
+$('co-logo-clear').onclick=e=>{
+  e.stopPropagation();coLogoDataUrl=null;
+  const img=$('co-logo-img');img.src='';img.classList.remove('loaded');
+  $('co-logo-placeholder').style.display='flex';
+  $('co-logo-clear').style.display='none';
+  $('co-logo-input').value='';
+};
+
+/* ─── COMPANY PROFILE — localStorage ─────────────────── */
+const PROFILE_KEY = 'snaptofile_company_profile';
+
+function getProfileFields(){
+  return {
+    name:     $('co-name-input').value,
+    tagline:  $('co-tagline-input').value,
+    addr:     $('co-addr').value,
+    phone:    $('co-phone').value,
+    web:      $('co-web').value,
+    logo:     coLogoDataUrl || null
+  };
+}
+
+function applyProfile(p){
+  if(!p) return;
+  $('co-name-input').value    = p.name    || '';
+  $('co-tagline-input').value = p.tagline || '';
+  $('co-addr').value          = p.addr    || '';
+  $('co-phone').value         = p.phone   || '';
+  $('co-web').value           = p.web     || '';
+  if(p.logo){
+    coLogoDataUrl = p.logo;
+    const img=$('co-logo-img');
+    img.src=p.logo; img.classList.add('loaded');
+    $('co-logo-placeholder').style.display='none';
+    $('co-logo-clear').style.display='block';
+  }
+}
+
+function updateProfileBar(hasSaved){
+  const msg=$('co-profile-msg');
+  const clearBtn=$('btn-clear-profile');
+  if(hasSaved){
+    msg.textContent='✓ Company profile saved — loads automatically next time.';
+    msg.className='profile-msg saved';
+    clearBtn.style.display='';
+  } else {
+    msg.textContent='Company info is not saved — it will be lost when you close the browser.';
+    msg.className='profile-msg';
+    clearBtn.style.display='none';
+  }
+}
+
+$('btn-save-profile').onclick=()=>{
+  const profile=getProfileFields();
+  try{
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    updateProfileBar(true);
+    toast('✓ Company profile saved');
+  } catch(e){
+    toast('Could not save — storage may be full or unavailable');
+  }
+};
+
+$('btn-clear-profile').onclick=()=>{
+  if(!confirm('Remove the saved company profile? Your current inputs will not be cleared.')) return;
+  localStorage.removeItem(PROFILE_KEY);
+  updateProfileBar(false);
+  toast('Saved profile cleared');
+};
+
+// Auto-load profile on startup
+(function loadSavedProfile(){
+  try{
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if(!raw) return;
+    const p = JSON.parse(raw);
+    applyProfile(p);
+    updateProfileBar(true);
+  } catch(e){ /* corrupted storage, ignore */ }
+})();
+/* ─── DAMAGE SUMMARY BUILDER ──────────────────────────── */
+// Defensive binding: addEventListener (survives multiple binds) + null guards.
+// Wrapped in IIFE so a failure here can never block subsequent code.
+(function bindSummaryButtons(){
+  try{
+    const openBtn   = document.getElementById('btn-ai-summary');
+    const cancelBtn = document.getElementById('sum-cancel');
+    const genBtn    = document.getElementById('sum-generate');
+    const modal     = document.getElementById('mod-summary');
+
+    if(!modal){ console.error('[SnapToFile] mod-summary modal not found in DOM'); return; }
+    if(!openBtn)   console.error('[SnapToFile] btn-ai-summary button not found');
+    if(!cancelBtn) console.error('[SnapToFile] sum-cancel button not found');
+    if(!genBtn)    console.error('[SnapToFile] sum-generate button not found');
+
+    if(openBtn)   openBtn.addEventListener('click',   ()=>{ modal.classList.add('open'); });
+    if(cancelBtn) cancelBtn.addEventListener('click', ()=>{ modal.classList.remove('open'); });
+    if(genBtn)    genBtn.addEventListener('click',    runGenerateSummary);
+  } catch(err){
+    console.error('[SnapToFile] bindSummaryButtons failed:', err);
+  }
+})();
+
+function runGenerateSummary(){
+  // Collect damage types
+  const types=[...$('ds-type').querySelectorAll('input:checked')].map(i=>i.value);
+  // Collect areas
+  const areas=[...$('ds-areas').querySelectorAll('input:checked')].map(i=>i.value);
+  // Severity
+  const sev=($('ds-severity').querySelector('input:checked')||{}).value||'moderate';
+  // Hail size
+  const hail=$('ds-hail').value;
+  // Squares
+  const sq=parseInt($('ds-squares').value)||0;
+  // Recommendation
+  const rec=($('mod-summary').querySelector('input[name="ds-rec"]:checked')||{}).value||'full replacement';
+  // Property info
+  const addr=$('m-addr').value.trim();
+  const addr2=$('m-addr2').value.trim();
+  const rptName=$('m-name').value.trim();
+  const photoCount=photos.length;
+
+  if(!types.length&&!areas.length){ toast('Select at least one damage type or area'); return; }
+
+  // ── Template engine ──
+  const propertyRef=addr?(addr+(addr2?' '+addr2:'')):(rptName||'the subject property');
+
+  // Damage type phrase
+  const typeMap={
+    hail:'hail damage',wind:'wind damage',impact:'impact damage from a falling object',
+    water:'water intrusion','fire':'fire and smoke damage','hail storm':'hail and wind damage'
+  };
+  const typePhrase=types.length
+    ? types.map(t=>typeMap[t]||t).join(' and ')
+    : 'storm damage';
+
+  // Hail size phrase
+  const hailPhrase=hail?' consistent with '+hail+' hailstones':'';
+
+  // Area phrase
+  const areaPhrase=areas.length
+    ? listJoin(areas)
+    : 'multiple components of the structure';
+
+  // Severity phrase
+  const sevMap={
+    minor:'cosmetic in nature with no functional impairment',
+    moderate:'functionally significant and requires prompt attention',
+    severe:'severe and requires immediate remediation',
+    'total loss':'extensive, rendering the affected components beyond repair'
+  };
+  const sevPhrase=sevMap[sev]||sevMap.moderate;
+
+  // Squares phrase
+  const sqPhrase=sq>0?'Approximately '+sq+' roof square'+(sq!==1?'s':'')+' are affected. ':'';
+
+  // Recommendation phrase
+  const recMap={
+    repair:'repair of the damaged components is recommended',
+    'partial replacement':'partial replacement of the most severely affected sections is recommended',
+    'full replacement':'full replacement of the affected components is recommended',
+    'further evaluation':'further evaluation by a licensed contractor is recommended prior to claim settlement'
+  };
+  const recPhrase=recMap[rec]||recMap['full replacement'];
+
+  // ── Assemble paragraph ──
+  let summary='';
+
+  // Sentence 1: what damage, where
+  summary+=cap(typePhrase)+hailPhrase+' was observed at '+propertyRef+', affecting the '+areaPhrase+'.';
+
+  // Sentence 2: photo count + severity
+  summary+=' Documentation of '+photoCount+' photo'+(photoCount!==1?'s':'')+' confirms the damage is '+sevPhrase+'.';
+
+  // Sentence 3: squares if provided
+  if(sqPhrase) summary+=' '+sqPhrase.trim();
+
+  // Sentence 4: recommendation
+  summary+=' Based on the scope and extent of the documented damage, '+recPhrase+'.';
+
+  // Write into notes
+  $('m-notes').value=summary;
+  $('m-notes').style.borderColor='var(--blue2)';
+  setTimeout(()=>$('m-notes').style.borderColor='',2000);
+  $('mod-summary').classList.remove('open');
+  toast('✓ Summary written to Notes');
+}
+
+// Helper: join array as "a, b and c"
+function listJoin(arr){
+  if(!arr.length) return '';
+  if(arr.length===1) return arr[0];
+  return arr.slice(0,-1).join(', ')+' and '+arr[arr.length-1];
+}
+// Helper: capitalise first letter
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+/* ─── PROJECTS — .stf file save/open ──────────────────────
+   A .stf file is a SnapToFile project: one self-contained JSON file
+   holding photos, annotations, company info, and report metadata.
+   Users own their files — they can be stored locally, emailed, or
+   kept in any cloud folder (Dropbox, OneDrive, Google Drive, etc.).
+   ─────────────────────────────────────────────────────── */
+
+const STF_FORMAT  = 'snaptofile-project';
+const STF_VERSION = 1;
+const APP_VERSION = '1.0.0';
+
+// Track whether there are unsaved changes (for beforeunload warning)
+let dirty = false;
+// Stable UUID for the current project — preserved across save/load
+// so future cloud-sync can reconcile the same project reliably
+let currentProjectId = null;
+
+function markDirty(){ dirty = true; }
+function markClean(){ dirty = false; }
+
+function projIndex(){ return []; } // legacy stub — no longer used
+function projSaveIndex(){}           // legacy stub — no longer used
+
+/* ─── Filename generation ──────────────────────────────── */
+// Sanitize any user text into a safe filename fragment
+function sanitizeForFilename(s){
+  return String(s||'')
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9\- ]+/g,'')   // strip anything not letter/digit/dash/space
+    .replace(/\s+/g,'_')             // spaces → underscores
+    .replace(/_+/g,'_')              // collapse multiple underscores
+    .replace(/^_+|_+$/g,'')          // trim leading/trailing underscores
+    .slice(0,60);                    // cap length per segment
+}
+
+function buildStfFilename(){
+  const nameRaw = $('m-name').value;
+  const refRaw  = $('m-claim').value;
+  const name = sanitizeForFilename(nameRaw) || 'UNTITLED';
+  const ref  = sanitizeForFilename(refRaw);
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const dateStr = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const timeStr = pad(d.getHours())+pad(d.getMinutes());
+  const parts = [name];
+  if(ref) parts.push(ref);
+  parts.push(dateStr, timeStr);
+  return parts.join('_')+'.stf';
+}
+
+function updateFilenamePreview(){
+  const el = $('stf-filename-display');
+  if(el) el.textContent = buildStfFilename();
+  const lbl = $('stf-ref-label');
+  if(lbl) lbl.textContent = (refType==='project' ? 'project number' : 'claim number');
+}
+
+/* ─── Build the project object (what gets saved) ───────── */
+function buildProjectObject(){
+  if(!currentProjectId) currentProjectId = 'proj_'+Date.now()+'_'+uid();
+  const meta = {
+    rptName: $('m-name').value,
+    addr:    $('m-addr').value,
+    addr2:   $('m-addr2').value,
+    date:    $('m-date').value,
+    claim:   $('m-claim').value,
+    notes:   $('m-notes').value,
+    refType: refType
+  };
+  const coData = {
+    name:    $('co-name-input').value,
+    tagline: $('co-tagline-input').value,
+    addr:    $('co-addr').value,
+    phone:   $('co-phone').value,
+    web:     $('co-web').value,
+    logo:    coLogoDataUrl || null
+  };
+  return {
+    format:      STF_FORMAT,
+    version:     STF_VERSION,
+    app_version: APP_VERSION,
+    created:     new Date().toISOString(),
+    modified:    new Date().toISOString(),
+    project: {
+      id:      currentProjectId,
+      name:    meta.rptName || meta.addr || 'Untitled Project',
+      meta:    meta,
+      coData:  coData,
+      photos:  photos,
+      gridCols: gridCols
+    }
+  };
+}
+
+/* ─── Save: download .stf file ─────────────────────────── */
+function stfSave(){
+  if(!photos.length && !$('m-name').value && !$('m-addr').value){
+    toast('Nothing to save yet — add some info or photos first');
+    return;
+  }
+  try{
+    const obj = buildProjectObject();
+    const json = JSON.stringify(obj, null, 2);
+    const blob = new Blob([json], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const filename = buildStfFilename();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    markClean();
+    toast('✓ Saved — '+filename);
+    $('mod-projects').classList.remove('open');
+  } catch(e){
+    console.error(e);
+    toast('Could not save project — file may be too large');
+  }
+}
+
+/* ─── Open: load .stf file ─────────────────────────────── */
+function stfOpenDialog(){
+  if(dirty && !confirm('You have unsaved changes. Open a different project anyway?\n\nYour current work will be replaced.')) return;
+  $('stf-file-input').click();
+}
+
+async function stfLoadFromFile(file){
+  if(!file) return;
+  try{
+    const text = await file.text();
+    let data;
+    try{ data = JSON.parse(text); }
+    catch(e){ toast('✗ Not a valid .stf file'); return; }
+
+    // Validate format
+    if(!data || data.format !== STF_FORMAT){
+      toast('✗ This doesn\u2019t appear to be a SnapToFile project');
+      return;
+    }
+    if(data.version > STF_VERSION){
+      if(!confirm('This file was saved by a newer version of SnapToFile. Try to open it anyway? Some data may not load correctly.')) return;
+    }
+
+    const p = data.project || {};
+
+    // Restore photos
+    photos = Array.isArray(p.photos) ? p.photos : [];
+
+    // ── FREE TIER: enforce photo cap on .stf import ──
+    // An .stf file may contain more than FREE_PHOTO_CAP photos — either
+    // because it was created on Pro, or because the cap changed after
+    // the file was saved. Without this check, opening such a file would
+    // bypass the hard cap enforced on the upload path. Truncate to the
+    // first FREE_PHOTO_CAP photos and warn the user that the rest
+    // require Pro to load. The .stf file on disk is never modified by
+    // open — only by an explicit save action.
+    let stfTruncatedCount = 0;
+    let stfOriginalCount  = photos.length;
+    if(!IS_PRO && photos.length > FREE_PHOTO_CAP){
+      stfTruncatedCount = photos.length - FREE_PHOTO_CAP;
+      photos = photos.slice(0, FREE_PHOTO_CAP);
+    }
+
+    // Backfill any missing fields on older photo objects
+    photos.forEach(ph=>{
+      if(!ph.id) ph.id = uid();
+      if(ph.header===undefined) ph.header = '';
+      if(ph.desc===undefined) ph.desc = '';
+      if(!Array.isArray(ph.annotations)) ph.annotations = [];
+      if(ph.cropSrc===undefined) ph.cropSrc = null;
+    });
+    selected.clear();
+    lastSelectedId = null;
+
+    // Restore meta
+    const m = p.meta || {};
+    $('m-name').value  = m.rptName || '';
+    $('m-addr').value  = m.addr    || '';
+    $('m-addr2').value = m.addr2   || '';
+    $('m-date').value  = m.date    || '';
+    $('m-claim').value = m.claim   || '';
+    $('m-notes').value = m.notes   || '';
+    if(m.refType && m.refType !== refType) toggleRefType();
+
+    // Restore company data
+    const c = p.coData || {};
+    $('co-name-input').value    = c.name    || '';
+    $('co-tagline-input').value = c.tagline || '';
+    $('co-addr').value          = c.addr    || '';
+    $('co-phone').value         = c.phone   || '';
+    $('co-web').value           = c.web     || '';
+    if(c.logo){
+      coLogoDataUrl = c.logo;
+      const img = $('co-logo-img');
+      img.src = c.logo; img.classList.add('loaded');
+      $('co-logo-placeholder').style.display = 'none';
+      $('co-logo-clear').style.display = 'block';
+    } else {
+      coLogoDataUrl = null;
+      const img = $('co-logo-img');
+      img.src = ''; img.classList.remove('loaded');
+      $('co-logo-placeholder').style.display = 'flex';
+      $('co-logo-clear').style.display = 'none';
+    }
+
+    // Restore grid columns if saved
+    if(typeof p.gridCols === 'number' && p.gridCols >= 1 && p.gridCols <= 6){
+      gridCols = p.gridCols;
+      const lbl = $('colslbl'); if(lbl) lbl.textContent = gridCols+'-up';
+    }
+
+    // Keep the same project id so future saves update cleanly
+    currentProjectId = p.id || ('proj_'+Date.now()+'_'+uid());
+
+    $('mod-projects').classList.remove('open');
+    render();
+    markClean();
+    if(stfTruncatedCount > 0){
+      toast('✓ Opened "'+(p.name||'project')+'" — showing first '+FREE_PHOTO_CAP+' of '+stfOriginalCount+' photos');
+      // Delay the modal slightly so the toast reads first and the grid
+      // has a moment to paint — matches the pattern used on the upload cap.
+      setTimeout(()=>showUpgrade({
+        title: 'More photos in this file',
+        sub:   'This project contains '+stfOriginalCount+' photos. Free accounts display the first '+FREE_PHOTO_CAP+'. Upgrade to Pro to load all '+stfOriginalCount+' photos — plus unlimited photos on new reports, custom branding, and watermark-free PDFs.',
+        icon:  '📂'
+      }), 900);
+    } else {
+      toast('✓ Opened "'+(p.name||'project')+'" — '+photos.length+' photo'+(photos.length!==1?'s':''));
+    }
+    updateFilenamePreview();
+  } catch(e){
+    console.error(e);
+    toast('✗ Could not open file');
+  }
+}
+
+/* ─── Start new project ────────────────────────────────── */
+function stfNewProject(){
+  if(dirty && !confirm('You have unsaved changes. Start a new project anyway?\n\nYour current work will be cleared.')) return;
+  photos = [];
+  selected.clear();
+  lastSelectedId = null;
+  ['m-name','m-addr','m-addr2','m-date','m-claim','m-notes'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
+  currentProjectId = null;
+  $('mod-projects').classList.remove('open');
+  render();
+  markClean();
+  toast('✓ New project started');
+  updateFilenamePreview();
+}
+
+/* ─── Wire up handlers ─────────────────────────────────── */
+$('btn-projects').onclick = ()=>{
+  updateFilenamePreview();
+  $('mod-projects').classList.add('open');
+};
+$('btn-stf-save').onclick = stfSave;
+$('btn-stf-open').onclick = stfOpenDialog;
+$('btn-stf-new').onclick  = stfNewProject;
+$('stf-file-input').onchange = e => {
+  const f = e.target.files && e.target.files[0];
+  if(f) stfLoadFromFile(f);
+  e.target.value = ''; // allow re-opening same file
+};
+
+// Keep filename preview live as the user types into name/claim fields
+['m-name','m-claim'].forEach(id=>{
+  const el = $(id);
+  if(el) el.addEventListener('input', ()=>{ markDirty(); updateFilenamePreview(); });
+});
+// Track dirty state for other meta fields too
+['m-addr','m-addr2','m-date','m-notes','co-name-input','co-tagline-input','co-addr','co-phone','co-web'].forEach(id=>{
+  const el = $(id);
+  if(el) el.addEventListener('input', markDirty);
+});
+
+// Warn before closing tab if there are unsaved changes
+window.addEventListener('beforeunload', e=>{
+  if(dirty){ e.preventDefault(); e.returnValue = ''; return ''; }
+});
+
+// Show both FABs when the dropzone scrolls out of view
+(function(){
+  if(!window.IntersectionObserver)return;
+  const fab=$('fab-upload');
+  const fabCam=$('fab-camera');
+  new IntersectionObserver(entries=>{
+    const v=!entries[0].isIntersecting;
+    fab.classList.toggle('visible',v);
+    if(fabCam)fabCam.classList.toggle('visible',v);
+  },{threshold:0}).observe($('dz'));
+  fab.onclick=()=>$('fi').click();
+  if(fabCam)fabCam.onclick=()=>$('fi-cam').click();
+})();
+
+/* ─── ANNOTATION THUMBNAIL ────────────────────────────── */
+// Renders annotations onto the photo and caches as thumbSrc for the card view
+async function buildThumb(ph){
+  return new Promise(res=>{
+    const si=new Image();
+    si.onload=()=>{
+      // Render at card thumbnail size — no need for full resolution
+      const MAX=600;
+      const sc=Math.min(1,MAX/Math.max(si.width,1));
+      const w=Math.round(si.width*sc),h=Math.round(si.height*sc);
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      const ctx=cv.getContext('2d');ctx.drawImage(si,0,0,w,h);
+      const sx=w/si.naturalWidth,sy=h/si.naturalHeight;
+      (ph.annotations||[]).forEach(a=>{
+        const sa={...a,
+          strokeWidth:(a.strokeWidth||2)*sx,
+          x1:(a.x1||0)*sx,y1:(a.y1||0)*sy,
+          x2:(a.x2||0)*sx,y2:(a.y2||0)*sy
+        };
+        if(a.points)sa.points=a.points.map(p=>({x:p.x*sx,y:p.y*sy}));
+        if(a.fontSize)sa.fontSize=a.fontSize*sx;
+        if(a.tool==='magnify')sa.srcImg=si;
+        drawA(ctx,sa);
+      });
+      ph.thumbSrc=cv.toDataURL('image/jpeg',0.82);
+      res();
+    };
+    si.onerror=()=>res();
+    si.src=ph.cropSrc||ph.src;
+  });
+}
+
+/* ─── STICKY ACTION BAR ───────────────────────────────── */
+(function(){
+  const bar=$('abar');if(!bar||!window.IntersectionObserver)return;
+  const sentinel=document.createElement('div');
+  sentinel.style.cssText='height:1px;margin-bottom:-1px;pointer-events:none';
+  bar.parentNode.insertBefore(sentinel,bar);
+  new IntersectionObserver(entries=>{
+    bar.classList.toggle('stuck',!entries[0].isIntersecting);
+  },{threshold:1}).observe(sentinel);
+})();
+
+/* ─── LIGHTBOX SCROLL BUTTONS ─────────────────────────── */
+$('lb-scroll-top').onclick=()=>{$('lb-area').scrollTo({top:0,behavior:'smooth'})};
+$('lb-scroll-bot').onclick=()=>{const a=$('lb-area');a.scrollTo({top:a.scrollHeight,behavior:'smooth'})};
+
+// File input change — fires when user selects from gallery
+$('fi').onchange=e=>{
+  const files=[...e.target.files].filter(f=>f.type.startsWith('image/')||f.name.match(/\.(heic|heif)$/i));
+  if(files.length)handleFiles(files);
+  e.target.value='';
+};
+// Camera capture input — opens rear camera directly
+$('fi-cam').onchange=e=>{
+  const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
+  if(files.length)handleFiles(files);
+  e.target.value='';
+};
+// Dropzone buttons trigger the hidden inputs
+$('btn-gallery').onclick=()=>$('fi').click();
+$('btn-camera').onclick=()=>$('fi-cam').click();
+// Clicking anywhere on the dropzone (not on a button) also opens gallery
+$('dz').onclick=e=>{if(e.target===$('dz')||e.target.tagName==='H3'||e.target.tagName==='P'||e.target.tagName==='svg'||e.target.tagName==='path')$('fi').click()};
+
+/* ─── PAGE-WIDE DRAG AND DROP ─────────────────────────── */
+// Show a full-page drop overlay whenever files are dragged into the window.
+// Photos drop anywhere on the page — not just the dropzone.
+(function(){
+  // Create full-page overlay element
+  const overlay=document.createElement('div');
+  overlay.id='drop-overlay';
+  overlay.innerHTML='<div class="drop-overlay-inner"><svg width="48" height="48" fill="none" stroke="#93c5fd" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg><div class="drop-overlay-text">Drop photos anywhere</div></div>';
+  document.body.appendChild(overlay);
+
+  let dragCounter=0; // track enter/leave pairs to avoid flicker
+
+  document.addEventListener('dragenter',e=>{
+    // Only react to file drags, not card reorders
+    if(!e.dataTransfer||![...e.dataTransfer.types].includes('Files')) return;
+    dragCounter++;
+    if(dragCounter===1) overlay.classList.add('active');
+    e.preventDefault();
+  });
+
+  document.addEventListener('dragleave',e=>{
+    if(!e.dataTransfer||![...e.dataTransfer.types].includes('Files')) return;
+    dragCounter--;
+    if(dragCounter<=0){ dragCounter=0; overlay.classList.remove('active'); }
+  });
+
+  document.addEventListener('dragover',e=>{
+    if(!e.dataTransfer||![...e.dataTransfer.types].includes('Files')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect='copy';
+  });
+
+  document.addEventListener('drop',e=>{
+    if(!e.dataTransfer||![...e.dataTransfer.types].includes('Files')) return;
+    e.preventDefault();
+    dragCounter=0;
+    overlay.classList.remove('active');
+    $('dz').classList.remove('dragover');
+    const all = [...e.dataTransfer.files];
+    // .stf files open the project — take priority if dropped alongside anything else
+    const stf = all.find(f=>/\.stf$/i.test(f.name));
+    if(stf){ stfLoadFromFile(stf); return; }
+    const files = all.filter(f=>f.type.startsWith('image/')||f.name.match(/\.(heic|heif)$/i));
+    if(files.length) handleFiles(files);
+  });
+
+  // Also keep the dropzone highlight when dragging over it specifically
+  $('dz').addEventListener('dragenter',e=>{if([...e.dataTransfer.types].includes('Files'))$('dz').classList.add('dragover')});
+  $('dz').addEventListener('dragleave',()=>$('dz').classList.remove('dragover'));
+})();
+
+async function handleFiles(files){
+  if(!files.length)return;
+
+  let fileList = Array.from(files);
+
+  // ── FREE TIER: hard cap at FREE_PHOTO_CAP photos ──
+  // Reject any uploads that would push total photos above the cap.
+  // If the current selection partially fits, accept the portion that fits
+  // and show the upgrade modal so the user knows why the rest were dropped.
+  if(!IS_PRO){
+    const remaining = FREE_PHOTO_CAP - photos.length;
+    if(remaining <= 0){
+      showUpgrade({
+        title: 'Photo limit reached',
+        sub:   'Free accounts hold up to '+FREE_PHOTO_CAP+' photos per report. Upgrade to Pro for unlimited photos.',
+        icon:  '📸'
+      });
+      return;
+    }
+    if(fileList.length > remaining){
+      const dropped = fileList.length - remaining;
+      fileList = fileList.slice(0, remaining);
+      // Short toast first — upgrade modal opens after processing completes
+      toast('Free accounts hold '+FREE_PHOTO_CAP+' photos — '+dropped+' not added');
+      // Schedule the upgrade modal for after this batch finishes rendering
+      setTimeout(()=>showUpgrade({
+        title: 'Photo limit reached',
+        sub:   'You\'ve hit the '+FREE_PHOTO_CAP+'-photo limit. Upgrade to Pro for unlimited photos, custom branding, and watermark-free PDFs.',
+        icon:  '📸'
+      }), 900);
+    }
+  }
+
+  const total=fileList.length;
+  let added=0, failed=0;
+
+  // Show live progress toast — updates as each batch completes
+  function prog(){
+    const done=added+failed;
+    toast('Loading '+done+' / '+total+' photos…');
+  }
+  prog();
+
+  // Process in batches of 3 — prevents browser from choking on
+  // large Google Photos selections where images may need to be
+  // fetched from the cloud before they can be decoded
+  const BATCH=3;
+  for(let i=0;i<fileList.length;i+=BATCH){
+    const batch=fileList.slice(i,i+BATCH);
+    const results=await Promise.allSettled(batch.map(f=>readURL(f)));
+    results.forEach(r=>{
+      if(r.status==='fulfilled'&&r.value){
+        photos.push({id:uid(),src:r.value,header:'',desc:'',annotations:[],cropSrc:null});
+        added++;
+      } else {
+        failed++;
+      }
+    });
+    // Re-render incrementally so user sees photos appearing as they load
+    render();
+    prog();
+  }
+
+  if(added>0){
+    markDirty();
+    toast('✓ Added '+added+' photo'+(added>1?'s':'')+(failed?' ('+failed+' failed)':''));
+  } else {
+    toast('Could not load any photos — try selecting fewer at once');
+  }
+}
+
+/* ─── GRID COLS ───────────────────────────────────────── */
+$('btn-cols').onclick=()=>{gridCols=gridCols===3?2:gridCols===2?1:3;$('pgrid').style.setProperty('--cols',gridCols);$('colslbl').textContent=gridCols+'-col view'};
+
+/* ─── RENDER ──────────────────────────────────────────── */
+function render(){
+  const g=$('pgrid');g.innerHTML='';
+  $('empty').style.display=photos.length?'none':'block';
+  $('btn-exp').style.display=photos.length?'':'none';
+  $('abar').style.display=photos.length?'':'none';
+  updateSelUI();
+  photos.forEach((ph,i)=>g.appendChild(makeCard(ph,i)));
+}
+
+function makeCard(ph,idx){
+  const sel=selected.has(ph.id);
+  const c=document.createElement('div');
+  c.className='pcard'+(sel?' selected':'');c.dataset.id=ph.id;
+
+  const iw=document.createElement('div');iw.className='cimg';
+  const img=document.createElement('img');img.src=ph.thumbSrc||ph.cropSrc||ph.src;
+  img.loading='lazy';
+  iw.appendChild(img);
+
+  // hover overlay
+  const ov=document.createElement('div');ov.className='cov';
+  const ob=document.createElement('button');ob.className='cov-btn';
+  ob.innerHTML=`<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> Open`;
+  ob.onclick=e=>{e.stopPropagation();openLb(ph.id)};ov.appendChild(ob);iw.appendChild(ov);
+
+  const ib=document.createElement('div');ib.className='cidx';ib.textContent=idx+1;iw.appendChild(ib);
+  const sb=document.createElement('div');sb.className='csel'+(sel?' on':'');
+  sb.innerHTML=`<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
+  sb.onclick=e=>{e.stopPropagation();toggleSel(ph.id,e)};iw.appendChild(sb);
+
+  if(ph.annotations?.length){const ab=document.createElement('div');ab.className='abadge';ab.style.left='7px';ab.style.bottom='6px';ab.textContent='✏️ '+ph.annotations.length;iw.appendChild(ab)}
+  if(ph.cropSrc){const cb=document.createElement('div');cb.className='abadge';cb.style.right='7px';cb.style.bottom='6px';cb.style.background='rgba(16,163,74,.85)';cb.textContent='✂️ cropped';iw.appendChild(cb)}
+
+  iw.onclick=()=>openLb(ph.id);
+  c.appendChild(iw);
+
+  const body=document.createElement('div');body.className='cbody';
+  const ht=document.createElement('div');ht.className='chtxt'+(ph.header?'':' empty');ht.textContent=ph.header||'No header';
+  const dt=document.createElement('div');dt.className='cdtxt'+(ph.desc?'':' empty');dt.textContent=ph.desc||'No description';
+  const acts=document.createElement('div');acts.className='cact';
+  [['light','✏️ Edit',()=>openLb(ph.id,'info')],
+   ['amber','🖊 Draw',()=>openLb(ph.id,'annot')],
+   ['dark','✂️ Crop',()=>openLb(ph.id,'xform')],
+   ['danger','✕',()=>{photos=photos.filter(p=>p.id!==ph.id);selected.delete(ph.id);if(lastSelectedId===ph.id)lastSelectedId=null;markDirty();render()}]
+  ].forEach(([s,l,fn])=>{const b=document.createElement('button');b.className=`btn btn-${s}`;b.innerHTML=l;b.onclick=fn;acts.appendChild(b)});
+  body.appendChild(ht);body.appendChild(dt);body.appendChild(acts);c.appendChild(body);
+
+  c.draggable=true;
+  c.addEventListener('dragstart',e=>{
+    // If dragging a selected card, drag the whole group; otherwise drag just this one
+    if(!selected.has(ph.id)){ selected.clear(); selected.add(ph.id); lastSelectedId=ph.id; render(); }
+    dragSrc=ph.id;
+    // Store all dragged IDs as ordered list
+    dragGroup=[...photos.filter(p=>selected.has(p.id)).map(p=>p.id)];
+    e.dataTransfer.effectAllowed='move';
+    // Visual: dim all dragging cards
+    document.querySelectorAll('.pcard').forEach(el=>{
+      if(dragGroup.includes(el.dataset.id)) el.classList.add('dragging');
+    });
+    startDragScroll();
+  });
+  c.addEventListener('dragend',()=>{
+    document.querySelectorAll('.pcard.dragging').forEach(el=>el.classList.remove('dragging'));
+    dragSrc=null; dragGroup=[];
+    stopDragScroll();
+  });
+  c.addEventListener('dragover',e=>{if(dragSrc&&dragSrc!==ph.id&&!dragGroup.includes(ph.id)){e.preventDefault();c.classList.add('drag-over')}});
+  c.addEventListener('dragleave',()=>c.classList.remove('drag-over'));
+  c.addEventListener('drop',e=>{
+    e.preventDefault();c.classList.remove('drag-over');
+    if(!dragSrc||dragSrc===ph.id||dragGroup.includes(ph.id))return;
+    const ti=photos.findIndex(p=>p.id===ph.id);
+    // Remove all dragged photos from array, keeping order
+    const dragged=photos.filter(p=>dragGroup.includes(p.id));
+    const rest=photos.filter(p=>!dragGroup.includes(p.id));
+    // Insert at drop position in the rest array
+    const insertAt=rest.findIndex(p=>p.id===ph.id);
+    rest.splice(insertAt,0,...dragged);
+    photos=rest;
+    render();
+  });
+  return c;
+}
+
+/* ─── DRAG AUTO-SCROLL ────────────────────────────────── */
+// Smooth physics-based auto-scroll during card reordering.
+// Uses velocity easing — scroll speed ramps up the closer you are to the edge.
+let _dsVel=0, _dsRAF=null, _dsLastT=0;
+const _DS_ZONE=100;  // px from viewport edge that activates scroll
+const _DS_MAX=28;    // max px per frame at 60fps
+
+function _dsStep(t){
+  if(!dragSrc){ _stopDS(); return; }
+  const dt=Math.min((t-_dsLastT)/16.67,3); // delta in frames, capped at 3
+  _dsLastT=t;
+  if(_dsVel!==0) window.scrollBy({top:_dsVel*dt,behavior:'instant'});
+  _dsRAF=requestAnimationFrame(_dsStep);
+}
+
+function _startDS(){
+  _stopDS();
+  _dsLastT=performance.now();
+  document._dsMove=e=>{
+    const y=e.clientY, vh=window.innerHeight;
+    if(y<_DS_ZONE){
+      // Ease: 0 at zone boundary, max at edge
+      const t=1-(y/_DS_ZONE);
+      _dsVel=-(_DS_MAX*(t*t));
+    } else if(y>vh-_DS_ZONE){
+      const t=(y-(vh-_DS_ZONE))/_DS_ZONE;
+      _dsVel=_DS_MAX*(t*t);
+    } else {
+      _dsVel=0;
+    }
+  };
+  document.addEventListener('dragover',document._dsMove,{passive:true});
+  _dsRAF=requestAnimationFrame(_dsStep);
+}
+
+function _stopDS(){
+  _dsVel=0;
+  if(_dsRAF){cancelAnimationFrame(_dsRAF);_dsRAF=null;}
+  if(document._dsMove){
+    document.removeEventListener('dragover',document._dsMove);
+    document._dsMove=null;
+  }
+}
+
+// Keep legacy names so existing dragstart/dragend calls still work
+function startDragScroll(){ _startDS(); }
+function stopDragScroll(){ _stopDS(); }
+
+/* ─── SELECTION ───────────────────────────────────────── */
+let lastSelectedId=null; // anchor point for shift-range selection
+
+function toggleSel(id,e){
+  const idx=photos.findIndex(p=>p.id===id);
+
+  if(e?.shiftKey && lastSelectedId!==null){
+    // Range select: fill everything between lastSelectedId and id
+    const anchorIdx=photos.findIndex(p=>p.id===lastSelectedId);
+    const lo=Math.min(anchorIdx,idx), hi=Math.max(anchorIdx,idx);
+    // If Ctrl/Meta also held, ADD the range; otherwise replace selection with range
+    if(!e.ctrlKey && !e.metaKey) selected.clear();
+    for(let i=lo;i<=hi;i++) selected.add(photos[i].id);
+    // Don't update lastSelectedId on shift — anchor stays fixed for multi-range
+  } else if(e?.ctrlKey||e?.metaKey){
+    // Toggle individual item, update anchor
+    selected.has(id)?selected.delete(id):selected.add(id);
+    lastSelectedId=id;
+  } else {
+    // Plain click — select only this item, set as new anchor
+    if(selected.has(id)&&selected.size===1){ selected.clear(); lastSelectedId=null; }
+    else { selected.clear(); selected.add(id); lastSelectedId=id; }
+  }
+  render();
+}
+function updateSelUI(){
+  const n=selected.size;
+  $('selcnt').textContent=n>0?`${n} selected`:`${photos.length} photo${photos.length!==1?'s':''}`;
+  $('btn-selnone').style.display=n>0?'':'none';
+  $('btn-bulk').style.display=n>1?'':'none';
+}
+$('btn-selall').onclick=()=>{photos.forEach(p=>selected.add(p.id));lastSelectedId=photos[0]?.id??null;render()};
+$('btn-selnone').onclick=()=>{selected.clear();lastSelectedId=null;render()};
+
+/* ═══════════════════════════════════════════════════════
+   LIGHTBOX
+═══════════════════════════════════════════════════════ */
+function lbPh(){return photos.find(p=>p.id===lbId)}
+
+function clearCropCanvas(){const dc=$('lb-dc');if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height);}}
+
+function openLb(id,tab='annot'){
+  lbId=id;lbTab=tab;lbZoom=1;
+  cropping=false;clearCropCanvas();
+  document.querySelectorAll('.lbtab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
+  $('lb').classList.add('open');document.body.classList.add('lb-open');document.body.style.overflow='hidden';
+  loadLbImg().then(()=>{renderPanel();renderNav()});
+}
+function closeLb(){
+  $('lb').classList.remove('open');
+  document.body.classList.remove('lb-open');
+  document.body.style.overflow='';
+  cropping=false;clearCropCanvas();
+  // Rebuild the thumbnail for the edited photo so annotations show in the grid
+  const ph=lbPh();
+  if(ph){
+    buildThumb(ph).then(()=>render());
+  } else {
+    render();
+  }
+}
+
+function loadLbImg(){
+  return new Promise(res=>{
+    const ph=lbPh();if(!ph){res();return}
+    const img=$('lb-img');
+    img.onload=()=>{fitZoom();applyZoom();syncCanvases();redrawAC();res()};
+    img.src=ph.cropSrc||ph.src;
+    $('lb-title').textContent=ph.header||`Photo ${photos.indexOf(ph)+1}`;
+  })
+}
+
+function renderNav(){
+  const i=photos.findIndex(p=>p.id===lbId);
+  $('lb-navlbl').textContent=`${i+1} / ${photos.length}`;
+  $('lb-prev').disabled=i<=0;$('lb-next').disabled=i>=photos.length-1;
+}
+
+$('lb-prev').onclick=()=>{const i=photos.findIndex(p=>p.id===lbId);if(i>0)openLb(photos[i-1].id,lbTab)};
+$('lb-next').onclick=()=>{const i=photos.findIndex(p=>p.id===lbId);if(i<photos.length-1)openLb(photos[i+1].id,lbTab)};
+$('lb-x').onclick=closeLb;
+$('lb-saveclose').onclick=()=>{saveLbInfo();closeLb();toast('Saved')};
+$('lb-del').onclick=()=>{if(!confirm('Delete this photo?'))return;photos=photos.filter(p=>p.id!==lbId);markDirty();closeLb();toast('Photo deleted')};
+
+/* Tabs */
+document.querySelectorAll('.lbtab').forEach(t=>{
+  t.onclick=()=>{
+    lbTab=t.dataset.tab;
+    document.querySelectorAll('.lbtab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+    cropping=false;clearCropCanvas();
+    $('lb-dc').style.cursor=lbTab==='annot'?'crosshair':'default';
+    renderPanel();
+  }
+});
+
+function renderPanel(){
+  const p=$('lb-panel');
+  if(lbTab==='annot')p.innerHTML=buildAnnotPanel();
+  else if(lbTab==='xform')p.innerHTML=buildXformPanel();
+  else p.innerHTML=buildInfoPanel();
+  bindPanel();
+}
+
+function buildAnnotPanel(){
+  // Magnify is a Pro-only tool in the free tier — shown but visibly locked.
+  const magnifyLocked = !IS_PRO;
+  const tools=[
+    ['pan','✋','Pan',false],
+    ['arrow','➡️','Arrow',false],
+    ['circle','⭕','Circle',false],
+    ['rect','⬜','Rect',false],
+    ['highlight','🖍','Hilite',false],
+    ['freehand','✏️','Free',false],
+    ['text','T','Text',false],
+    ['magnify','🔍','Magnify',magnifyLocked]
+  ];
+  const magnifySlider = (lbTool==='magnify' && IS_PRO)
+    ? '<div class="tg"><div class="tg-lbl">Zoom level — <span id="mz-v">'+lbMagnifyZoom+'×</span></div><input type="range" class="lslider" id="mz" min="1.5" max="6" step="0.5" value="'+lbMagnifyZoom+'"/></div>'
+    : '';
+  return`<div class="tg"><div class="tg-lbl">Tool</div><div class="tr">${tools.map(([t,ic,l,locked])=>`<button class="ltool${lbTool===t?' on':''}${locked?' locked':''}" data-tool="${t}"${locked?' data-locked="1"':''}>${ic} ${l}</button>`).join('')}</div></div>
+<div class="tg"><div class="tg-lbl">Color</div><div class="tr">${COLORS.map(c=>`<div class="cdot${lbColor===c?' on':''}" data-c="${c}" style="background:${c}"></div>`).join('')}</div></div>
+<div class="tg"><div class="tg-lbl">Stroke — <span id="sw-v">${lbStroke}px</span></div><input type="range" class="lslider" id="sw" min="1" max="12" value="${lbStroke}"/></div>
+${magnifySlider}
+<div class="ldiv"></div>
+<div style="display:flex;gap:6px"><button class="btn btn-dark btn-sm" id="lb-undo" style="flex:1;justify-content:center">↩ Undo</button><button class="btn btn-danger btn-sm" id="lb-clr" style="flex:1;justify-content:center">🗑 Clear All</button></div>
+<div style="margin-top:9px;font-size:10px;color:var(--slatel);line-height:1.6">Draw on photo · Scroll to zoom<br>✋ Pan tool or <kbd style="background:#334155;padding:1px 4px;border-radius:3px;font-size:9px">Space</kbd>+drag to pan<br>Two-finger drag on mobile · Alt+drag also pans</div>`
+}
+
+function buildXformPanel(){
+  // FREE TIER: the whole Transform panel is Pro-only. Show a polished
+  // teaser that makes the user feel what they're missing, not a dead panel.
+  if(!IS_PRO){
+    return`<div class="locked-panel">
+  <div class="lp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></div>
+  <div class="lp-title">Transform Tools</div>
+  <div class="lp-sub">Tighten the shot on the damage, fix the orientation, or zoom in for detail work — all included with Pro.</div>
+  <ul class="lp-feats">
+    <li>Crop — tighten focus onto the damaged area</li>
+    <li>Rotate — fix sideways or upside-down photos</li>
+    <li>Zoom — work on fine detail without losing place</li>
+  </ul>
+  <button class="lp-cta" data-upgrade="xform">Upgrade to Pro</button>
+</div>`;
+  }
+  return`<div class="tg"><div class="tg-lbl">Zoom</div><div class="tr"><button class="ltool" id="xz-out">➖</button><button class="ltool" id="xz-fit">⊞ Fit</button><button class="ltool" id="xz-100">1:1</button><button class="ltool" id="xz-in">➕</button></div></div>
+<div class="ldiv"></div>
+<div class="tg"><div class="tg-lbl">Crop Tool</div>
+<div style="font-size:11px;color:var(--slatel);margin-bottom:8px;line-height:1.55">Draw a selection box on the photo, drag handles to adjust, then click Apply.<br><em style="color:#f59e0b">Note: applying crop clears annotations.</em></div>
+<div class="tr"><button class="ltool${cropping?' on':''}" id="xc-tog">✂️ ${cropping?'Cancel':'Start Crop'}</button>${cropping?`<button class="ltool" id="xc-apply" style="background:var(--green);color:#fff;border-color:var(--green)">✓ Apply</button>`:''}</div>
+${lbPh()?.cropSrc?`<button class="btn btn-danger btn-sm" id="xc-reset" style="width:100%;justify-content:center;margin-top:8px">↩ Reset to Original</button>`:''}
+</div>
+<div class="ldiv"></div>
+<div class="tg"><div class="tg-lbl">Rotate</div><div class="tr"><button class="ltool" id="xr-l">↺ 90° Left</button><button class="ltool" id="xr-r">↻ 90° Right</button></div></div>`
+}
+
+function buildInfoPanel(){
+  const ph=lbPh();if(!ph)return'';
+  return`<div class="lf"><label>Header</label><input type="text" id="lb-hdr" value="${esc(ph.header)}" placeholder="Photo header…"/></div>
+<div class="lf"><label>Description</label><textarea id="lb-dsc" rows="7" placeholder="Describe what this photo shows…">${esc(ph.desc)}</textarea></div>
+<div style="font-size:10px;color:var(--slatel);margin-top:4px;margin-bottom:4px">✓ Changes save automatically</div>
+<div class="ldiv"></div>
+<div style="font-size:10px;color:var(--slatel);line-height:1.7">Photo ${photos.indexOf(ph)+1} of ${photos.length}<br>${ph.annotations?.length||0} annotation${ph.annotations?.length!==1?'s':''}${ph.cropSrc?' · Cropped':''}</div>`
+}
+
+function bindPanel(){
+  // Locked-panel CTA (Transform panel on free) — upgrade modal on click
+  document.querySelectorAll('.lp-cta[data-upgrade]').forEach(b=>b.onclick=()=>{
+    const src=b.dataset.upgrade;
+    const msg={
+      xform:{title:'Transform Tools are Pro',sub:'Crop, rotate, and zoom are included with SnapToFile Pro along with unlimited photos, custom branding, and watermark-free PDFs.',icon:'✂️'}
+    };
+    showUpgrade(msg[src] || {});
+  });
+  // Annot tools — locked tools intercept and open upgrade modal
+  document.querySelectorAll('.ltool[data-tool]').forEach(b=>b.onclick=()=>{
+    if(b.dataset.locked === '1'){
+      const map={
+        magnify:{title:'Magnifier is Pro',sub:'Drop a zoom-in callout onto any detail — cracked shingles, dented flashing, chipped paint — so adjusters can see what you see. Included with SnapToFile Pro.',icon:'🔍'}
+      };
+      showUpgrade(map[b.dataset.tool] || {});
+      return;
+    }
+    lbTool=b.dataset.tool;
+    renderPanel();
+    const cursors={pan:'grab',text:'text'};
+    $('lb-dc').style.cursor=cursors[lbTool]||'crosshair';
+  });
+  document.querySelectorAll('.cdot').forEach(d=>d.onclick=()=>{lbColor=d.dataset.c;renderPanel()});
+  const sw=$('sw');if(sw){sw.oninput=()=>{lbStroke=+sw.value;$('sw-v').textContent=lbStroke+'px'}}
+  const mz=$('mz');if(mz){mz.oninput=()=>{lbMagnifyZoom=+mz.value;$('mz-v').textContent=lbMagnifyZoom+'×'}}
+  const ub=$('lb-undo');if(ub)ub.onclick=()=>{const ph=lbPh();if(ph){ph.annotations.pop();redrawAC();renderPanel()}};
+  const cb=$('lb-clr');if(cb)cb.onclick=()=>{const ph=lbPh();if(ph){ph.annotations=[];redrawAC();renderPanel()}toast('Cleared')};
+  // Xform
+  const xzo=$('xz-out'),xzf=$('xz-fit'),xz1=$('xz-100'),xzi=$('xz-in');
+  if(xzo)xzo.onclick=()=>setZ(lbZoom*.75);if(xzf)xzf.onclick=()=>fitZoom();if(xz1)xz1.onclick=()=>setZ(1);if(xzi)xzi.onclick=()=>setZ(lbZoom*1.33);
+  const xct=$('xc-tog');if(xct)xct.onclick=()=>{
+    cropping=!cropping;
+    if(cropping){
+      initCrop();
+      $('lb-dc').style.cursor='crosshair';
+    } else {
+      // Clear the crop overlay from draw canvas
+      const dc=$('lb-dc');if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height);}
+      $('lb-dc').style.cursor='default';
+    }
+    renderPanel();
+  };
+  const xca=$('xc-apply');if(xca)xca.onclick=applyCrop;
+  const xcr=$('xc-reset');if(xcr)xcr.onclick=()=>{const ph=lbPh();if(ph){ph.cropSrc=null;ph.annotations=[]}loadLbImg().then(()=>renderPanel());toast('Reset to original')};
+  const xrl=$('xr-l'),xrr=$('xr-r');
+  if(xrl)xrl.onclick=()=>rotatePh(-90);if(xrr)xrr.onclick=()=>rotatePh(90);
+  // Info — auto-save on every keystroke
+  const hdr=$('lb-hdr'),dsc=$('lb-dsc');
+  if(hdr)hdr.oninput=()=>saveLbInfo();
+  if(dsc)dsc.oninput=()=>saveLbInfo();
+  const si=$('lb-sinfo');if(si)si.onclick=()=>{saveLbInfo();toast('Saved')};
+}
+
+function saveLbInfo(){const ph=lbPh();if(!ph)return;const h=$('lb-hdr'),d=$('lb-dsc');if(h)ph.header=h.value;if(d)ph.desc=d.value;$('lb-title').textContent=ph.header||`Photo ${photos.indexOf(ph)+1}`}
+
+/* ─── ZOOM ────────────────────────────────────────────── */
+function fitZoom(){
+  const a=$('lb-area'),img=$('lb-img');if(!img.naturalWidth)return;
+  const sx=(a.clientWidth-40)/img.naturalWidth,sy=(a.clientHeight-40)/img.naturalHeight;
+  lbZoom=Math.min(1,sx,sy);applyZoom();
+}
+function setZ(z){lbZoom=clamp(z,.05,8);applyZoom();showZInd()}
+function applyZoom(){
+  const img=$('lb-img');
+  const w=img.naturalWidth*lbZoom,h=img.naturalHeight*lbZoom;
+  const wr=$('lb-wrap');
+  wr.style.width=w+'px';wr.style.height=h+'px';
+  img.style.width=w+'px';img.style.height=h+'px';
+  syncCanvases();$('lb-zval').textContent=Math.round(lbZoom*100)+'%';
+}
+function syncCanvases(){
+  const img=$('lb-img');const w=img.naturalWidth*lbZoom,h=img.naturalHeight*lbZoom;
+  [$('lb-ac'),$('lb-dc')].forEach(c=>{c.width=w;c.height=h;c.style.width=w+'px';c.style.height=h+'px'});
+  redrawAC();if(cropping)drawCropOverlay();
+}
+let zIndT;function showZInd(){const e=$('zoom-ind');e.textContent=Math.round(lbZoom*100)+'%';e.classList.add('show');clearTimeout(zIndT);zIndT=setTimeout(()=>e.classList.remove('show'),1100)}
+
+$('lz-out').onclick=()=>setZ(lbZoom*.8);$('lz-in').onclick=()=>setZ(lbZoom*1.25);
+$('lz-fit').onclick=()=>fitZoom();$('lz-100').onclick=()=>setZ(1);
+
+/* Scroll to zoom — fine-grained, zooms toward cursor */
+$('lb-area').addEventListener('wheel',e=>{
+  e.preventDefault();
+  let px=e.deltaY;
+  if(e.deltaMode===1) px*=18;
+  if(e.deltaMode===2) px*=300;
+  const factor=1-clamp(px*0.003,-0.15,0.15);
+  const area=$('lb-area');
+  // Zoom toward the mouse cursor, not the center
+  const rect=area.getBoundingClientRect();
+  const mouseX=e.clientX-rect.left+area.scrollLeft;
+  const mouseY=e.clientY-rect.top+area.scrollTop;
+  const prevZoom=lbZoom;
+  lbZoom=clamp(lbZoom*factor,0.05,8);
+  applyZoom();
+  // Adjust scroll so the point under the cursor stays fixed
+  const scale=lbZoom/prevZoom;
+  area.scrollLeft=mouseX*scale-(e.clientX-rect.left);
+  area.scrollTop=mouseY*scale-(e.clientY-rect.top);
+  showZInd();
+},{passive:false});
+
+/* ─── PINCH-TO-ZOOM + SWIPE NAVIGATION ───────────────── */
+(function(){
+  const area=$('lb-area');
+  let pinchDist=null;      // distance between two fingers at last event
+  let pinchMid=null;       // midpoint of the two fingers in scroll-space
+  let swipeStart=null;     // {x,y,t} for swipe detection
+  let gestureHandled=false;// true once we commit to pinch (suppress swipe)
+
+  function dist(t1,t2){
+    return Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
+  }
+  function mid(t1,t2){
+    return {
+      clientX:(t1.clientX+t2.clientX)/2,
+      clientY:(t1.clientY+t2.clientY)/2
+    };
+  }
+
+  area.addEventListener('touchstart',e=>{
+    gestureHandled=false;
+    if(e.touches.length===2){
+      // Begin pinch
+      pinchDist=dist(e.touches[0],e.touches[1]);
+      const m=mid(e.touches[0],e.touches[1]);
+      const rect=area.getBoundingClientRect();
+      pinchMid={
+        x:m.clientX-rect.left+area.scrollLeft,
+        y:m.clientY-rect.top+area.scrollTop,
+        cx:m.clientX-rect.left,
+        cy:m.clientY-rect.top
+      };
+      e.preventDefault();
+    } else if(e.touches.length===1){
+      // Track potential swipe start — only on lb-area background, not draw canvas
+      const t=e.touches[0];
+      swipeStart={x:t.clientX,y:t.clientY,t:Date.now()};
+    }
+  },{passive:false});
+
+  area.addEventListener('touchmove',e=>{
+    if(e.touches.length===2){
+      gestureHandled=true;
+      e.preventDefault();
+      const newDist=dist(e.touches[0],e.touches[1]);
+      if(!pinchDist||newDist===0){pinchDist=newDist;return;}
+      const factor=newDist/pinchDist;
+      pinchDist=newDist;
+      // Update midpoint as fingers move
+      const m=mid(e.touches[0],e.touches[1]);
+      const rect=area.getBoundingClientRect();
+      pinchMid={
+        x:m.clientX-rect.left+area.scrollLeft,
+        y:m.clientY-rect.top+area.scrollTop,
+        cx:m.clientX-rect.left,
+        cy:m.clientY-rect.top
+      };
+      const prevZoom=lbZoom;
+      lbZoom=clamp(lbZoom*factor,0.05,8);
+      applyZoom();
+      // Keep the midpoint pinned — same math as wheel zoom
+      const scale=lbZoom/prevZoom;
+      area.scrollLeft=pinchMid.x*scale-pinchMid.cx;
+      area.scrollTop=pinchMid.y*scale-pinchMid.cy;
+      showZInd();
+    }
+  },{passive:false});
+
+  area.addEventListener('touchend',e=>{
+    if(e.touches.length<2){pinchDist=null;pinchMid=null;}
+    // Swipe detection — only if no pinch occurred and touch was short
+    if(!gestureHandled&&swipeStart&&e.changedTouches.length===1){
+      const t=e.changedTouches[0];
+      const dx=t.clientX-swipeStart.x;
+      const dy=t.clientY-swipeStart.y;
+      const dt=Date.now()-swipeStart.t;
+      // Fast horizontal swipe: >60px horizontal, <80px vertical, <400ms
+      if(Math.abs(dx)>60&&Math.abs(dy)<80&&dt<400){
+        if(dx<0) $('lb-next').click(); // swipe left = next
+        else     $('lb-prev').click(); // swipe right = prev
+      }
+    }
+    swipeStart=null;
+  },{passive:true});
+})();
+$('lb-area').addEventListener('mousedown',e=>{
+  if(e.altKey||e.button===1){
+    panActive=true;panStart={x:e.clientX,y:e.clientY};
+    const a=$('lb-area');panOrig={x:a.scrollLeft,y:a.scrollTop};
+    e.preventDefault();
+    $('lb-dc').style.cursor='grabbing';
+  }
+});
+window.addEventListener('mousemove',e=>{
+  if(!panActive)return;
+  const a=$('lb-area');
+  a.scrollLeft=panOrig.x-(e.clientX-panStart.x);
+  a.scrollTop=panOrig.y-(e.clientY-panStart.y);
+});
+window.addEventListener('mouseup',()=>{
+  if(!panActive)return;
+  panActive=false;
+  // Restore correct cursor
+  if(spacePan){
+    $('lb-dc').style.cursor='grab';
+  } else if(lbTool==='pan'){
+    $('lb-dc').style.cursor='grab';
+  } else {
+    const cursors={text:'text'};
+    $('lb-dc').style.cursor=cursors[lbTool]||'crosshair';
+  }
+});
+
+/* ─── DRAW ────────────────────────────────────────────── */
+(function setupDraw(){
+  const dc=$('lb-dc');
+  const gp=e=>{const r=dc.getBoundingClientRect();const s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top}};
+
+  dc.addEventListener('mousedown',e=>{
+    if(panActive) return;
+    const p=gp(e);
+
+    // ── PAN TOOL or SPACE+drag ──
+    if(lbTab==='annot'&&(lbTool==='pan'||spacePan)){
+      e.preventDefault();
+      panActive=true;
+      panStart={x:e.clientX,y:e.clientY};
+      const a=$('lb-area');panOrig={x:a.scrollLeft,y:a.scrollTop};
+      $('lb-dc').style.cursor='grabbing';
+      return;
+    }
+
+    // ── CROP MODE ──
+    if(lbTab==='xform'&&cropping){
+      e.preventDefault();e.stopPropagation();
+      startCD(p.x,p.y);
+      return;
+    }
+
+    // ── ANNOTATE MODE ──
+    if(lbTab!=='annot') return;
+    e.preventDefault();
+    if(lbTool==='text'){
+      txtPend=p;$('txt-in').value='';$('mod-txt').classList.add('open');
+      setTimeout(()=>$('txt-in').focus(),40);return;
+    }
+    lbDrawing=true;lbDStart=p;lbDCur=p;if(lbTool==='freehand')lbDPts=[p];
+  });
+
+  dc.addEventListener('mousemove',e=>{
+    const p=gp(e);
+
+    // ── CROP MODE ──
+    if(lbTab==='xform'&&cropping){
+      if(cropDrag){ e.preventDefault(); doCD(p.x,p.y); }
+      else updateCropCursor(p.x,p.y);
+      return;
+    }
+
+    // ── ANNOTATE MODE ──
+    if(!lbDrawing) return;
+    e.preventDefault();
+    lbDCur=p;if(lbTool==='freehand')lbDPts.push(p);
+    const ctx=dc.getContext('2d');ctx.clearRect(0,0,dc.width,dc.height);
+    // Magnify preview: just show the selection ellipse while dragging (bubble draws on mouseup)
+    if(lbTool==='magnify'){
+      const rx=Math.abs(p.x-lbDStart.x)/2,ry=Math.abs(p.y-lbDStart.y)/2;
+      const cx=lbDStart.x+(p.x-lbDStart.x)/2,cy=lbDStart.y+(p.y-lbDStart.y)/2;
+      ctx.save();
+      ctx.strokeStyle=lbColor;ctx.lineWidth=lbStroke;ctx.setLineDash([6,3]);
+      ctx.beginPath();ctx.ellipse(cx,cy,Math.max(rx,2),Math.max(ry,2),0,0,Math.PI*2);ctx.stroke();
+      ctx.setLineDash([]);
+      // Mini label
+      ctx.fillStyle=lbColor;ctx.font='bold 11px sans-serif';
+      ctx.fillText('🔍 Release to magnify',cx-60,cy+Math.max(ry,2)+16);
+      ctx.restore();
+    } else {
+      drawA(ctx,{tool:lbTool,color:lbColor,strokeWidth:lbStroke,x1:lbDStart.x,y1:lbDStart.y,x2:p.x,y2:p.y,points:lbTool==='freehand'?[...lbDPts]:undefined});
+    }
+  });
+
+  dc.addEventListener('mouseup',e=>{
+    const p=gp(e);
+
+    // ── CROP MODE ──
+    if(lbTab==='xform'&&cropping&&cropDrag){
+      e.preventDefault();
+      doCD(p.x,p.y);
+      endCD();
+      return;
+    }
+
+    // ── ANNOTATE MODE ──
+    if(!lbDrawing) return;
+    lbDrawing=false;
+    const ctx=dc.getContext('2d');ctx.clearRect(0,0,dc.width,dc.height);
+    const ph=lbPh();if(!ph) return;
+    // Store coords in IMAGE-PIXEL space (divide by lbZoom) so export scaling is trivial
+    const iz=lbZoom;
+    const ann={
+      id:uid(),tool:lbTool,color:lbColor,
+      strokeWidth:lbStroke/iz,   // store stroke in image-pixel scale too
+      x1:lbDStart.x/iz, y1:lbDStart.y/iz,
+      x2:lbDCur.x/iz,   y2:lbDCur.y/iz
+    };
+    if(lbTool==='freehand') ann.points=lbDPts.map(p=>({x:p.x/iz,y:p.y/iz}));
+    if(lbTool==='text'){
+      ann.x1=lbDStart.x/iz; ann.y1=lbDStart.y/iz;
+      ann.fontSize=(lbStroke*4)/iz;
+    }
+    if(lbTool==='magnify'){
+      ann.srcImg=$('lb-img');
+      ann.magnifyZoom=lbMagnifyZoom;
+    }
+    ph.annotations.push(ann);redrawAC();
+  });
+
+  // Also end crop drag on window mouseup (in case mouse leaves canvas)
+  window.addEventListener('mouseup',()=>{ if(cropDrag) endCD(); });
+
+  // Touch support — pan tool or two-finger touch = pan; single finger = draw
+  let touchPanStart=null, touchPanOrig=null;
+  dc.addEventListener('touchstart',e=>{
+    if(lbTab!=='annot')return;
+    // Two fingers OR pan tool = pan
+    if(e.touches.length===2||(lbTool==='pan')){
+      e.preventDefault();
+      const t=e.touches[0];
+      touchPanStart={x:t.clientX,y:t.clientY};
+      const a=$('lb-area');touchPanOrig={x:a.scrollLeft,y:a.scrollTop};
+      return;
+    }
+    e.preventDefault();
+    const p=gp(e);lbDrawing=true;lbDStart=p;lbDCur=p;if(lbTool==='freehand')lbDPts=[p];
+  },{passive:false});
+  dc.addEventListener('touchmove',e=>{
+    if(lbTab!=='annot')return;
+    if(touchPanStart){
+      e.preventDefault();
+      const t=e.touches[0];
+      const a=$('lb-area');
+      a.scrollLeft=touchPanOrig.x-(t.clientX-touchPanStart.x);
+      a.scrollTop=touchPanOrig.y-(t.clientY-touchPanStart.y);
+      return;
+    }
+    if(!lbDrawing)return;
+    e.preventDefault();
+    const p=gp(e);lbDCur=p;if(lbTool==='freehand')lbDPts.push(p);
+    const ctx=dc.getContext('2d');ctx.clearRect(0,0,dc.width,dc.height);
+    drawA(ctx,{tool:lbTool,color:lbColor,strokeWidth:lbStroke,x1:lbDStart.x,y1:lbDStart.y,x2:p.x,y2:p.y,points:lbTool==='freehand'?[...lbDPts]:undefined});
+  },{passive:false});
+  dc.addEventListener('touchend',e=>{
+    touchPanStart=null; touchPanOrig=null; // always clear pan state
+    if(!lbDrawing)return;lbDrawing=false;
+    const ctx=dc.getContext('2d');ctx.clearRect(0,0,dc.width,dc.height);
+    const ph=lbPh();if(!ph)return;
+    const iz=lbZoom;
+    const ann={id:uid(),tool:lbTool,color:lbColor,strokeWidth:lbStroke/iz,
+      x1:lbDStart.x/iz,y1:lbDStart.y/iz,x2:lbDCur.x/iz,y2:lbDCur.y/iz};
+    if(lbTool==='freehand')ann.points=lbDPts.map(p=>({x:p.x/iz,y:p.y/iz}));
+    ph.annotations.push(ann);redrawAC();
+  });
+})();
+
+function scaleAnnForDisplay(a){
+  const z=lbZoom;
+  const s={...a,
+    strokeWidth:(a.strokeWidth||2)*z,
+    x1:(a.x1||0)*z, y1:(a.y1||0)*z,
+    x2:(a.x2||0)*z, y2:(a.y2||0)*z
+  };
+  if(a.points) s.points=a.points.map(p=>({x:p.x*z,y:p.y*z}));
+  if(a.fontSize) s.fontSize=a.fontSize*z;
+  // Magnify: re-attach live image element; cx/cy in scaled coords → image coords at draw time
+  if(a.tool==='magnify') s.srcImg=a.srcImg||$('lb-img');
+  return s;
+}
+
+function redrawAC(){
+  const c=$('lb-ac');if(!c)return;const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  const ph=lbPh();if(!ph)return;
+  ph.annotations.forEach(a=>drawA(ctx,scaleAnnForDisplay(a)));
+}
+
+function drawA(ctx,a){
+  ctx.save();ctx.strokeStyle=a.color;ctx.fillStyle=a.color;ctx.lineWidth=a.strokeWidth||2;ctx.lineCap='round';ctx.lineJoin='round';
+  if(a.tool==='arrow'){
+    const dx=a.x2-a.x1,dy=a.y2-a.y1,len=Math.hypot(dx,dy);if(len<2){ctx.restore();return}
+    const ang=Math.atan2(dy,dx),hw=Math.min(24,len*.35);
+    ctx.beginPath();ctx.moveTo(a.x1,a.y1);ctx.lineTo(a.x2,a.y2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(a.x2,a.y2);ctx.lineTo(a.x2-hw*Math.cos(ang-.45),a.y2-hw*Math.sin(ang-.45));ctx.lineTo(a.x2-hw*Math.cos(ang+.45),a.y2-hw*Math.sin(ang+.45));ctx.closePath();ctx.fill();
+  }else if(a.tool==='circle'){
+    /* OUTLINE ONLY — no fill */
+    const rx=Math.abs(a.x2-a.x1)/2,ry=Math.abs(a.y2-a.y1)/2;if(rx<2||ry<2){ctx.restore();return}
+    ctx.beginPath();ctx.ellipse(a.x1+(a.x2-a.x1)/2,a.y1+(a.y2-a.y1)/2,rx,ry,0,0,Math.PI*2);ctx.stroke();
+  }else if(a.tool==='rect'){
+    /* OUTLINE ONLY — no fill */
+    ctx.strokeRect(a.x1,a.y1,a.x2-a.x1,a.y2-a.y1);
+  }else if(a.tool==='highlight'){
+    ctx.globalAlpha=.38;ctx.fillRect(a.x1,a.y1,a.x2-a.x1,a.y2-a.y1);ctx.globalAlpha=1;
+  }else if(a.tool==='text'&&a.text){
+    const fs=a.fontSize||20;ctx.font=`bold ${fs}px 'Instrument Sans',sans-serif`;
+    ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=3;ctx.strokeText(a.text,a.x1,a.y1);
+    ctx.fillStyle=a.color;ctx.fillText(a.text,a.x1,a.y1);
+  }else if(a.tool==='freehand'&&a.points?.length>1){
+    ctx.beginPath();a.points.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+  }else if(a.tool==='magnify'&&a.srcImg){
+    /*
+      MAGNIFY CALLOUT
+      ──────────────
+      All of a.x1/y1/x2/y2 are in canvas-pixel space (already scaled by scaleAnnForDisplay).
+      The srcImg is the actual image element.
+      
+      Strategy:
+        1. cx/cy = center of selection ellipse in canvas pixels
+        2. Convert cx/cy → image-pixel coords by multiplying by (naturalW/canvasW)
+        3. The region to show = (bubbleDiameter / MZ) image pixels wide/tall, centred on that point
+        4. drawImage from that image region into the bubble circle
+    */
+    const rx=Math.abs(a.x2-a.x1)/2, ry=Math.abs(a.y2-a.y1)/2;
+    if(rx<4||ry<4){ctx.restore();return;}
+    const cx=a.x1+(a.x2-a.x1)/2, cy=a.y1+(a.y2-a.y1)/2;
+    const MZ=a.magnifyZoom||2.5;
+    const bR=Math.max(rx,ry)*1.6+20;
+    const cw=ctx.canvas.width, ch=ctx.canvas.height;
+    const srcImg=a.srcImg;
+
+    // Smart bubble placement — try 4 quadrants, pick first that fits
+    const pad=10;
+    const cands=[
+      {bx:cx+rx+bR*0.8, by:cy-ry-bR*0.8},
+      {bx:cx-rx-bR*0.8, by:cy-ry-bR*0.8},
+      {bx:cx+rx+bR*0.8, by:cy+ry+bR*0.8},
+      {bx:cx-rx-bR*0.8, by:cy+ry+bR*0.8},
+    ];
+    let {bx,by}=cands[0];
+    for(const c of cands){
+      if(c.bx-bR>=pad&&c.bx+bR<=cw-pad&&c.by-bR>=pad&&c.by+bR<=ch-pad){bx=c.bx;by=c.by;break;}
+    }
+    bx=Math.max(bR+pad,Math.min(cw-bR-pad,bx));
+    by=Math.max(bR+pad,Math.min(ch-bR-pad,by));
+
+    // Convert canvas center → natural image pixels
+    const scaleX = srcImg.naturalWidth  / cw;
+    const scaleY = srcImg.naturalHeight / ch;
+    const imgCX = cx * scaleX;   // center of selected area in image pixels
+    const imgCY = cy * scaleY;
+
+    // Source region size in image pixels = (bubble diameter / zoom) × scale
+    const srcRegW = (bR*2 / MZ) * scaleX;
+    const srcRegH = (bR*2 / MZ) * scaleY;
+
+    // ── Draw selection ellipse outline
+    ctx.save();
+    ctx.strokeStyle=a.color; ctx.lineWidth=a.strokeWidth||2;
+    ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+
+    // ── Draw magnified image clipped to bubble
+    ctx.save();
+    ctx.beginPath(); ctx.arc(bx,by,bR,0,Math.PI*2); ctx.clip();
+    ctx.fillStyle='#f8fafc'; ctx.fillRect(bx-bR,by-bR,bR*2,bR*2);
+    ctx.drawImage(srcImg,
+      imgCX - srcRegW/2, imgCY - srcRegH/2, srcRegW, srcRegH,
+      bx-bR, by-bR, bR*2, bR*2
+    );
+    ctx.restore();
+
+    // ── Bubble border ring
+    ctx.save();
+    ctx.beginPath(); ctx.arc(bx,by,bR,0,Math.PI*2);
+    ctx.strokeStyle=a.color; ctx.lineWidth=(a.strokeWidth||2)+1.5; ctx.stroke();
+    ctx.restore();
+
+    // ── Connecting line: bubble edge → selection ellipse edge
+    ctx.save();
+    const lineAng=Math.atan2(cy-by,cx-bx);
+    const lx1=bx+Math.cos(lineAng)*(bR+1), ly1=by+Math.sin(lineAng)*(bR+1);
+    const selEdgeR=Math.sqrt(Math.pow(rx*Math.cos(lineAng),2)+Math.pow(ry*Math.sin(lineAng),2));
+    const lx2=cx-Math.cos(lineAng)*selEdgeR, ly2=cy-Math.sin(lineAng)*selEdgeR;
+    ctx.strokeStyle=a.color; ctx.lineWidth=a.strokeWidth||2;
+    ctx.beginPath(); ctx.moveTo(lx1,ly1); ctx.lineTo(lx2,ly2); ctx.stroke();
+    ctx.restore();
+
+  } // end magnify
+  ctx.restore(); // end drawA outer save
+}
+
+/* ─── CROP (canvas-drawn, no DOM overlay) ─────────────── */
+// cropBox coords are always in IMAGE-PIXEL space (not zoom-display space)
+// This makes applyCrop trivially correct regardless of zoom level.
+
+let cropDrawing=false, cropDrawStart=null; // for drawing a new crop region by dragging
+let cropMoveMode=null; // 'new'|'move'|'tl'|'tr'|'bl'|'br'
+let cropMoveStart=null, cropMoveSnap=null;
+
+const HANDLE_R = 7; // hit radius for corner handles in image-pixel space
+
+function initCrop(){
+  // Default selection: 10% inset from each edge, in image-pixel space
+  const img=$('lb-img');
+  const W=img.naturalWidth, H=img.naturalHeight;
+  cropBox={x:Math.round(W*.1),y:Math.round(H*.1),w:Math.round(W*.8),h:Math.round(H*.8)};
+  drawCropOverlay();
+}
+
+/* Draw the crop overlay onto lb-dc */
+function drawCropOverlay(){
+  const dc=$('lb-dc'); if(!dc) return;
+  const ctx=dc.getContext('2d');
+  ctx.clearRect(0,0,dc.width,dc.height);
+  if(!cropping) return;
+
+  const {x,y,w,h}=cropBox;
+  // Scale box from image pixels → canvas (display) pixels
+  const sx=lbZoom, sy=lbZoom;
+  const bx=x*sx, by=y*sy, bw=w*sx, bh=h*sy;
+
+  // Dark overlay outside the crop region
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,0.52)';
+  ctx.fillRect(0,0,dc.width,dc.height);
+  ctx.clearRect(bx,by,bw,bh); // punch out crop area
+  ctx.restore();
+
+  // Crop border
+  ctx.save();
+  ctx.strokeStyle='#fff';
+  ctx.lineWidth=2;
+  ctx.setLineDash([6,3]);
+  ctx.strokeRect(bx,by,bw,bh);
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // Rule-of-thirds grid lines
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,0.25)';
+  ctx.lineWidth=1;
+  for(let i=1;i<3;i++){
+    ctx.beginPath();ctx.moveTo(bx+bw*i/3,by);ctx.lineTo(bx+bw*i/3,by+bh);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(bx,by+bh*i/3);ctx.lineTo(bx+bw,by+bh*i/3);ctx.stroke();
+  }
+  ctx.restore();
+
+  // Corner handles
+  ctx.save();
+  ctx.fillStyle='#fff';
+  ctx.strokeStyle='#1d4ed8';
+  ctx.lineWidth=2;
+  [[bx,by],[bx+bw,by],[bx,by+bh],[bx+bw,by+bh]].forEach(([hx,hy])=>{
+    ctx.beginPath();ctx.arc(hx,hy,6,0,Math.PI*2);ctx.fill();ctx.stroke();
+  });
+  ctx.restore();
+
+  // Size label
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,0.65)';
+  ctx.fillRect(bx+4,by+4,80,20);
+  ctx.fillStyle='#fff';
+  ctx.font='bold 11px sans-serif';
+  ctx.fillText(`${w} × ${h}px`,bx+8,by+16);
+  ctx.restore();
+}
+
+/* Convert a canvas-space point to image-pixel space */
+function canvasToPx(cx,cy){ return {x:cx/lbZoom, y:cy/lbZoom}; }
+
+/* Hit-test which part of the crop box a canvas-space point is in */
+function cropHitTest(cx,cy){
+  if(!cropping) return null;
+  const {x,y,w,h}=cropBox;
+  const bx=x*lbZoom,by=y*lbZoom,bw=w*lbZoom,bh=h*lbZoom;
+  const HR=HANDLE_R+4; // slightly bigger hit area
+  if(Math.hypot(cx-bx,      cy-by     )<HR) return 'tl';
+  if(Math.hypot(cx-(bx+bw), cy-by     )<HR) return 'tr';
+  if(Math.hypot(cx-bx,      cy-(by+bh))<HR) return 'bl';
+  if(Math.hypot(cx-(bx+bw), cy-(by+bh))<HR) return 'br';
+  if(cx>bx&&cx<bx+bw&&cy>by&&cy<by+bh) return 'move';
+  return 'new'; // outside box → start a new crop selection
+}
+
+/* Update cursor based on hover position */
+function updateCropCursor(cx,cy){
+  const h=cropHitTest(cx,cy);
+  const map={tl:'nw-resize',tr:'ne-resize',bl:'sw-resize',br:'se-resize',move:'move',new:'crosshair'};
+  $('lb-dc').style.cursor=map[h]||'crosshair';
+}
+
+/* Start a crop drag */
+function startCD(canvasX, canvasY){
+  cropMoveMode=cropHitTest(canvasX,canvasY);
+  cropMoveStart={cx:canvasX,cy:canvasY};
+  cropMoveSnap={...cropBox};
+  cropDrag=true;
+  if(cropMoveMode==='new'){
+    // Begin drawing a brand new crop rect from this point
+    const p=canvasToPx(canvasX,canvasY);
+    cropDrawStart={x:p.x,y:p.y};
+    cropBox={x:p.x,y:p.y,w:0,h:0};
+  }
+}
+
+/* Update crop during drag */
+function doCD(canvasX,canvasY){
+  if(!cropDrag) return;
+  const img=$('lb-img');
+  const MW=img.naturalWidth, MH=img.naturalHeight;
+  const mn=20; // minimum crop size in px
+  const dx=(canvasX-cropMoveStart.cx)/lbZoom;
+  const dy=(canvasY-cropMoveStart.cy)/lbZoom;
+  let{x,y,w,h}=cropMoveSnap;
+
+  if(cropMoveMode==='new'){
+    // Live-draw from start point
+    const p=canvasToPx(canvasX,canvasY);
+    const nx=clamp(Math.min(cropDrawStart.x,p.x),0,MW);
+    const ny=clamp(Math.min(cropDrawStart.y,p.y),0,MH);
+    const nw=clamp(Math.abs(p.x-cropDrawStart.x),1,MW-nx);
+    const nh=clamp(Math.abs(p.y-cropDrawStart.y),1,MH-ny);
+    cropBox={x:Math.round(nx),y:Math.round(ny),w:Math.round(nw),h:Math.round(nh)};
+  } else if(cropMoveMode==='move'){
+    x=clamp(x+dx,0,MW-w); y=clamp(y+dy,0,MH-h);
+    cropBox={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
+  } else if(cropMoveMode==='br'){
+    w=clamp(w+dx,mn,MW-x); h=clamp(h+dy,mn,MH-y);
+    cropBox={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
+  } else if(cropMoveMode==='bl'){
+    const nx=clamp(x+dx,0,x+w-mn); w=cropMoveSnap.w+(cropMoveSnap.x-nx); x=nx;
+    h=clamp(h+dy,mn,MH-y);
+    cropBox={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
+  } else if(cropMoveMode==='tr'){
+    w=clamp(w+dx,mn,MW-x);
+    const ny=clamp(y+dy,0,y+h-mn); h=cropMoveSnap.h+(cropMoveSnap.y-ny); y=ny;
+    cropBox={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
+  } else if(cropMoveMode==='tl'){
+    const nx=clamp(x+dx,0,x+w-mn); w=cropMoveSnap.w+(cropMoveSnap.x-nx); x=nx;
+    const ny=clamp(y+dy,0,y+h-mn); h=cropMoveSnap.h+(cropMoveSnap.y-ny); y=ny;
+    cropBox={x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h)};
+  }
+  drawCropOverlay();
+}
+
+function endCD(){
+  cropDrag=false;
+  // Normalize: ensure w/h are positive
+  if(cropBox.w<0){cropBox.x+=cropBox.w;cropBox.w=Math.abs(cropBox.w)}
+  if(cropBox.h<0){cropBox.y+=cropBox.h;cropBox.h=Math.abs(cropBox.h)}
+  drawCropOverlay();
+}
+
+function applyCrop(){
+  const ph=lbPh(); if(!ph) return;
+  if(cropBox.w<4||cropBox.h<4){toast('Selection too small — drag a larger area');return}
+  // cropBox is already in image-pixel coordinates — no zoom factor needed
+  const {x,y,w,h}=cropBox;
+  const cv=document.createElement('canvas'); cv.width=Math.round(w); cv.height=Math.round(h);
+  const ctx=cv.getContext('2d');
+  const si=new Image();
+  si.onload=()=>{
+    ctx.drawImage(si, Math.round(x),Math.round(y),Math.round(w),Math.round(h), 0,0,Math.round(w),Math.round(h));
+    ph.cropSrc=cv.toDataURL('image/jpeg',.95);
+    ph.annotations=[];
+    cropping=false;
+    // Clear the crop overlay from draw canvas
+    const dc=$('lb-dc'); if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height)}
+    loadLbImg().then(()=>renderPanel());
+    toast('✂️ Crop applied');
+  };
+  si.src=ph.src; // always crop from original source
+}
+
+/* ─── ROTATE ──────────────────────────────────────────── */
+function rotatePh(deg){
+  const ph=lbPh();if(!ph)return;
+  const src=ph.cropSrc||ph.src;const cv=document.createElement('canvas');const si=new Image();
+  si.onload=()=>{
+    if(Math.abs(deg)===90||Math.abs(deg)===270){cv.width=si.height;cv.height=si.width}else{cv.width=si.width;cv.height=si.height}
+    const ctx=cv.getContext('2d');ctx.translate(cv.width/2,cv.height/2);ctx.rotate(deg*Math.PI/180);ctx.drawImage(si,-si.width/2,-si.height/2);
+    ph.cropSrc=cv.toDataURL('image/jpeg',.95);ph.annotations=[];loadLbImg().then(()=>renderPanel());toast(`Rotated ${deg>0?'right':'left'}`);
+  };si.src=src;
+}
+
+/* ─── TEXT ANNOTATION ────────────────────────────────── */
+$('txt-yes').onclick=()=>{
+  const t=$('txt-in').value.trim();$('mod-txt').classList.remove('open');
+  if(t&&txtPend){
+    const ph=lbPh();const iz=lbZoom;
+    if(ph)ph.annotations.push({id:uid(),tool:'text',color:lbColor,
+      strokeWidth:lbStroke/iz,
+      x1:txtPend.x/iz,y1:txtPend.y/iz,x2:txtPend.x/iz,y2:txtPend.y/iz,
+      text:t,fontSize:Math.max(14,lbStroke*4)/iz});
+    redrawAC();
+  }
+};
+$('txt-no').onclick=()=>$('mod-txt').classList.remove('open');
+$('txt-in').onkeydown=e=>{if(e.key==='Enter')$('txt-yes').click()};
+
+/* ─── BULK EDIT ───────────────────────────────────────── */
+$('btn-bulk').onclick=()=>{
+  const n=selected.size;$('bulk-sub').textContent=`Applying to ${n} selected photos. Leave blank to keep existing.`;
+  $('bh').value='';$('bd').value='';$('mod-bulk').classList.add('open');setTimeout(()=>$('bh').focus(),40);
+};
+$('bulk-no').onclick=()=>$('mod-bulk').classList.remove('open');
+$('bulk-yes').onclick=()=>{
+  const h=$('bh').value.trim(),d=$('bd').value.trim(),targets=[...selected];
+  photos.forEach(p=>{if(targets.includes(p.id)){if(h)p.header=h;if(d)p.desc=d}});
+  $('mod-bulk').classList.remove('open');render();toast(`Updated ${targets.length} photos`);
+};
+
+/* ─── EXPORT ──────────────────────────────────────────── */
+$('btn-exp').onclick=()=>{$('exp-sub').textContent=`${photos.length} photo${photos.length>1?'s':''} · 2 per page · photo left, info right`;$('mod-exp').classList.add('open')};
+$('exp-no').onclick=()=>$('mod-exp').classList.remove('open');
+// Save Project (.stf) shortcut from the Export modal — same behavior
+// as the Save/Open button in the topbar, just offered at the moment
+// the user is already thinking about "saving" their work.
+$('exp-stf-save').onclick=()=>{ stfSave(); };
+
+document.querySelectorAll('.copt').forEach(o=>o.onclick=()=>{document.querySelectorAll('.copt').forEach(x=>x.classList.remove('on'));o.classList.add('on');compLv=+o.dataset.lv});
+
+$('exp-yes').onclick=async()=>{
+  const btn=$('exp-yes');btn.disabled=true;btn.textContent='Building report…';
+  // Open the window IMMEDIATELY while still in the user gesture — mobile browsers block
+  // window.open() called after an await (loses gesture context)
+  const win=window.open('','_blank');
+  if(!win){
+    // Popup blocked — fallback: build as blob and use location
+    btn.disabled=false;btn.textContent='Generate & Print / Save PDF';
+    toast('Pop-up blocked — please allow pop-ups for this page');
+    return;
+  }
+  // Show a loading page while we process
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width"/></head><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f8fafc"><p style="font-size:18px;color:#64748b">⏳ Building report…</p></body></html>');
+  try{
+    const{q,mw}=CLEV[compLv-1];
+    const rptName=$('m-name').value;
+    const addr=$('m-addr').value, addr2=$('m-addr2').value;
+    const date=$('m-date').value, claim=$('m-claim').value;
+    const notes=$('m-notes').value;
+    const pd=await Promise.all(photos.map(async(ph,i)=>({...ph,es:await compPh(ph,q,mw),num:i+1})));
+    const html=buildReport(pd,{rptName,addr,addr2,date,claim,refType,notes});
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    setTimeout(()=>{
+      win.focus();
+      win.print();
+      btn.disabled=false;
+      btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg> Generate &amp; Print / Save PDF';
+      $('mod-exp').classList.remove('open');
+      toast('Print dialog open — choose "Save as PDF" to save');
+    },900);
+  }catch(err){
+    win.close();
+    btn.disabled=false;btn.textContent='Generate & Print / Save PDF';
+    toast('Export failed — try a lower quality setting');
+  }
+};
+
+async function compPh(ph,q,mw){
+  return new Promise(res=>{
+    const si=new Image();si.onload=()=>{
+      // Export scale: only compress to max dimension, no zoom factor involved
+      const sc=Math.min(1,mw/Math.max(si.width,1));
+      const w=Math.round(si.width*sc),h=Math.round(si.height*sc);
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      const ctx=cv.getContext('2d');ctx.drawImage(si,0,0,w,h);
+      // sx/sy: scale from natural image pixels to export canvas pixels
+      const sx=w/si.naturalWidth, sy=h/si.naturalHeight;
+      (ph.annotations||[]).forEach(a=>{
+        const sa={...a,
+          strokeWidth:(a.strokeWidth||2)*sx,
+          x1:(a.x1||0)*sx, y1:(a.y1||0)*sy,
+          x2:(a.x2||0)*sx, y2:(a.y2||0)*sy
+        };
+        if(a.points) sa.points=a.points.map(p=>({x:p.x*sx,y:p.y*sy}));
+        if(a.fontSize) sa.fontSize=a.fontSize*sx;
+        // Magnify: attach the export canvas image; cx/cy → image coords derived at draw time
+        if(a.tool==='magnify'){ sa.srcImg=si; }
+        drawA(ctx,sa);
+      });
+      res(cv.toDataURL('image/jpeg',q));
+    };si.src=ph.cropSrc||ph.src;
+  })
+}
+
+function buildReport(pds,meta){
+  const ds=meta.date?new Date(meta.date+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'';
+  const refLabel=meta.refType==='project'?'Project #':'Claim #';
+
+  // ── Company header block ──
+  // FREE TIER: never render a company header, even if a saved profile
+  // is loaded into the (hidden) form fields. The header is a Pro-only feature.
+  let coHeader='';
+  if(IS_PRO){
+    const coName=$('co-name-input').value.trim();
+    const coTagline=$('co-tagline-input').value.trim();
+    const coAddr=$('co-addr').value.trim();
+    const coPhone=$('co-phone').value.trim();
+    const coWeb=$('co-web').value.trim();
+    if(coName||coAddr||coPhone||coWeb){
+      const logoImg   = coLogoDataUrl ? '<img class="co-logo" src="'+coLogoDataUrl+'" alt="Logo"/>' : '';
+      const coNmHtml  = coName    ? '<div class="co-name">'+esc(coName)+'</div>' : '';
+      const coTgHtml  = coTagline ? '<div class="co-tag">'+esc(coTagline)+'</div>' : '';
+      const coAdHtml  = coAddr    ? '<span>📍 '+esc(coAddr)+'</span>' : '';
+      const coPhnHtml = coPhone   ? '<span>📞 '+esc(coPhone)+'</span>' : '';
+      const coWbHtml  = coWeb     ? '<span>🌐 '+esc(coWeb)+'</span>' : '';
+      coHeader='<div class="co-hdr">'+logoImg+'<div class="co-text">'+coNmHtml+coTgHtml+'<div class="co-contact">'+coAdHtml+coPhnHtml+coWbHtml+'</div></div></div>';
+    }
+  }
+
+  // ── Report header block ──
+  const rptNameHtml = meta.rptName ? '<div class="rpt-name">'+esc(meta.rptName)+'</div>' : '';
+  const addrLine    = meta.addr    ? '<div class="ra">📍 '+esc(meta.addr)+(meta.addr2?' — '+esc(meta.addr2):'')+'</div>' : '';
+  const dateHtml    = ds           ? '<div><b>Date:</b> '+ds+'</div>' : '';
+  const claimHtml   = meta.claim   ? '<div><b>'+refLabel+'</b> '+esc(meta.claim)+'</div>' : '';
+  const photoCount  = pds.length+' photo'+(pds.length!==1?'s':'');
+
+  // ── Notes section block ──
+  let notesBlock='';
+  if(meta.notes){
+    notesBlock='<div class="notes-section"><div class="notes-label">Notes &amp; Comments</div><div class="notes-body">'+esc(meta.notes).replace(/\n/g,'<br>')+'</div></div>';
+  } else {
+    const emptyLines='<div class="note-line"></div>'.repeat(10);
+    notesBlock='<div class="notes-section notes-empty"><div class="notes-label">Notes &amp; Comments</div><div class="notes-empty-lines">'+emptyLines+'</div></div>';
+  }
+
+  // ── Cover photo block ──
+  let coverPhotoBlock='';
+  const cp=pds[0];
+  if(cp){
+    const cpHdr  = cp.header ? '<div class="photo-hdr">'+esc(cp.header)+'</div>' : '';
+    const cpDesc = cp.desc   ? '<div class="photo-desc">'+esc(cp.desc)+'</div>' : '';
+    coverPhotoBlock='<div class="photo-row">'
+      +'<div class="photo-img-col"><img src="'+cp.es+'" alt="Photo 1"/></div>'
+      +'<div class="photo-info-col"><div class="photo-num">Photo 1 of '+pds.length+'</div>'+cpHdr+cpDesc+'</div>'
+      +'</div>';
+  }
+
+  // ── Page 1 ──
+  // Fixed page height. Photo 1 is absolutely pinned to the bottom.
+  // Notes section fills all space between the header and the photo.
+  const page1='<div class="pg-wrap pg-cover">'
+    +'<div class="cover-body">'
+    +coHeader
+    +'<div class="rh">'
+      +'<div>'
+        +'<div class="rt">Photo Documentation Report</div>'
+        +rptNameHtml
+        +addrLine
+      +'</div>'
+      +'<div class="rm">'+dateHtml+claimHtml+'<div style="color:#94a3b8;font-size:10px;margin-top:2px">'+photoCount+'</div></div>'
+    +'</div>'
+    +notesBlock
+    +'</div>'
+    +'<div class="cover-photo-pin">'
+    +coverPhotoBlock
+    +'</div>'
+    +(IS_PRO ? '' : '<div class="stf-wm stf-wm-cover">'+esc(PRO_WATERMARK)+'</div>')
+    +'</div>';
+
+  // ── Pages 2+ — 2 photos per page; last page with 1 photo leaves bottom blank ──
+  const remaining=pds.slice(1);
+  const pages=[];
+  for(let i=0;i<remaining.length;i+=2) pages.push(remaining.slice(i,i+2));
+
+  const photoPageCards=pages.map(function(pair){
+    const runHdr='<div class="pg-header">'
+      +(meta.rptName?'<strong>'+esc(meta.rptName)+'</strong>':'<span>Photo Documentation Report</span>')
+      +'<span>'+(meta.claim?refLabel+' '+esc(meta.claim):'')+(ds?' &nbsp;·&nbsp; '+ds:'')+'</span>'
+      +'</div>';
+    const rows=pair.map(function(ph){
+      const phHdr  = ph.header ? '<div class="photo-hdr">'+esc(ph.header)+'</div>' : '';
+      const phDesc = ph.desc   ? '<div class="photo-desc">'+esc(ph.desc)+'</div>' : '';
+      return '<div class="photo-row">'
+        +'<div class="photo-img-col"><img src="'+ph.es+'" alt="Photo '+ph.num+'"/></div>'
+        +'<div class="photo-info-col">'
+        +'<div class="photo-num">Photo '+ph.num+' of '+pds.length+'</div>'
+        +phHdr+phDesc
+        +'</div></div>';
+    }).join('');
+    // Last page with 1 photo: bottom is simply blank — no filler
+    return '<div class="pg-wrap pg-photo">'+runHdr+rows+(IS_PRO ? '' : '<div class="stf-wm">'+esc(PRO_WATERMARK)+'</div>')+'</div>';
+  }).join('');
+
+  // ── Report CSS ──
+  const PHOTO_H='4.6in';
+  const css='*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:\'Instrument Sans\',sans-serif;background:#fff;color:#1e293b;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    // Company header
+    +'.co-hdr{display:flex;align-items:center;gap:14px;padding:10px 14px;background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);border-radius:7px;margin-bottom:10px}'
+    +'.co-logo{max-width:80px;max-height:50px;width:auto;height:auto;object-fit:contain;border-radius:4px;flex-shrink:0}'
+    +'.co-text{flex:1;color:#fff;min-width:0}'
+    +'.co-name{font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+    +'.co-tag{font-size:10px;color:rgba(255,255,255,.65);margin-top:1px}'
+    +'.co-contact{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px;font-size:9px;color:rgba(255,255,255,.75)}'
+    // Standard page wrapper — no padding on cover (cover-body handles its own)
+    +'.pg-wrap{padding:14px 18px}'
+    // Cover page: fixed height = one printed page. Photo pinned to bottom via absolute positioning.
+    +'.pg-cover{position:relative;height:10.2in;overflow:hidden;padding:0}'
+    // Upper body: from top to just above the photo. Padding applied here.
+    +'.cover-body{position:absolute;top:0;left:0;right:0;bottom:'+PHOTO_H+';padding:14px 18px 8px;display:flex;flex-direction:column}'
+    +'.cover-body .co-hdr{flex-shrink:0}'
+    +'.cover-body .rh{flex-shrink:0}'
+    // Notes section: fills ALL remaining space in cover-body — single declaration, no duplicate
+    +'.notes-section{flex:1;min-height:0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 13px;display:flex;flex-direction:column;overflow:hidden}'
+    +'.notes-label{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;flex-shrink:0}'
+    +'.notes-body{font-size:11px;color:#1e293b;line-height:1.7;white-space:pre-wrap}'
+    // Empty lines spread evenly to fill the full height of the notes box
+    +'.notes-empty-lines{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding-top:2px}'
+    +'.note-line{height:1px;background:#d1d5db;width:100%}'
+    // Photo pinned to exact bottom of cover page
+    +'.cover-photo-pin{position:absolute;bottom:0;left:0;right:0;height:'+PHOTO_H+'}'
+    +'.cover-photo-pin .photo-row{margin-bottom:0;height:'+PHOTO_H+';border-radius:0}'
+    // Running page header
+    +'.pg-header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #e2e8f0;padding-bottom:5px;margin-bottom:10px;font-size:10px;color:#64748b;flex-shrink:0}'
+    +'.pg-header strong{color:#334155}'
+    // Report header block
+    +'.rh{border-bottom:3px solid #1d4ed8;padding-bottom:9px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}'
+    +'.rt{font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;color:#1d4ed8;letter-spacing:-.02em}'
+    +'.rpt-name{font-size:11px;color:#334155;font-weight:600;margin-top:2px}'
+    +'.ra{font-size:10px;color:#64748b;margin-top:1px;line-height:1.5}'
+    +'.rm{text-align:right;font-size:10px;color:#334155;line-height:1.8;flex-shrink:0}'
+    +'.rm b{color:#0f172a}'
+    // Photo rows — same fixed height everywhere
+    +'.photo-row{display:flex;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;height:'+PHOTO_H+';margin-bottom:10px;flex-shrink:0}'
+    +'.photo-row:last-of-type{margin-bottom:0}'
+    +'.photo-img-col{flex:0 0 62%;overflow:hidden}'
+    +'.photo-img-col img{width:100%;height:100%;object-fit:cover;display:block}'
+    +'.photo-info-col{flex:1;padding:11px 13px;display:flex;flex-direction:column;gap:4px;border-left:1px solid #e2e8f0;overflow:hidden}'
+    +'.photo-num{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;flex-shrink:0}'
+    +'.photo-hdr{font-family:\'Syne\',sans-serif;font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;flex-shrink:0}'
+    +'.photo-desc{font-size:11px;color:#475569;line-height:1.55;overflow:hidden}'
+    // SnapToFile watermark — visible, professional. Removed for Pro users.
+    +'.stf-wm{font-family:\'Inter Tight\',sans-serif;font-size:8px;color:#94a3b8;text-align:center;letter-spacing:.04em;padding:4px 0 2px;border-top:1px dashed #e2e8f0;margin-top:8px}'
+    +'.stf-wm-cover{position:absolute;bottom:'+PHOTO_H+';left:0;right:0;padding:3px 0;background:#fff;border-top:1px dashed #e2e8f0;border-bottom:none;margin:0;z-index:2}'
+    +'.pg-photo{display:flex;flex-direction:column}'
+    +'.pg-photo .stf-wm{margin-top:auto}'
+    // Print
+    +'@media print{'
+    +'@page{size:letter portrait;margin:0.4in}'
+    // Suppress browser URL/date/page-number headers and footers printed by the browser
+    +'@page{@top-left{content:none}@top-center{content:none}@top-right{content:none}'
+    +'@bottom-left{content:none}@bottom-center{content:none}@bottom-right{content:none}}'
+    +'.pg-wrap{padding:0;page-break-after:always;break-after:always}'
+    +'.pg-wrap:last-child{page-break-after:auto;break-after:auto}'
+    +'.pg-photo{min-height:10.2in;display:flex;flex-direction:column}'
+    +'.pg-photo .stf-wm{margin-top:auto}'
+    +'.photo-row{break-inside:avoid;height:'+PHOTO_H+';flex-shrink:0}'
+    +'.pg-cover{height:10.2in;padding:0}'
+    +'.cover-body{top:0;bottom:'+PHOTO_H+';padding:0.1in 0.1in 6px}'
+    +'.stf-wm{break-inside:avoid}'
+    +'}';
+
+  const titleStr=(meta.rptName?esc(meta.rptName):'Photo Report')+(meta.claim?' — '+meta.claim:'');
+
+  return '<!DOCTYPE html><html lang="en"><head>'
+    +'<meta charset="UTF-8"/>'
+    +'<title>'+titleStr+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>'
+    +'<style>'+css+'</style>'
+    +'</head><body>'
+    +page1
+    +photoPageCards
+    +'</body></html>';
+}
+
+/* ─── TOAST ───────────────────────────────────────────── */
+let _tt;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('show'),2500)}
+
+/* ─── MODAL CLOSE ─────────────────────────────────────── */
+['mod-bulk','mod-exp','mod-txt','mod-summary','mod-projects'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')})});
+
+/* ─── KEYBOARD ────────────────────────────────────────── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){['mod-bulk','mod-exp','mod-txt','mod-summary','mod-projects'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('open')});const lb=$('lb');if(lb&&lb.classList.contains('open'))closeLb()}
+  if($('lb').classList.contains('open')){
+    if(e.key==='ArrowLeft'&&!e.target.matches('input,textarea'))$('lb-prev').click();
+    if(e.key==='ArrowRight'&&!e.target.matches('input,textarea'))$('lb-next').click();
+    if(e.key==='='||e.key==='+')setZ(lbZoom*1.15);
+    if(e.key==='-')setZ(lbZoom*.87);
+    // Space = temporary pan mode from any annotation tool
+    if(e.code==='Space'&&!e.target.matches('input,textarea')&&lbTab==='annot'&&!spacePan&&lbTool!=='pan'){
+      e.preventDefault();
+      spacePan=true;
+      prePanTool=lbTool;
+      $('lb-dc').style.cursor='grab';
+    }
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='a'&&document.activeElement.tagName==='BODY'){e.preventDefault();photos.forEach(p=>selected.add(p.id));lastSelectedId=photos[0]?.id??null;render()}
+});
+document.addEventListener('keyup',e=>{
+  if(e.code==='Space'&&spacePan){
+    spacePan=false;
+    if(prePanTool){lbTool=prePanTool;prePanTool=null;}
+    const cursors={text:'text'};
+    $('lb-dc').style.cursor=cursors[lbTool]||'crosshair';
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>
