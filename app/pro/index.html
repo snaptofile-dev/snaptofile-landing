@@ -416,6 +416,51 @@ img{max-width:100%;height:auto}
 #upgrade-modal .um-btn-secondary{background:#f1f5f9;color:#334155}
 #upgrade-modal .um-btn-secondary:hover{background:#e2e8f0}
 #upgrade-modal .um-foot{margin-top:14px;font-size:11px;color:#94a3b8}
+
+/* ─── PRECISION COMPRESSION DIAL (Pro) ──────────────────
+   Replaces the 5-level radio in Pro's export modal with a continuous
+   270° arc dial. Sage palette to match the unlocked-Pro accent.
+   ─────────────────────────────────────────────────────── */
+.dial-wrap{padding:6px 0 4px;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'Inter Tight',sans-serif}
+.dial-svg{display:block;width:100%;max-width:260px;height:auto;cursor:grab;-webkit-tap-highlight-color:transparent;touch-action:none;outline:none}
+.dial-svg:focus-visible{filter:drop-shadow(0 0 0 2px rgba(74,92,63,.5))}
+.dial-svg:active{cursor:grabbing}
+.dial-track{stroke:#e2e8f0;stroke-width:13;stroke-linecap:round;fill:none}
+.dial-fill{stroke:url(#dial-grad);stroke-width:13;stroke-linecap:round;fill:none}
+.dial-tick{stroke:#94a3b8;stroke-width:2.5;stroke-linecap:round}
+.dial-tick.warn{stroke:#dc2626}
+.dial-tick.warn-soft{stroke:#ea580c}
+.dial-tick.ok{stroke:#16a34a}
+.dial-tick-label{fill:#64748b;font-size:8px;font-weight:700;font-family:'Inter Tight',sans-serif;text-anchor:middle;dominant-baseline:middle;letter-spacing:.02em}
+.dial-handle{fill:url(#dial-grad);stroke:#fff;stroke-width:2.5;cursor:grab;filter:drop-shadow(0 2px 5px rgba(74,92,63,.4));pointer-events:none}
+.dial-handle-hit{fill:transparent;cursor:grab}
+.dial-svg:active .dial-handle{cursor:grabbing}
+.dial-center-num{fill:#1e293b;font-family:'Fraunces',serif;font-size:24px;font-weight:600;text-anchor:middle;dominant-baseline:middle;letter-spacing:-.02em}
+.dial-center-lbl{fill:#94a3b8;font-family:'Inter Tight',sans-serif;font-size:9px;font-weight:700;text-anchor:middle;dominant-baseline:middle;letter-spacing:.08em}
+.dial-status{margin-top:-2px;font-size:11px;line-height:1.35;color:#64748b;text-align:center;min-height:16px;padding:0 4px}
+.dial-status.ok{color:#16a34a}
+.dial-status.warn{color:#dc2626}
+.dial-status.warn-soft{color:#d97706}
+.dial-status .icon{display:inline-block;margin-right:3px;font-weight:700}
+.dial-readout{font-size:10px;color:#64748b;text-align:center;letter-spacing:.02em;line-height:1.4}
+.dial-readout strong{color:#475569;font-weight:600}
+.preset-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;margin-top:4px}
+.preset-chip{padding:7px 4px;border:1.5px solid #d6dfd0;border-radius:7px;background:#f8faf6;color:#4a5c3f;font-family:'Inter Tight',sans-serif;font-size:10px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;transition:transform .12s,background .12s,border-color .12s,box-shadow .12s,color .12s;-webkit-tap-highlight-color:transparent}
+.preset-chip:hover{background:#eef2e7;border-color:#a8b89a}
+.preset-chip:active{transform:scale(.96)}
+.preset-chip.active{background:#4a5c3f;color:#fff;border-color:#4a5c3f;box-shadow:0 2px 6px rgba(74,92,63,.3)}
+.preset-chip .pc-lbl{display:block;font-weight:700;letter-spacing:-.01em}
+.preset-chip .pc-sub{display:block;font-size:8px;font-weight:600;opacity:.7;margin-top:2px;letter-spacing:.04em;text-transform:uppercase}
+.preset-chip.unavailable{opacity:.5;cursor:not-allowed}
+.preset-chip.unavailable:hover{background:#f8faf6;border-color:#d6dfd0;transform:none}
+.dial-profiling{font-size:9px;color:#94a3b8;font-style:italic;margin-top:1px;letter-spacing:.02em}
+.dial-profiling::before{content:'•';display:inline-block;margin-right:4px;animation:dial-blink 1s ease-in-out infinite}
+@keyframes dial-blink{0%,100%{opacity:.3}50%{opacity:1}}
+@media (max-width:380px){
+  .dial-svg{max-width:220px}
+  .preset-row{grid-template-columns:repeat(2,1fr)}
+  .dial-center-num{font-size:21px}
+}
 </style>
 </head>
 <body>
@@ -854,7 +899,7 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-04-21 04:30 UTC';
+const BUILD_STAMP       = '2026-04-21 15:30 UTC · dial';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
@@ -1756,6 +1801,9 @@ async function handleFiles(files){
   if(added>0){
     markDirty();
     toast('✓ Added '+added+' photo'+(added>1?'s':'')+(failed?' ('+failed+' failed)':''));
+    // Pro: kick off background dial profiling so size estimates are ready
+    // by the time the user opens the export modal. No-op on free.
+    if(typeof scheduleProfile === 'function') scheduleProfile();
   } else {
     toast('Could not load any photos — try selecting fewer at once');
   }
@@ -2772,8 +2820,489 @@ $('bulk-yes').onclick=()=>{
   $('mod-bulk').classList.remove('open');render();toast(`Updated ${targets.length} photos`);
 };
 
+/* ═══ PRECISION COMPRESSION DIAL (Pro only) ════════════════════
+   Replaces the 5-level radio in #copts with a continuous arc dial.
+     - dialT in [0,1]:  0 = max quality / largest, 1 = max compression / smallest
+     - q and mw interpolated through the existing 5-level anchor points
+     - Live PDF size estimate using per-photo profile sample (bg-computed)
+     - Tick marks on the arc at 10/15/25 MB email-limit thresholds when in range
+     - Preset chips: Email-safe / Standard / Archive / Original
+   Free tier keeps the 3-level radio + locked teaser (handled by applyTierGates).
+   ═════════════════════════════════════════════════════════════ */
+
+let dialT = 0.25;                   // current dial position; default ≈ original Level 2
+// Anchor points for the dial curve. The LEFT end is capped at q=0.95/mw=2400
+// instead of q=1.0/mw=3000 for two reasons:
+//   1. readURL stores photos at max 2400px, so mw=3000 is a no-op — we were
+//      lying to the user about the effective max.
+//   2. JPEG file size diverges asymptotically as q→1.0 (quantization tables
+//      become all-1's) — a single power-law fit cannot capture that cliff, so
+//      size estimates at q=1.0 are wildly unreliable. q=0.95 is visually
+//      indistinguishable from q=1.0 but predictable.
+// Mid-anchors retuned to match the new top so the curve stays smooth.
+const DIAL_ANCHORS = [
+  { t: 0.00, q: 0.95, mw: 2400 },
+  { t: 0.25, q: 0.88, mw: 1800 },
+  { t: 0.50, q: 0.75, mw: 1200 },
+  { t: 0.75, q: 0.55, mw:  800 },
+  { t: 1.00, q: 0.35, mw:  600 }
+];
+const DIAL_TICKS = [10, 15, 25];        // MB thresholds (carrier inbox limits)
+// THREE-point profile sample. File-size-vs-quality for JPEG isn't a clean
+// power law across [0.35, 0.95] — the curve steepens sharply near q=0.95
+// because quantization tables approach their minimum. A single exponent
+// underpredicts by 30%+ at the top of the dial, which can turn a "fits
+// Gmail" estimate into a bounced email. Three probes let us fit TWO
+// exponents piecewise: one for q ≤ refMid (wide, low-curvature range),
+// one for q > refMid (narrow, high-curvature range near the asymptote).
+// All three probes run at the same dim so the comparison is purely q-driven.
+const DIAL_PROBE_LO  = { q: 0.40, mw: 1500 };
+const DIAL_PROBE_MID = { q: 0.75, mw: 1500 };
+const DIAL_PROBE_HI  = { q: 0.92, mw: 1500 };
+const DIAL_ORIG_Q = 0.92;               // photos are stored at q=0.92 by readURL
+const DIAL_HEURISTIC_K = 2.5;           // conservative — overestimate while profile is pending
+let dialAnimRaf = null;
+let dialProfilingActive = false;
+
+function dialInterp(t, key){
+  for(let i=0; i<DIAL_ANCHORS.length-1; i++){
+    if(t <= DIAL_ANCHORS[i+1].t){
+      const a = DIAL_ANCHORS[i], b = DIAL_ANCHORS[i+1];
+      const f = (t - a.t) / (b.t - a.t);
+      return a[key] + f * (b[key] - a[key]);
+    }
+  }
+  return DIAL_ANCHORS[DIAL_ANCHORS.length-1][key];
+}
+function dialQAt(t){ return dialInterp(t, 'q'); }
+function dialMwAt(t){ return Math.round(dialInterp(t, 'mw')); }
+
+function fmtSize(bytes){
+  if(!bytes || bytes < 1024) return '0 KB';
+  if(bytes < 1024*1024) return Math.round(bytes/1024) + ' KB';
+  const mb = bytes / (1024*1024);
+  if(mb < 10)   return mb.toFixed(1) + ' MB';
+  if(mb < 1000) return Math.round(mb) + ' MB';
+  return (mb/1024).toFixed(2) + ' GB';
+}
+
+function approxBytesFromDataUrl(url){
+  if(!url) return 0;
+  const i = url.indexOf(',');
+  if(i < 0) return 0;
+  const b64len = url.length - i - 1;
+  const padding = url.endsWith('==') ? 2 : (url.endsWith('=') ? 1 : 0);
+  return Math.floor(b64len * 3 / 4) - padding;
+}
+
+// Cached on the photo: original max dim (re-computed if cropSrc changes).
+function ensureOrigDim(ph){
+  const currentSrc = ph.cropSrc || ph.src;
+  if(ph._origMaxDim != null && ph._origMaxDimSrc === currentSrc) return Promise.resolve();
+  return new Promise(res=>{
+    const img = new Image();
+    img.onload = ()=>{
+      ph._origMaxDim = Math.max(img.naturalWidth, img.naturalHeight);
+      ph._origMaxDimSrc = currentSrc;
+      res();
+    };
+    img.onerror = ()=>{ ph._origMaxDim = 2400; ph._origMaxDimSrc = currentSrc; res(); };
+    img.src = currentSrc;
+  });
+}
+
+// Cached per-photo profile sample. Invalidated when src/cropSrc changes.
+function dialPhotoProfile(ph){
+  const currentSrc = ph.cropSrc || ph.src;
+  if(ph._dialProfile && ph._dialProfileSrc === currentSrc) return ph._dialProfile;
+  return null;
+}
+
+async function profileSinglePhoto(ph){
+  if(dialPhotoProfile(ph)) return;
+  try {
+    // Three encodes at same dim — captures the curve shape in both the
+    // wide mid-range and the steeper near-top region.
+    const urlLo  = await compPh(ph, DIAL_PROBE_LO.q,  DIAL_PROBE_LO.mw);
+    const urlMid = await compPh(ph, DIAL_PROBE_MID.q, DIAL_PROBE_MID.mw);
+    const urlHi  = await compPh(ph, DIAL_PROBE_HI.q,  DIAL_PROBE_HI.mw);
+    const loBytes  = approxBytesFromDataUrl(urlLo);
+    const midBytes = approxBytesFromDataUrl(urlMid);
+    const hiBytes  = approxBytesFromDataUrl(urlHi);
+    // Fit two exponents: kLow from [0.40, 0.75], kHigh from [0.75, 0.92].
+    let kLow  = 1.7, kHigh = 3.0;  // safe defaults if probes degenerate
+    if(loBytes > 0 && midBytes > 0 && loBytes !== midBytes){
+      kLow = Math.log(midBytes / loBytes) / Math.log(DIAL_PROBE_MID.q / DIAL_PROBE_LO.q);
+      kLow = Math.max(0.8, Math.min(5.0, kLow));
+    }
+    if(midBytes > 0 && hiBytes > 0 && midBytes !== hiBytes){
+      kHigh = Math.log(hiBytes / midBytes) / Math.log(DIAL_PROBE_HI.q / DIAL_PROBE_MID.q);
+      kHigh = Math.max(0.8, Math.min(8.0, kHigh));
+    }
+    ph._dialProfile = {
+      refMw:     DIAL_PROBE_HI.mw,  // all probes share the same dim
+      midQ:      DIAL_PROBE_MID.q,
+      midBytes:  midBytes,
+      kLow:      kLow,
+      kHigh:     kHigh
+    };
+    ph._dialProfileSrc = ph.cropSrc || ph.src;
+  } catch(e){
+    console.warn('[SnapToFile] dial profile failed for photo', ph.id, e);
+  }
+}
+
+// Per-photo size estimate at (q, mw). Uses measured profile (with piecewise
+// content-specific exponents) when available; otherwise heuristic from the
+// stored data-URL size with a conservative exponent.
+function estPhotoBytes(ph, q, mw){
+  const p = dialPhotoProfile(ph);
+  const origMw = ph._origMaxDim || 2400;
+  if(p){
+    const mwEff    = Math.min(mw, origMw);
+    const refMwEff = Math.min(p.refMw, origMw);
+    const ratioDim = refMwEff > 0 ? Math.pow(mwEff / refMwEff, 2) : 1;
+    // Piecewise: below midQ use kLow, above midQ use kHigh (the near-top
+    // region where JPEG size grows sharply).
+    const k = q <= p.midQ ? p.kLow : p.kHigh;
+    const ratioQ = Math.pow(q / p.midQ, k);
+    return p.midBytes * ratioDim * ratioQ;
+  }
+  // Heuristic fallback (used while profile is being computed).
+  const orig = approxBytesFromDataUrl(ph.cropSrc || ph.src);
+  if(!orig) return 0;
+  const mwEff = Math.min(mw, origMw);
+  const ratioDim = Math.pow(mwEff / origMw, 2);
+  const ratioQ   = Math.pow(q / DIAL_ORIG_Q, DIAL_HEURISTIC_K);
+  return orig * ratioDim * ratioQ;
+}
+
+function dialEstimate(t){
+  const q = dialQAt(t), mw = dialMwAt(t);
+  let total = 0;
+  for(const ph of photos) total += estPhotoBytes(ph, q, mw);
+  // PDF overhead: cover page + per-photo layout chrome
+  if(photos.length > 0) total += 80000 + photos.length * 20000;
+  return total;
+}
+
+// Inverse: find dial t such that estimate ≈ target. Estimate is monotonically
+// decreasing in t, so binary-search.
+function dialAtSize(targetBytes){
+  if(dialEstimate(0) <= targetBytes) return 0;
+  if(dialEstimate(1) >= targetBytes) return 1;
+  let lo = 0, hi = 1;
+  for(let i=0; i<24; i++){
+    const mid = (lo + hi) / 2;
+    if(dialEstimate(mid) > targetBytes) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// Background profiler: walk every unprofiled photo and sample it. Updates the
+// dial readout as each one completes. Best-effort, non-blocking.
+async function profileAllPhotos(){
+  if(!IS_PRO) return;
+  if(dialProfilingActive) return;
+  if(photos.every(p => dialPhotoProfile(p))) return;
+  dialProfilingActive = true;
+  const prof = $('dial-profiling');
+  if(prof) prof.style.display = 'block';
+  try {
+    for(const ph of photos){
+      if(!dialPhotoProfile(ph)){
+        await ensureOrigDim(ph);
+        await profileSinglePhoto(ph);
+        if(document.getElementById('dial-svg')) updateDial();
+      }
+    }
+  } finally {
+    dialProfilingActive = false;
+    if(prof) prof.style.display = 'none';
+  }
+}
+
+function scheduleProfile(){
+  if(!IS_PRO) return;
+  if('requestIdleCallback' in window){
+    requestIdleCallback(()=>profileAllPhotos(), {timeout: 8000});
+  } else {
+    setTimeout(profileAllPhotos, 300);
+  }
+}
+
+/* ─── Dial rendering & interaction ───────────────────── */
+
+// Convert dial position t in [0,1] to (x,y) on a circle of radius r,
+// using compass convention: t=0 at bottom-left (compass 225°), going
+// clockwise through the top, ending at bottom-right (compass 135°), 270° sweep.
+function dialPt(t, r){
+  const ang = (225 + 270*t) * Math.PI / 180;
+  return [r*Math.sin(ang), -r*Math.cos(ang)];
+}
+function arcPath(t0, t1, r){
+  const [x0, y0] = dialPt(t0, r);
+  const [x1, y1] = dialPt(t1, r);
+  const sweepDeg = 270 * (t1 - t0);
+  const largeArc = sweepDeg > 180 ? 1 : 0;
+  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+
+const DIAL_R = 78;       // arc radius
+const DIAL_TICK_INNER = 70;
+const DIAL_TICK_OUTER = 88;
+const DIAL_LABEL_R = 100;
+
+function buildDial(){
+  const cpw = $('copts');
+  if(!cpw) return;
+  cpw.innerHTML =
+    '<div class="dial-wrap">'
+  +   '<svg class="dial-svg" id="dial-svg" viewBox="0 0 240 200" aria-label="Compression dial — turn right for a smaller PDF">'
+  +     '<defs>'
+  +       '<linearGradient id="dial-grad" x1="0" y1="0" x2="1" y2="1">'
+  +         '<stop offset="0%" stop-color="#5a7048"/>'
+  +         '<stop offset="100%" stop-color="#3d4d34"/>'
+  +       '</linearGradient>'
+  +     '</defs>'
+  +     '<g transform="translate(120 105)">'
+  +       '<path id="dial-track" class="dial-track" d=""/>'
+  +       '<path id="dial-fill"  class="dial-fill"  d=""/>'
+  +       '<g id="dial-ticks"></g>'
+  +       '<text id="dial-num"   class="dial-center-num" y="-4">— MB</text>'
+  +       '<text id="dial-num-l" class="dial-center-lbl" y="14">EST. PDF SIZE</text>'
+  +       '<circle id="dial-handle"     class="dial-handle"     r="11" cx="0" cy="0"/>'
+  +       '<circle id="dial-handle-hit" class="dial-handle-hit" r="22" cx="0" cy="0"/>'
+  +     '</g>'
+  +   '</svg>'
+  +   '<div class="dial-status" id="dial-status"></div>'
+  +   '<div class="dial-readout" id="dial-readout"><strong>—</strong></div>'
+  +   '<div class="dial-profiling" id="dial-profiling" style="display:none">refining estimate…</div>'
+  +   '<div class="preset-row">'
+  +     '<button type="button" class="preset-chip" data-preset="email"    id="pc-email"><span class="pc-lbl">Email-safe</span><span class="pc-sub">&lt; 10 MB</span></button>'
+  +     '<button type="button" class="preset-chip" data-preset="standard" id="pc-standard"><span class="pc-lbl">Standard</span><span class="pc-sub">&lt; 25 MB</span></button>'
+  +     '<button type="button" class="preset-chip" data-preset="archive"  id="pc-archive"><span class="pc-lbl">Archive</span><span class="pc-sub">balanced</span></button>'
+  +     '<button type="button" class="preset-chip" data-preset="original" id="pc-original"><span class="pc-lbl">Original</span><span class="pc-sub">no shrink</span></button>'
+  +   '</div>'
+  + '</div>';
+  drawTrack();
+  setDialT(dialT);
+  wireDialInteraction();
+  $('pc-email').onclick    = function(){ applyPreset('email'); };
+  $('pc-standard').onclick = function(){ applyPreset('standard'); };
+  $('pc-archive').onclick  = function(){ applyPreset('archive'); };
+  $('pc-original').onclick = function(){ applyPreset('original'); };
+}
+
+function drawTrack(){
+  const track = $('dial-track');
+  if(track) track.setAttribute('d', arcPath(0, 1, DIAL_R));
+}
+
+function drawFill(){
+  const fill = $('dial-fill');
+  if(!fill) return;
+  if(dialT > 0.001) fill.setAttribute('d', arcPath(0, dialT, DIAL_R));
+  else fill.setAttribute('d', '');
+}
+
+function drawTicks(){
+  const wrap = $('dial-ticks');
+  if(!wrap) return;
+  let html = '';
+  const eMax = dialEstimate(0);
+  const eMin = dialEstimate(1);
+  for(const mb of DIAL_TICKS){
+    const targetBytes = mb * 1024 * 1024;
+    if(targetBytes < eMin || targetBytes > eMax) continue;
+    const t = dialAtSize(targetBytes);
+    const ang = 225 + 270*t;
+    const aRad = ang * Math.PI / 180;
+    const sx =  DIAL_TICK_INNER * Math.sin(aRad), sy = -DIAL_TICK_INNER * Math.cos(aRad);
+    const ex =  DIAL_TICK_OUTER * Math.sin(aRad), ey = -DIAL_TICK_OUTER * Math.cos(aRad);
+    const lx =  DIAL_LABEL_R    * Math.sin(aRad), ly = -DIAL_LABEL_R    * Math.cos(aRad);
+    const cls = mb <= 10 ? 'dial-tick warn' : (mb <= 15 ? 'dial-tick warn-soft' : 'dial-tick');
+    html += '<line class="'+cls+'" x1="'+sx.toFixed(1)+'" y1="'+sy.toFixed(1)+'" x2="'+ex.toFixed(1)+'" y2="'+ey.toFixed(1)+'"/>';
+    html += '<text class="dial-tick-label" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'">'+mb+'M</text>';
+  }
+  wrap.innerHTML = html;
+}
+
+function setDialT(t){
+  dialT = Math.max(0, Math.min(1, t));
+  const [hx, hy] = dialPt(dialT, DIAL_R);
+  const h   = $('dial-handle');
+  const hit = $('dial-handle-hit');
+  if(h){   h.setAttribute('cx', hx.toFixed(2));   h.setAttribute('cy', hy.toFixed(2)); }
+  if(hit){ hit.setAttribute('cx', hx.toFixed(2)); hit.setAttribute('cy', hy.toFixed(2)); }
+  drawFill();
+  updateDial();
+}
+
+function updateDial(){
+  if(!$('dial-svg')) return;
+  const bytes = dialEstimate(dialT);
+  const num = $('dial-num');
+  if(num) num.textContent = fmtSize(bytes);
+  const q = dialQAt(dialT), mw = dialMwAt(dialT);
+  const ro = $('dial-readout');
+  if(ro){
+    ro.innerHTML = '<strong>'+mw+' px</strong> · '+Math.round(q*100)+'% quality';
+  }
+  const st = $('dial-status');
+  if(st){
+    const mb = bytes / (1024*1024);
+    let cls = '', icon = '', msg = '';
+    if(photos.length === 0){
+      msg = 'Add photos to see size estimate';
+    } else if(mb <= 10){
+      cls = 'ok'; icon = '✓'; msg = 'Fits any carrier inbox';
+    } else if(mb <= 25){
+      cls = 'ok'; icon = '✓'; msg = 'Fits Gmail / Outlook 365 (25 MB)';
+    } else if(mb <= 50){
+      cls = 'warn-soft'; icon = '⚠'; msg = 'May exceed strict carrier limits';
+    } else {
+      cls = 'warn'; icon = '⚠'; msg = 'Too large for most email — turn dial right';
+    }
+    st.className = 'dial-status ' + cls;
+    st.innerHTML = msg ? '<span class="icon">'+icon+'</span>'+msg : '';
+  }
+  // ARIA
+  const svg = $('dial-svg');
+  if(svg){
+    svg.setAttribute('role', 'slider');
+    svg.setAttribute('aria-valuemin', '0');
+    svg.setAttribute('aria-valuemax', '100');
+    svg.setAttribute('aria-valuenow', String(Math.round(dialT * 100)));
+    svg.setAttribute('aria-valuetext', Math.round(dialT*100)+'% compression — estimated '+fmtSize(bytes));
+  }
+  drawTicks();
+  highlightActivePreset();
+}
+
+function highlightActivePreset(){
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+}
+
+function applyPreset(name){
+  if(name === 'original'){ animateDial(0); return; }
+  if(name === 'archive'){
+    // Mid-balance: pick t near q=0.6, mw≈1000
+    let bestT = 0.5, bestErr = Infinity;
+    for(let t=0; t<=1; t+=0.005){
+      const err = Math.abs(dialQAt(t) - 0.6) + Math.abs(dialMwAt(t) - 1000)/3000;
+      if(err < bestErr){ bestErr = err; bestT = t; }
+    }
+    animateDial(bestT);
+    return;
+  }
+  const targetMB = (name === 'email') ? 9.5 : 24.0;
+  const targetBytes = targetMB * 1024 * 1024;
+  if(photos.length === 0){ animateDial(0.5); return; }
+  if(dialEstimate(1) > targetBytes){
+    animateDial(1);
+    toast('Even at maximum compression, the report exceeds '+Math.ceil(targetMB)+' MB');
+    return;
+  }
+  if(dialEstimate(0) <= targetBytes){
+    animateDial(0); // already small enough at original
+    return;
+  }
+  animateDial(dialAtSize(targetBytes));
+}
+
+function animateDial(targetT){
+  if(dialAnimRaf) cancelAnimationFrame(dialAnimRaf);
+  const startT = dialT;
+  const start  = performance.now();
+  const dur    = 320;
+  function step(now){
+    const f = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - f, 3);
+    setDialT(startT + (targetT - startT) * eased);
+    if(f < 1) dialAnimRaf = requestAnimationFrame(step);
+    else dialAnimRaf = null;
+  }
+  dialAnimRaf = requestAnimationFrame(step);
+}
+
+function wireDialInteraction(){
+  const svg = $('dial-svg');
+  if(!svg) return;
+  let dragging = false;
+  function eventToInner(ev){
+    const rect = svg.getBoundingClientRect();
+    const cx = ev.touches && ev.touches.length ? ev.touches[0].clientX : ev.clientX;
+    const cy = ev.touches && ev.touches.length ? ev.touches[0].clientY : ev.clientY;
+    const x = (cx - rect.left) * (240 / rect.width)  - 120;
+    const y = (cy - rect.top)  * (200 / rect.height) - 105;
+    return [x, y];
+  }
+  function tFromXY(x, y){
+    let ang = Math.atan2(x, -y) * 180 / Math.PI;
+    if(ang < 0) ang += 360;
+    let rel = ang - 225;
+    while(rel < 0) rel += 360;
+    if(rel <= 270) return rel / 270;
+    // Dead zone (between bottom-right end and bottom-left start), split at compass south (315° relative)
+    return rel < 315 ? 1 : 0;
+  }
+  function start(ev){
+    ev.preventDefault();
+    dragging = true;
+    if(dialAnimRaf){ cancelAnimationFrame(dialAnimRaf); dialAnimRaf = null; }
+    const [x, y] = eventToInner(ev);
+    setDialT(tFromXY(x, y));
+    svg.focus();
+  }
+  function move(ev){
+    if(!dragging) return;
+    ev.preventDefault();
+    const [x, y] = eventToInner(ev);
+    setDialT(tFromXY(x, y));
+  }
+  function end(){ dragging = false; }
+  svg.addEventListener('mousedown',  start);
+  svg.addEventListener('touchstart', start, {passive:false});
+  document.addEventListener('mousemove',  move);
+  document.addEventListener('touchmove',  move, {passive:false});
+  document.addEventListener('mouseup',  end);
+  document.addEventListener('touchend', end);
+  document.addEventListener('touchcancel', end);
+  // Keyboard
+  svg.setAttribute('tabindex', '0');
+  svg.addEventListener('keydown', function(ev){
+    let step = 0;
+    if(ev.key === 'ArrowLeft'  || ev.key === 'ArrowDown') step = -0.025;
+    else if(ev.key === 'ArrowRight' || ev.key === 'ArrowUp') step = 0.025;
+    else if(ev.key === 'PageDown') step = -0.1;
+    else if(ev.key === 'PageUp')   step = 0.1;
+    else if(ev.key === 'Home'){ ev.preventDefault(); animateDial(0); return; }
+    else if(ev.key === 'End') { ev.preventDefault(); animateDial(1); return; }
+    if(step){ ev.preventDefault(); setDialT(dialT + step); }
+  });
+}
+
+// Build the dial UI on parse for Pro. Wrapped in try/catch so a bug here
+// can't take down the whole export modal — radio HTML stays as fallback.
+(function initDialIfPro(){
+  if(!IS_PRO) return;
+  try { buildDial(); }
+  catch(e){ console.error('[SnapToFile] Dial init failed; keeping radio fallback:', e); }
+})();
+
 /* ─── EXPORT ──────────────────────────────────────────── */
-$('btn-exp').onclick=()=>{$('exp-sub').textContent=`${photos.length} photo${photos.length>1?'s':''} · 2 per page · photo left, info right`;$('mod-exp').classList.add('open')};
+$('btn-exp').onclick=()=>{
+  $('exp-sub').textContent=`${photos.length} photo${photos.length>1?'s':''} · 2 per page · photo left, info right`;
+  $('mod-exp').classList.add('open');
+  if(IS_PRO){
+    // Pre-warm origMaxDim for instant heuristic, then sample for measured estimates
+    Promise.all(photos.map(ensureOrigDim)).then(()=>{
+      updateDial();
+      profileAllPhotos();
+    });
+  }
+};
 $('exp-no').onclick=()=>$('mod-exp').classList.remove('open');
 // Save Project (.stf) shortcut from the Export modal — same behavior
 // as the Save/Open button in the topbar, just offered at the moment
@@ -2796,7 +3325,10 @@ $('exp-yes').onclick=async()=>{
   // Show a loading page while we process
   win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width"/></head><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f8fafc"><p style="font-size:18px;color:#64748b">⏳ Building report…</p></body></html>');
   try{
-    const{q,mw}=CLEV[compLv-1];
+    // Pro uses the dial's continuous values; Free uses CLEV by compLv index
+    let q, mw;
+    if(IS_PRO){ q = dialQAt(dialT); mw = dialMwAt(dialT); }
+    else      { ({q, mw} = CLEV[compLv-1]); }
     const rptName=$('m-name').value;
     const addr=$('m-addr').value, addr2=$('m-addr2').value;
     const date=$('m-date').value, claim=$('m-claim').value;
