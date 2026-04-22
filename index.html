@@ -8,9 +8,13 @@
 
 <!-- Social preview -->
 <meta property="og:title" content="SnapToFile — Photo documentation that doesn't require a subscription"/>
-<meta property="og:description" content="Build Xactimate-ready photo reports from a single HTML file. No install. No login. Works offline. Free trial."/>
+<meta property="og:description" content="Build carrier-ready photo inspection reports from a single HTML file. No install. No login. Works offline. Free trial."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://snaptofile.com/"/>
+
+<!-- Favicon — aperture-in-page, simplified for 16/32px rendering -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M10 8 H50 L66 24 V72 H10 Z' fill='%231a1a1a'/%3E%3Cpath d='M50 8 V24 H66' stroke='%23f5efe6' stroke-width='3' fill='none'/%3E%3Ccircle cx='37' cy='46' r='14' fill='%234a5c3f'/%3E%3Ccircle cx='37' cy='46' r='5' fill='%23f5efe6'/%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f5efe6'/%3E%3Cpath d='M12 10 H50 L66 24 V72 H12 Z' fill='none' stroke='%231a1a1a' stroke-width='3'/%3E%3Cpath d='M50 10 V24 H66' fill='none' stroke='%231a1a1a' stroke-width='3'/%3E%3Ccircle cx='37' cy='46' r='14' fill='none' stroke='%234a5c3f' stroke-width='3'/%3E%3Ccircle cx='37' cy='46' r='4' fill='%234a5c3f'/%3E%3C/svg%3E"/>
 
 <!-- Fonts: Editorial pairing — Fraunces (display) + Inter Tight (body) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,10 +40,29 @@
   ─────────────────────────────────────────────────────────────────
 -->
 <script>
-  const KIT_FORM_ID     = "9341868";                     // Kit form: SnapToFile Trial
-  const KIT_ACCOUNT_UID = "89da877a42";                  // Kit account UID
+  const KIT_FORM_ID     = "REPLACE_ME_FORM_ID";          // e.g. "1234567"
+  const KIT_ACCOUNT_UID = "REPLACE_ME_ACCOUNT_UID";      // e.g. "abcd1234ef"
+  // Direct download fallback — served after successful submit so user can start right away.
+  // Host the current trial build at this URL (e.g. on your CDN or Vercel /public).
+  const DIRECT_DOWNLOAD_URL = "https://snaptofile.com/download/SnapToFile_Trial_2026-04.html";
   const TRIAL_BUILD_LABEL   = "Build 2026-04";
   const TRIAL_EXPIRES_LABEL = "Valid through June 1, 2026";
+
+  /* ──────────────────────────────────────────────
+     VIDEO WALKTHROUGH — paste Loom/YouTube/Vimeo URL
+     when the video is ready. Leave as PLACEHOLDER
+     to show the "coming soon" state.
+     Examples:
+       Loom:    "https://www.loom.com/embed/xxxxxxxxxxxxxxxxxxxxxx"
+       YouTube: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+       Vimeo:   "https://player.vimeo.com/video/123456789"
+  ────────────────────────────────────────────── */
+  const VIDEO_URL   = "PLACEHOLDER";
+  const VIDEO_TITLE = "SnapToFile — the 3-minute walkthrough";
+
+  /* Sample PDF download — export one from the generator
+     and upload it to the repo at /samples/ */
+  const SAMPLE_PDF_URL = "/samples/SnapToFile-sample-report.pdf";
 </script>
 
 <style>
@@ -108,9 +131,15 @@ header.masthead{
   text-transform:uppercase;color:var(--muted);
 }
 .mast-brand{
+  display:inline-flex;align-items:center;gap:11px;
   font-family:var(--serif);font-weight:900;font-size:clamp(22px,2.6vw,30px);
   letter-spacing:-.02em;line-height:1;color:var(--ink);
 }
+.mast-brand-icon{
+  flex-shrink:0;width:34px;height:34px;display:block;
+  transition:transform .25s ease;
+}
+.mast-brand:hover .mast-brand-icon{transform:rotate(-4deg) scale(1.04)}
 .mast-brand em{font-style:italic;font-weight:400;color:var(--sage)}
 .mast-right{display:flex;gap:22px;align-items:center}
 .mast-link{
@@ -580,6 +609,225 @@ footer{
 }
 
 /* ────────────────────────────────────────────────────────────────
+   ANDROID MIGRATION STRIP — timely, tasteful, not breaking-news
+   ──────────────────────────────────────────────────────────────── */
+.android-strip{
+  background:var(--ink);color:var(--cream);
+  padding:clamp(36px,5vw,60px) 0;position:relative;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+}
+.android-strip::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.7' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.android-grid{
+  display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,5vw,60px);align-items:center;
+  position:relative;
+}
+.android-kicker{
+  font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--sage-soft);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.android-kicker::before{content:"";width:24px;height:1px;background:var(--sage-soft)}
+.android-hdl{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(26px,3.6vw,42px);line-height:1.08;letter-spacing:-.02em;
+  color:var(--cream);
+}
+.android-hdl em{font-style:italic;color:var(--sage-soft);font-weight:400}
+.android-body{
+  font-family:var(--serif);font-size:16px;line-height:1.6;color:rgba(245,239,230,.78);
+  max-width:520px;
+}
+.android-body b{color:var(--cream);font-weight:600}
+.android-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:18px;padding:10px 18px;
+  border:1px solid rgba(245,239,230,.25);border-radius:30px;
+  font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.04em;
+  color:var(--cream);transition:background .18s, border-color .18s, transform .18s;
+}
+.android-cta:hover{background:var(--sage-deep);border-color:var(--sage-deep);transform:translateY(-1px)}
+.android-cta svg{transition:transform .22s}
+.android-cta:hover svg{transform:translateX(3px)}
+.android-dates{
+  display:flex;flex-direction:column;gap:14px;
+  padding:clamp(20px,3vw,28px) clamp(22px,3vw,32px);
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);
+}
+.android-date{
+  display:flex;gap:16px;align-items:baseline;
+  padding-bottom:14px;border-bottom:1px dashed rgba(255,255,255,.1);
+}
+.android-date:last-child{padding-bottom:0;border-bottom:none}
+.android-date-when{
+  font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--sage-soft);min-width:92px;flex-shrink:0;
+}
+.android-date-what{
+  font-family:var(--serif);font-size:14px;line-height:1.45;color:rgba(245,239,230,.85);
+}
+.android-date-what b{color:var(--cream);font-weight:600}
+
+/* ────────────────────────────────────────────────────────────────
+   HOW IT WORKS — three-step mental model
+   ──────────────────────────────────────────────────────────────── */
+.how{padding:clamp(60px,7vw,90px) 0;background:var(--cream)}
+.how-hdr{text-align:center;margin-bottom:clamp(40px,5vw,60px)}
+.how-hdr .eyebrow{justify-content:center}
+.how-hdr h2{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.022em;
+  margin-top:18px;
+}
+.how-hdr h2 em{font-style:italic;color:var(--sage-deep);font-weight:400}
+.how-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,40px);
+  counter-reset:how;
+}
+.how-step{
+  position:relative;padding:28px 26px 28px 26px;
+  background:var(--paper);border:1px solid var(--rule);border-radius:var(--r-lg);
+  transition:transform .28s, box-shadow .28s;
+}
+.how-step:hover{transform:translateY(-3px);box-shadow:0 20px 40px -20px rgba(26,26,26,.12)}
+.how-step-num{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:42px;line-height:1;color:var(--sage);opacity:.55;
+  margin-bottom:14px;
+}
+.how-step-ico{
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--rule);border-radius:50%;color:var(--sage-deep);
+  background:var(--cream);margin-bottom:16px;
+}
+.how-step h3{
+  font-family:var(--serif);font-weight:600;font-size:22px;line-height:1.2;
+  letter-spacing:-.01em;color:var(--ink);margin-bottom:10px;
+}
+.how-step p{
+  font-size:14px;color:var(--muted);line-height:1.65;
+}
+.how-arrow{
+  position:absolute;right:-22px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;background:var(--cream);border:1px solid var(--rule);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:var(--sage);z-index:2;
+}
+.how-step:last-child .how-arrow{display:none}
+
+/* ────────────────────────────────────────────────────────────────
+   VIDEO SECTION — facade embed
+   ──────────────────────────────────────────────────────────────── */
+.video{padding:clamp(60px,8vw,100px) 0;background:var(--paper);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.video-hdr{text-align:center;margin-bottom:clamp(36px,4vw,52px);max-width:640px;margin-left:auto;margin-right:auto}
+.video-hdr .eyebrow{justify-content:center}
+.video-hdr h2{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacing:-.022em;
+  margin-top:18px;
+}
+.video-hdr h2 em{font-style:italic;color:var(--sage-deep)}
+.video-hdr p{
+  font-family:var(--serif);font-size:17px;line-height:1.55;color:var(--ink-soft);
+  margin-top:14px;
+}
+
+.video-frame{
+  max-width:960px;margin:0 auto;position:relative;
+  aspect-ratio:16/9;background:var(--cream-deep);
+  border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;
+  box-shadow:0 40px 80px -40px rgba(26,26,26,.3), 0 4px 8px rgba(26,26,26,.06);
+}
+
+/* Facade state (placeholder or before-click) */
+.video-facade{
+  position:absolute;inset:0;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:
+    radial-gradient(ellipse at 30% 25%, rgba(74,92,63,.14), transparent 55%),
+    radial-gradient(ellipse at 75% 75%, rgba(176,141,58,.08), transparent 55%),
+    linear-gradient(140deg,#faf5ea 0%,#ece4d3 100%);
+  transition:background .3s;
+}
+.video-facade::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.video-facade:hover .video-play{transform:scale(1.06);background:var(--sage-deep)}
+.video-facade-logo{
+  position:absolute;top:28px;left:28px;
+  font-family:var(--serif);font-weight:900;font-size:22px;letter-spacing:-.02em;
+  color:var(--ink);
+}
+.video-facade-logo em{font-style:italic;font-weight:400;color:var(--sage)}
+.video-facade-badge{
+  position:absolute;top:28px;right:28px;
+  font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);
+  padding:6px 12px;background:rgba(255,255,255,.6);border:1px solid var(--rule);border-radius:30px;
+}
+.video-facade-title{
+  font-family:var(--serif);font-weight:500;font-size:clamp(20px,2.6vw,28px);
+  line-height:1.2;letter-spacing:-.015em;color:var(--ink);
+  margin-top:22px;padding:0 24px;text-align:center;
+  max-width:460px;
+}
+.video-facade-sub{
+  font-family:var(--sans);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-top:10px;font-weight:600;
+}
+.video-play{
+  width:76px;height:76px;border-radius:50%;
+  background:var(--ink);color:var(--cream);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 20px 40px -12px rgba(26,26,26,.4);
+  transition:transform .25s, background .25s;
+  position:relative;z-index:2;
+}
+.video-play svg{margin-left:4px}
+
+/* Loaded iframe state */
+.video-frame iframe{
+  position:absolute;inset:0;width:100%;height:100%;border:none;display:block;
+}
+
+/* Coming-soon toast */
+.video-toast{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+  opacity:0;pointer-events:none;transition:opacity .3s, transform .3s;
+  background:var(--ink);color:var(--cream);
+  padding:10px 20px;border-radius:30px;
+  font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.02em;
+  box-shadow:0 12px 30px -10px rgba(26,26,26,.4);
+  z-index:3;
+}
+.video-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ────────────────────────────────────────────────────────────────
+   SAMPLE PDF DOWNLOAD LINK (in sample section)
+   ──────────────────────────────────────────────────────────────── */
+.sample-pdf-link{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:22px;padding:12px 20px;
+  background:var(--ink);color:var(--cream);border-radius:30px;
+  font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:.02em;
+  transition:background .18s, transform .18s;
+}
+.sample-pdf-link:hover{background:var(--sage-deep);transform:translateY(-1px)}
+.sample-pdf-link svg{transition:transform .2s}
+.sample-pdf-link:hover svg{transform:translateY(2px)}
+.sample-pdf-size{font-weight:400;opacity:.65;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ────────────────────────────────────────────────────────────────
+   COMPARE — 4-column override (was 3)
+   ──────────────────────────────────────────────────────────────── */
+.compare-row{grid-template-columns:1.3fr .9fr .9fr .9fr}
+.compare-cell.them-2{color:rgba(245,239,230,.55)}
+
+/* ────────────────────────────────────────────────────────────────
    RESPONSIVE
    ──────────────────────────────────────────────────────────────── */
 @media(max-width:960px){
@@ -591,23 +839,41 @@ footer{
   .sample-grid{grid-template-columns:1fr;gap:50px}
   .sample-art{max-width:520px;margin:0 auto;transform:rotate(0)}
   .foot-top{grid-template-columns:1fr 1fr;gap:40px}
+  .android-grid{grid-template-columns:1fr;gap:36px}
+  .how-grid{grid-template-columns:1fr;gap:20px}
+  .how-arrow{display:none}
+  .how-step:last-child .how-arrow{display:none}
 }
 @media(max-width:640px){
   .mast-right{gap:14px}
   .mast-link:first-of-type{display:none}
   .feat-grid{grid-template-columns:1fr}
   .beliefs-grid{grid-template-columns:1fr;gap:30px}
-  .compare-row{grid-template-columns:1.6fr 1fr 1fr;font-size:12px}
-  .compare-cell{padding:14px 12px;font-size:12px}
-  .compare-cell.label{font-size:13px}
+  .compare-row{grid-template-columns:1.4fr .9fr .9fr .9fr;font-size:11px}
+  .compare-cell{padding:12px 10px;font-size:11px;gap:6px}
+  .compare-cell.label{font-size:12px}
+  .compare-cell svg{width:13px;height:13px}
   .foot-top{grid-template-columns:1fr;gap:32px}
   .hero-art-tag-2{left:8px}
   .hero-art-tag-1{right:8px}
+  .video-facade-logo,.video-facade-badge{top:16px}
+  .video-facade-logo{left:16px;font-size:18px}
+  .video-facade-badge{right:16px;font-size:9px;padding:5px 10px}
+  .video-play{width:58px;height:58px}
 }
 @media(max-width:420px){
   .hero-proof{gap:14px 20px}
   .gate-input-row{flex-direction:column}
   .gate-input, .gate-btn{width:100%}
+  .compare-row{grid-template-columns:1fr}
+  .compare-row{display:block;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .compare-cell{border-top:1px solid rgba(255,255,255,.05);padding:8px 0}
+  .compare-cell:first-child{border-top:none;padding-top:0}
+  .compare-cell.head{display:none}
+  .compare-cell.label::after{content:"";display:block;width:20px;height:1px;background:rgba(255,255,255,.15);margin-top:6px}
+  .compare-cell.us::before{content:"SnapToFile ";font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-soft);margin-right:8px}
+  .compare-cell.them::before{content:"CompanyCam ";font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.45);margin-right:8px}
+  .compare-cell.them-2::before{content:"PHOTO iD ";font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.45);margin-right:8px}
 }
 @media(prefers-reduced-motion:reduce){
   *, *::before, *::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
@@ -622,7 +888,25 @@ footer{
 <header class="masthead">
   <div class="wrap mast-row">
     <div class="mast-left">
-      <span class="mast-brand">Snap<em>To</em>File</span>
+      <a href="#" class="mast-brand" aria-label="SnapToFile — home">
+        <svg class="mast-brand-icon" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+          <path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#1a1a1a" stroke-width="2.8" stroke-linejoin="miter"/>
+          <path d="M50 8 V24 H66" stroke="#1a1a1a" stroke-width="2.8" stroke-linejoin="miter"/>
+          <path d="M50 8 L66 24" stroke="#1a1a1a" stroke-width="2.8"/>
+          <g transform="translate(37 46)">
+            <circle r="15" stroke="#4a5c3f" stroke-width="2.6" fill="none"/>
+            <g stroke="#4a5c3f" stroke-width="2.6" stroke-linecap="round" fill="none">
+              <path d="M 0 -15 L 5 -3"/>
+              <path d="M 13 -7.5 L 5 3"/>
+              <path d="M 13 7.5 L 0 6"/>
+              <path d="M 0 15 L -5 3"/>
+              <path d="M -13 7.5 L -5 -3"/>
+              <path d="M -13 -7.5 L 0 -6"/>
+            </g>
+          </g>
+        </svg>
+        <span>Snap<em>To</em>File</span>
+      </a>
       <span class="mast-issue">Vol.&nbsp;I &nbsp;·&nbsp; Issue 01 &nbsp;·&nbsp; April 2026</span>
     </div>
     <nav class="mast-right">
@@ -651,7 +935,7 @@ footer{
 
       <p class="hero-lede">
         <strong>SnapToFile is a single HTML file</strong> that turns your field photos into
-        Xactimate-ready inspection reports in minutes. No install. No login.
+        carrier-ready inspection reports in minutes. No install. No login.
         Works offline. Your files stay on your computer — forever.
       </p>
 
@@ -724,6 +1008,45 @@ footer{
 </section>
 
 <!-- ════════════════════════════════════════════════════════════
+     ANDROID MIGRATION STRIP — Verisk permission-slip hook
+     Valid through the Xactimate Android sunset (Q2 2027).
+     ════════════════════════════════════════════════════════════ -->
+<section class="android-strip">
+  <div class="wrap">
+    <div class="android-grid">
+      <div>
+        <div class="android-kicker">A note for Android users</div>
+        <h2 class="android-hdl">Xactimate is leaving Android. <em>Your photos shouldn't have to.</em></h2>
+        <p class="android-body" style="margin-top:18px">
+          Verisk is winding down Xactimate on Android. If you're an adjuster or roofer on an Android phone, you've got roughly <b>eight months to a year</b> to find a new photo-documentation workflow before the tool you rely on goes dark.
+        </p>
+        <p class="android-body" style="margin-top:14px">
+          SnapToFile runs in <b>any Android browser</b> today — and the same single HTML file works identically on iPhone, iPad, and laptop. No app install, no account, no migration project. You keep working.
+        </p>
+        <a class="android-cta" href="#download">
+          Try it on your phone
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <div class="android-dates">
+        <div class="android-date">
+          <div class="android-date-when">Dec 2026</div>
+          <div class="android-date-what">Xactimate Android goes into <b>limited functionality</b> mode per Verisk's announcement.</div>
+        </div>
+        <div class="android-date">
+          <div class="android-date-when">Q2 2027</div>
+          <div class="android-date-what">Full sunset. Android users <b>need a replacement workflow</b> in place by then.</div>
+        </div>
+        <div class="android-date">
+          <div class="android-date-when">Today</div>
+          <div class="android-date-what">SnapToFile already runs in <b>Chrome, Firefox, and Samsung Internet</b> on Android — offline, no install.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
      BELIEFS
      ════════════════════════════════════════════════════════════ -->
 <section class="beliefs">
@@ -749,6 +1072,50 @@ footer{
         <div class="belief-num">04</div>
         <h3 class="belief-title">$27 a month is a lot of receipts.</h3>
         <p class="belief-body">Field pros pay for six different tools already. We don't think photo documentation should be one of them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     HOW IT WORKS — 3 steps, mental model before the feature grid
+     ════════════════════════════════════════════════════════════ -->
+<section class="how">
+  <div class="wrap">
+    <div class="how-hdr">
+      <div class="eyebrow">How it works</div>
+      <h2>Three steps from <em>photo</em> to <em>finished PDF</em>.</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <div class="how-step-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <h3>Shoot</h3>
+        <p>Use your phone camera, drag photos from your laptop, or tap the in-app camera button. iPhone, Android, iPad, or desktop — same file, same flow.</p>
+        <div class="how-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <div class="how-step-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3>Annotate</h3>
+        <p>Circle the damage, draw arrows, highlight the seam. Type captions, crop, rotate, magnify. Bulk-edit 20 captions in one pass with the template builder.</p>
+        <div class="how-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <div class="how-step-ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <h3>Export</h3>
+        <p>One click for a branded 2-up PDF with your cover page and claim info. Save the whole project as a <code style="font-family:var(--sans);background:var(--cream-deep);padding:1px 6px;border-radius:3px;font-size:12px">.stf</code> file to reopen any time, anywhere.</p>
       </div>
     </div>
   </div>
@@ -822,13 +1189,41 @@ footer{
 </section>
 
 <!-- ════════════════════════════════════════════════════════════
+     VIDEO WALKTHROUGH — facade embed
+     Paste VIDEO_URL in the config block at the top of the file.
+     Shows a "coming soon" toast if URL is still the PLACEHOLDER.
+     ════════════════════════════════════════════════════════════ -->
+<section class="video" id="walkthrough">
+  <div class="wrap">
+    <div class="video-hdr">
+      <div class="eyebrow">See it in action</div>
+      <h2>Three minutes, <em>one full report</em>.</h2>
+      <p>Watch a complete walk-through of SnapToFile on a real claim — from the first photo off the camera to the finished PDF ready for the carrier.</p>
+    </div>
+
+    <div class="video-frame" id="video-frame">
+      <div class="video-facade" id="video-facade" role="button" tabindex="0" aria-label="Play the SnapToFile walkthrough video">
+        <div class="video-facade-logo">Snap<em>To</em>File</div>
+        <div class="video-facade-badge" id="video-duration">~3 min</div>
+        <div class="video-play" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="video-facade-title" id="video-facade-title">The 3-minute walkthrough</div>
+        <div class="video-facade-sub" id="video-facade-sub">Click to play</div>
+      </div>
+      <div class="video-toast" id="video-toast">Walkthrough video coming soon — check back shortly.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
      COMPARISON
      ════════════════════════════════════════════════════════════ -->
 <section class="compare">
   <div class="wrap">
     <div class="compare-hdr">
       <div class="eyebrow">The honest table</div>
-      <h2>How it stacks up against <em>CompanyCam</em>.</h2>
+      <h2>How it stacks up against the <em>cloud-first</em> crowd.</h2>
     </div>
 
     <div class="compare-tbl">
@@ -836,31 +1231,37 @@ footer{
         <div class="compare-cell head"></div>
         <div class="compare-cell head us">SnapToFile</div>
         <div class="compare-cell head">CompanyCam</div>
+        <div class="compare-cell head">PHOTO iD</div>
       </div>
       <div class="compare-row">
         <div class="compare-cell label">Works offline</div>
         <div class="compare-cell us"><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Always</div>
         <div class="compare-cell them"><svg class="compare-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Cloud required</div>
+        <div class="compare-cell them-2"><svg class="compare-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Cloud required</div>
       </div>
       <div class="compare-row">
         <div class="compare-cell label">Account required</div>
         <div class="compare-cell us"><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>None</div>
         <div class="compare-cell them"><svg class="compare-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Required</div>
+        <div class="compare-cell them-2"><svg class="compare-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Required</div>
       </div>
       <div class="compare-row">
         <div class="compare-cell label">Access old claims if you cancel</div>
         <div class="compare-cell us"><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Forever — files are yours</div>
         <div class="compare-cell them"><svg class="compare-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Read-only / paywalled</div>
+        <div class="compare-cell them-2"><svg class="compare-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Tied to subscription</div>
       </div>
       <div class="compare-row">
         <div class="compare-cell label">Price</div>
         <div class="compare-cell us"><b style="color:var(--cream)">Free trial this month</b></div>
         <div class="compare-cell them">~$27 / user / mo</div>
+        <div class="compare-cell them-2">Paid tier for full features</div>
       </div>
       <div class="compare-row">
         <div class="compare-cell label">Install required</div>
         <div class="compare-cell us"><svg class="compare-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>None — one HTML file</div>
         <div class="compare-cell them">App store, permissions, updates</div>
+        <div class="compare-cell them-2">App store, permissions, updates</div>
       </div>
     </div>
   </div>
@@ -892,6 +1293,12 @@ footer{
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         <span><b>Clean print output</b>Browser URL, date, and page-number clutter suppressed automatically.</span>
       </div>
+
+      <a class="sample-pdf-link" id="sample-pdf-link" href="#" download>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Download a sample report</span>
+        <span class="sample-pdf-size">PDF</span>
+      </a>
     </div>
 
     <div class="sample-art" aria-hidden="true">
@@ -934,8 +1341,8 @@ footer{
         <div class="eyebrow gate-eyebrow">Free trial · No credit card</div>
         <h2>Send me the <em>trial build</em>.</h2>
         <p class="gate-sub">
-          Drop your email and we'll send the current SnapToFile trial to your inbox.
-          One-click confirm, then download — usually arrives within a minute.
+          Drop your email and we'll send the current SnapToFile trial.
+          You'll also get the download link on-screen right away — no waiting.
         </p>
 
         <div class="gate-meta">
@@ -982,15 +1389,18 @@ footer{
         <div class="gate-check">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h3>Check your inbox. <em>Your trial is on its way.</em></h3>
+        <h3>You're on the list. <em>Here's your trial.</em></h3>
         <p>
-          We just sent the download link to <b id="gate-success-email">your inbox</b>.
-          Click the confirmation button in that email to get SnapToFile.
-          It usually arrives within a minute — peek at your spam folder if it doesn't.
+          Click below to download SnapToFile right now. We've also sent a copy of the link to
+          <b id="gate-success-email">your inbox</b> for later — check your spam folder if you don't see it in a minute.
         </p>
+        <a id="gate-download-link" href="#" class="gate-btn" download>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span id="gate-download-label">Download the trial</span>
+        </a>
         <div class="gate-success-mail">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <span>Look for sender <b>SnapToFile</b>. Add us to contacts so future builds land in your inbox.</span>
+          <span>Not seeing the email? Look for sender <b>SnapToFile</b>. Add us to contacts so future builds land in your inbox.</span>
         </div>
       </div>
     </div>
@@ -1054,7 +1464,47 @@ footer{
           <span class="faq-toggle">+</span>
         </summary>
         <div class="faq-a">
-          Yes. The PDF output is formatted with a proper cover page, claim info, and 2-up photo pages — readable by any carrier. Xactimate / Symbility integration is on our roadmap for the paid product; today, the PDF handoff is the recommended workflow.
+          Yes. The PDF output is formatted with a proper cover page, claim info, and 2-up photo pages — readable by any carrier. We don't try to replace your estimating software; we hand over a clean PDF and whatever tool you already use for scope keeps working.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>Does SnapToFile replace my estimating software?</span>
+          <span class="faq-toggle">+</span>
+        </summary>
+        <div class="faq-a">
+          No — and it's not trying to. SnapToFile owns the <b>photo documentation</b> workflow: capture, annotate, report, export. Your estimating tool owns <b>scope and pricing</b>. Two different jobs. We give you a clean PDF handoff so the tools you already use for scope keep working exactly as they do today.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>What happens when I lose signal on a job?</span>
+          <span class="faq-toggle">+</span>
+        </summary>
+        <div class="faq-a">
+          Nothing. Once the HTML file is saved to your device, SnapToFile runs entirely in your browser with no network required. Shoot, annotate, save, export — all offline. Basements, rural properties, rooftops with zero bars: it all works the same.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>Can I use my own company logo and branding on reports?</span>
+          <span class="faq-toggle">+</span>
+        </summary>
+        <div class="faq-a">
+          Yes. Upload your logo once in the profile panel and it appears on every PDF cover page and photo-sheet header. Company name, address, phone, and license number save with it — set once, reuse forever. (Custom branding is a Pro feature; see the next answer for what's in the free tier.)
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>What does the free version cap out at?</span>
+          <span class="faq-toggle">+</span>
+        </summary>
+        <div class="faq-a">
+          The free tier caps reports at <b>12 photos</b>, includes a small SnapToFile footer on exported PDFs, and doesn't include the custom company header. Everything else — annotation, bulk editing, offline use, <code style="font-family:var(--sans);background:var(--cream-deep);padding:1px 6px;border-radius:3px;font-size:13px">.stf</code> save &amp; reopen, PDF export — works identically to Pro. Pro removes the cap, the footer, and unlocks company branding.
         </div>
       </details>
 
@@ -1108,6 +1558,61 @@ footer{
 document.getElementById('gate-build').textContent    = TRIAL_BUILD_LABEL;
 document.getElementById('gate-expires').textContent  = TRIAL_EXPIRES_LABEL;
 document.getElementById('foot-build').textContent    = TRIAL_BUILD_LABEL + ' · ' + TRIAL_EXPIRES_LABEL;
+document.getElementById('gate-download-link').href   = DIRECT_DOWNLOAD_URL;
+
+/* ──────────────────────────────────────────────────────────────
+   Sample PDF download link — wire to config constant
+   ────────────────────────────────────────────────────────────── */
+(function(){
+  const link = document.getElementById('sample-pdf-link');
+  if(link) link.href = SAMPLE_PDF_URL;
+})();
+
+/* ──────────────────────────────────────────────────────────────
+   Video walkthrough facade
+   - If VIDEO_URL is set to a real URL, clicking swaps the
+     facade for an <iframe> that autoplays.
+   - If still PLACEHOLDER, clicking shows a polite toast.
+   ────────────────────────────────────────────────────────────── */
+(function(){
+  const facade = document.getElementById('video-facade');
+  const frame  = document.getElementById('video-frame');
+  const toast  = document.getElementById('video-toast');
+  const titleEl= document.getElementById('video-facade-title');
+  const subEl  = document.getElementById('video-facade-sub');
+  if(!facade || !frame) return;
+
+  const isReady = VIDEO_URL && VIDEO_URL !== 'PLACEHOLDER' && /^https?:\/\//.test(VIDEO_URL);
+
+  if(!isReady){
+    // Placeholder state — soften the copy so it doesn't feel broken
+    if(titleEl) titleEl.textContent = VIDEO_TITLE || 'The 3-minute walkthrough';
+    if(subEl)   subEl.textContent   = 'Coming soon';
+  } else {
+    if(titleEl) titleEl.textContent = VIDEO_TITLE || 'Watch the walkthrough';
+  }
+
+  function playOrToast(){
+    if(isReady){
+      const autoplayUrl = VIDEO_URL + (VIDEO_URL.includes('?') ? '&' : '?') + 'autoplay=1';
+      const iframe = document.createElement('iframe');
+      iframe.src = autoplayUrl;
+      iframe.title = VIDEO_TITLE;
+      iframe.setAttribute('allow','autoplay; fullscreen; picture-in-picture; encrypted-media');
+      iframe.setAttribute('allowfullscreen','');
+      facade.remove();
+      frame.appendChild(iframe);
+    } else {
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'), 2800);
+    }
+  }
+
+  facade.addEventListener('click', playOrToast);
+  facade.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playOrToast(); }
+  });
+})();
 
 /* ──────────────────────────────────────────────────────────────
    Smooth scroll for in-page anchors
@@ -1211,6 +1716,18 @@ form.addEventListener('submit', async (e) => {
     successEm.textContent = email;
     formWrap.style.display = 'none';
     successEl.classList.add('show');
+
+    // Fire the download automatically so the user gets the file
+    // even if they don't click the button. Many browsers allow
+    // this because we're inside a user-gesture-initiated handler.
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = DIRECT_DOWNLOAD_URL;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }, 600);
 
     // Scroll success card into view
     document.getElementById('download').scrollIntoView({behavior:'smooth',block:'start'});
