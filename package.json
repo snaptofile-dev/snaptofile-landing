@@ -5,6 +5,7 @@
   "type": "module",
   "description": "SnapToFile landing page + Stripe-backed subscription endpoints (Vercel)",
   "dependencies": {
+    "resend": "^6.0.0",
     "stripe": "^17.0.0"
   }
 }
