@@ -1,0 +1,10 @@
+{
+  "name": "snaptofile-landing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SnapToFile landing page + Stripe-backed subscription endpoints (Vercel)",
+  "dependencies": {
+    "stripe": "^17.0.0"
+  }
+}
