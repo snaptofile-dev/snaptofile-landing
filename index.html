@@ -506,29 +506,6 @@ form.gate-form{display:flex;flex-direction:column;gap:14px}
 }
 .gate-fine a{color:var(--sage-deep);border-bottom:1px solid var(--sage-soft)}
 
-/* Subscribe-direct aside — Option 3 placement (Stripe Chunk 3) */
-.subscribe-aside-wrap{
-  position:relative;margin-top:18px;padding-top:18px;
-  border-top:1px dashed var(--rule);
-}
-.subscribe-aside{
-  font-size:13px;color:var(--muted);
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.5;
-}
-.subscribe-aside-link{
-  color:var(--sage-deep);font-weight:600;
-  text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px;
-  background:none;border:none;font-family:inherit;font-size:inherit;
-  cursor:pointer;padding:0;transition:color .18s;
-}
-.subscribe-aside-link:hover:not(:disabled){color:var(--sage)}
-.subscribe-aside-link:disabled{opacity:.6;cursor:wait}
-.subscribe-aside .price{color:var(--ink);font-weight:600}
-.subscribe-aside-error{
-  font-size:12px;color:var(--rust);margin-top:8px;display:none;
-}
-.subscribe-aside-error.show{display:block}
-
 .gate-error{
   color:var(--rust);font-size:13px;font-weight:500;
   padding:10px 14px;background:rgba(184,84,42,.08);
@@ -902,6 +879,8 @@ footer{
   *, *::before, *::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
 }
 </style>
+<!-- Vercel Web Analytics (loads only when served from Vercel domain; silently no-ops when offline / standalone) -->
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -1405,20 +1384,6 @@ footer{
             By submitting you agree to our <a href="/privacy">privacy notice</a>.
           </p>
         </form>
-
-        <!-- Direct subscribe path (Stripe Chunk 3) — for visitors who don't need a trial -->
-        <div class="subscribe-aside-wrap">
-          <div class="subscribe-aside">
-            <span>Already sold?</span>
-            <button type="button" id="subscribe-direct" class="subscribe-aside-link">
-              Skip the trial — subscribe to Pro
-            </button>
-            <span class="price">· $15/mo</span>
-          </div>
-          <div id="subscribe-error" class="subscribe-aside-error">
-            Couldn't open checkout. Please try again, or grab the trial above and subscribe later.
-          </div>
-        </div>
       </div>
 
       <!-- Success state -->
@@ -1777,43 +1742,6 @@ form.addEventListener('submit', async (e) => {
     btnArrow.style.display = '';
   }
 });
-
-/* ──────────────────────────────────────────────
-   Direct subscribe (Stripe Chunk 3)
-   POSTs to /api/checkout, redirects to Stripe Checkout
-   ────────────────────────────────────────────── */
-(function setupDirectSubscribe(){
-  try {
-    const btn = document.getElementById('subscribe-direct');
-    const err = document.getElementById('subscribe-error');
-    if(!btn || !err) return;
-
-    btn.addEventListener('click', async function(){
-      err.classList.remove('show');
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Opening checkout…';
-
-      try {
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        if(!res.ok) throw new Error('checkout request failed: ' + res.status);
-        const data = await res.json();
-        if(!data.url) throw new Error('no checkout URL returned');
-        window.location.href = data.url;
-      } catch(e) {
-        console.error('[SnapToFile] subscribe-direct error:', e);
-        btn.disabled = false;
-        btn.textContent = originalText;
-        err.classList.add('show');
-      }
-    });
-  } catch(setupErr) {
-    console.error('[SnapToFile] subscribe-direct setup failed:', setupErr);
-  }
-})();
 </script>
 
 </body>
