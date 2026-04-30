@@ -262,6 +262,9 @@ img{max-width:100%;height:auto}
 #lb-dc{position:absolute;top:0;left:0;z-index:2}
 #zoom-ind{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
 #zoom-ind.show{opacity:1}
+/* PDF safe-area indicator — shows what survives the export crop. SVG is sized to the lb-wrap (which is sized to the displayed image), so its viewBox in image-pixel space scales naturally with zoom. */
+#lb-safe{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;display:none}
+#lb-safe.show{display:block}
 #lb-side{width:280px;background:var(--navy2);border-left:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
 #lb-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
 .lbtab{flex:1;padding:12px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slatel);background:none;border:none;cursor:pointer;transition:all .14s;border-bottom:2px solid transparent;-webkit-tap-highlight-color:transparent}
@@ -614,6 +617,7 @@ img{max-width:100%;height:auto}
         <img id="lb-img" src="" alt=""/>
         <canvas id="lb-ac"></canvas>
         <canvas id="lb-dc"></canvas>
+        <svg id="lb-safe" aria-hidden="true"></svg>
       </div>
       <div id="zoom-ind">100%</div>
     </div>
@@ -1960,6 +1964,15 @@ function lbPh(){return photos.find(p=>p.id===lbId)}
 function clearCropCanvas(){const dc=$('lb-dc');if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height);}}
 
 function openLb(id,tab='annot'){
+  // If switching photos, bake the outgoing photo's thumbnail so its
+  // annotations show in the gallery. Without this, only the last-edited
+  // photo's thumbnail updates — every prior photo in the editing session
+  // keeps a stale thumbnail until you re-edit it. (Regression hid in the
+  // prev/next/swipe/arrow-key paths since they all bypass closeLb.)
+  if(lbId && lbId !== id){
+    const leaving=photos.find(p=>p.id===lbId);
+    if(leaving) buildThumb(leaving).then(()=>render());
+  }
   lbId=id;lbTab=tab;lbZoom=1;
   cropping=false;clearCropCanvas();
   document.querySelectorAll('.lbtab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
@@ -1984,7 +1997,7 @@ function loadLbImg(){
   return new Promise(res=>{
     const ph=lbPh();if(!ph){res();return}
     const img=$('lb-img');
-    img.onload=()=>{fitZoom();applyZoom();syncCanvases();redrawAC();res()};
+    img.onload=()=>{fitZoom();applyZoom();syncCanvases();redrawAC();updateSafeArea();res()};
     img.src=ph.cropSrc||ph.src;
     $('lb-title').textContent=ph.header||`Photo ${photos.indexOf(ph)+1}`;
   })
@@ -2157,6 +2170,39 @@ function syncCanvases(){
   const img=$('lb-img');const w=img.naturalWidth*lbZoom,h=img.naturalHeight*lbZoom;
   [$('lb-ac'),$('lb-dc')].forEach(c=>{c.width=w;c.height=h;c.style.width=w+'px';c.style.height=h+'px'});
   redrawAC();if(cropping)drawCropOverlay();
+}
+
+/* ─── PDF SAFE-AREA INDICATOR ─────────────────────────── */
+// Shows what survives the PDF export crop. The PDF places each photo into a
+// fixed-aspect slot (62% of 7.7" wide × 4.6" tall ≈ 1.038:1, near-square but
+// slightly landscape) and uses object-fit:cover, so anything outside that
+// centered safe rect gets trimmed off the report. We mirror that math live
+// in the editor: dim wash outside + dashed sage outline of the safe area.
+// SVG (not canvas) — single element, viewBox in image-pixel space scales
+// naturally with zoom, never baked into saved annotations.
+const PDF_SLOT_AR = 4.774 / 4.6;  // 62% of (8.5" - 2*0.4" margins) wide / 4.6" tall
+function updateSafeArea(){
+  const img=$('lb-img'), svg=$('lb-safe');
+  if(!svg) return;
+  if(!img.naturalWidth){ svg.classList.remove('show'); return; }
+  const w=img.naturalWidth, h=img.naturalHeight;
+  let sw, sh, sx, sy;
+  if(w/h > PDF_SLOT_AR){
+    // Photo wider than slot — left/right strips will be cropped off
+    sh = h; sw = h * PDF_SLOT_AR; sx = (w - sw) / 2; sy = 0;
+  } else {
+    // Photo taller than slot — top/bottom strips cropped off
+    sw = w; sh = w / PDF_SLOT_AR; sx = 0; sy = (h - sh) / 2;
+  }
+  // Stroke/dash sized in image-pixel space; viewBox handles zoom scaling
+  const sk = Math.max(2, Math.min(w, h) * 0.005);
+  // Dim path: outer rect minus inner safe rect, fill-rule:evenodd dims outside
+  const dimPath = 'M0,0 H'+w+' V'+h+' H0 Z M'+sx+','+sy+' h'+sw+' v'+sh+' h'+(-sw)+' Z';
+  svg.setAttribute('viewBox', '0 0 '+w+' '+h);
+  svg.innerHTML =
+    '<path d="'+dimPath+'" fill="rgba(20,24,26,.42)" fill-rule="evenodd"/>' +
+    '<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="none" stroke="#4a5c3f" stroke-width="'+sk+'" stroke-dasharray="'+(sk*5)+','+(sk*4)+'"/>';
+  svg.classList.add('show');
 }
 let zIndT;function showZInd(){const e=$('zoom-ind');e.textContent=Math.round(lbZoom*100)+'%';e.classList.add('show');clearTimeout(zIndT);zIndT=setTimeout(()=>e.classList.remove('show'),1100)}
 
@@ -2937,6 +2983,10 @@ function buildReport(pds,meta){
       +'</div>';
   }
 
+  // ── Page count (cover + photo pages) ──
+  // Computed up front so every page can stamp "Page N of M".
+  const totalPages = 1 + Math.ceil(Math.max(0, pds.length - 1) / 2);
+
   // ── Page 1 ──
   // Fixed page height. Photo 1 is absolutely pinned to the bottom.
   // Notes section fills all space between the header and the photo.
@@ -2957,6 +3007,7 @@ function buildReport(pds,meta){
     +coverPhotoBlock
     +'</div>'
     +(IS_PRO ? '' : '<div class="stf-wm stf-wm-cover">'+PRO_WATERMARK+'</div>')
+    +'<div class="pg-num pg-num-cover">Page 1 of '+totalPages+'</div>'
     +'</div>';
 
   // ── Pages 2+ — 2 photos per page; last page with 1 photo leaves bottom blank ──
@@ -2964,7 +3015,8 @@ function buildReport(pds,meta){
   const pages=[];
   for(let i=0;i<remaining.length;i+=2) pages.push(remaining.slice(i,i+2));
 
-  const photoPageCards=pages.map(function(pair){
+  const photoPageCards=pages.map(function(pair, pIdx){
+    const pageNum = pIdx + 2;  // cover is page 1; first photo page is page 2
     const runHdr='<div class="pg-header">'
       +(meta.rptName?'<strong>'+esc(meta.rptName)+'</strong>':'<span>Photo Documentation Report</span>')
       +'<span>'+(meta.claim?refLabel+' '+esc(meta.claim):'')+(ds?' &nbsp;·&nbsp; '+ds:'')+'</span>'
@@ -2980,7 +3032,11 @@ function buildReport(pds,meta){
         +'</div></div>';
     }).join('');
     // Last page with 1 photo: bottom is simply blank — no filler
-    return '<div class="pg-wrap pg-photo">'+runHdr+rows+(IS_PRO ? '' : '<div class="stf-wm">'+PRO_WATERMARK+'</div>')+'</div>';
+    return '<div class="pg-wrap pg-photo">'
+      +runHdr+rows
+      +(IS_PRO ? '' : '<div class="stf-wm">'+PRO_WATERMARK+'</div>')
+      +'<div class="pg-num">Page '+pageNum+' of '+totalPages+'</div>'
+      +'</div>';
   }).join('');
 
   // ── Report CSS ──
@@ -2994,8 +3050,9 @@ function buildReport(pds,meta){
     +'.co-name{font-family:\'Syne\',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
     +'.co-tag{font-size:10px;color:rgba(255,255,255,.65);margin-top:1px}'
     +'.co-contact{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px;font-size:9px;color:rgba(255,255,255,.75)}'
-    // Standard page wrapper — no padding on cover (cover-body handles its own)
-    +'.pg-wrap{padding:14px 18px}'
+    // Standard page wrapper — no padding on cover (cover-body handles its own).
+    // position:relative is the positioning context for the absolute .pg-num.
+    +'.pg-wrap{padding:14px 18px;position:relative}'
     // Cover page: fixed height = one printed page. Photo pinned to bottom via absolute positioning.
     +'.pg-cover{position:relative;height:10.2in;overflow:hidden;padding:0}'
     // Upper body: from top to just above the photo. Padding applied here.
@@ -3037,6 +3094,10 @@ function buildReport(pds,meta){
     +'.stf-wm-ico{width:11px;height:11px;flex-shrink:0;opacity:.7;display:inline-block}'
     +'.stf-wm-txt{line-height:1}'
     +'.stf-wm-cover{position:absolute;bottom:'+PHOTO_H+';left:0;right:0;padding:4px 0;background:#fff;border-top:1px solid #e2e8f0;border-bottom:none;margin:0;z-index:2}'
+    // Page number — absolute bottom-right of every page, sits above content.
+    // Cover page: shifted up to share baseline with the watermark above the pinned photo.
+    +'.pg-num{font-family:\'Inter Tight\',sans-serif;font-size:9px;font-weight:500;color:#64748b;letter-spacing:.02em;position:absolute;right:18px;bottom:12px;z-index:3}'
+    +'.pg-num-cover{bottom:'+PHOTO_H+';padding:5px 0 3px}'
     +'.pg-photo{display:flex;flex-direction:column}'
     +'.pg-photo .stf-wm{margin-top:auto}'
     // Print
