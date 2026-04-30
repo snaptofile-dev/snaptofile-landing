@@ -265,6 +265,10 @@ img{max-width:100%;height:auto}
 /* PDF safe-area indicator — shows what survives the export crop. SVG is sized to the lb-wrap (which is sized to the displayed image), so its viewBox in image-pixel space scales naturally with zoom. */
 #lb-safe{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;display:none}
 #lb-safe.show{display:block}
+/* Drag interaction — pointer-events + cursor on the inner .safe-rect.
+   Only enabled when the SVG has class .draggable (Transform tab, not cropping). */
+#lb-safe.draggable .safe-rect{pointer-events:all;cursor:grab}
+#lb-safe.draggable.dragging .safe-rect{cursor:grabbing}
 #lb-side{width:280px;background:var(--navy2);border-left:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
 #lb-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
 .lbtab{flex:1;padding:12px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slatel);background:none;border:none;cursor:pointer;transition:all .14s;border-bottom:2px solid transparent;-webkit-tap-highlight-color:transparent}
@@ -2347,6 +2351,7 @@ document.querySelectorAll('.lbtab').forEach(t=>{
     cropping=false;clearCropCanvas();
     xformPan=false; // any tab change exits Transform pan mode
     $('lb-dc').style.cursor=lbCursorForState();
+    syncSafeDraggable();  // safe-area becomes draggable iff Transform tab + not cropping
     renderPanel();
   }
 });
@@ -2492,10 +2497,11 @@ function bindPanel(){
       const dc=$('lb-dc');if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height);}
       $('lb-dc').style.cursor=lbCursorForState();
     }
+    syncSafeDraggable();  // entering Crop disables safe-area drag; cancelling re-enables
     renderPanel();
   };
   const xca=$('xc-apply');if(xca)xca.onclick=applyCrop;
-  const xcr=$('xc-reset');if(xcr)xcr.onclick=()=>{const ph=lbPh();if(ph){ph.cropSrc=null;ph.annotations=[]}loadLbImg().then(()=>renderPanel());toast('Reset to original')};
+  const xcr=$('xc-reset');if(xcr)xcr.onclick=()=>{const ph=lbPh();if(ph){ph.cropSrc=null;ph.annotations=[];ph.safeOffsetX=0.5;ph.safeOffsetY=0.5;}loadLbImg().then(()=>renderPanel());toast('Reset to original')};
   const xrl=$('xr-l'),xrr=$('xr-r');
   if(xrl)xrl.onclick=()=>rotatePh(-90);if(xrr)xrr.onclick=()=>rotatePh(90);
   // Info — auto-save on every keystroke
@@ -2542,23 +2548,105 @@ function updateSafeArea(){
   if(!svg) return;
   if(!img.naturalWidth){ svg.classList.remove('show'); return; }
   const w=img.naturalWidth, h=img.naturalHeight;
+  const ph=lbPh();
+  // Per-photo offsets — fractions 0..1; 0.5 = centered. Default 0.5 each.
+  // Reset to 0.5 on rotate or applyCrop; otherwise persists across lightbox open/close.
+  const offX = (ph && typeof ph.safeOffsetX === 'number') ? ph.safeOffsetX : 0.5;
+  const offY = (ph && typeof ph.safeOffsetY === 'number') ? ph.safeOffsetY : 0.5;
   let sw, sh, sx, sy;
   if(w/h > PDF_SLOT_AR){
-    // Photo wider than slot — left/right strips will be cropped off
-    sh = h; sw = h * PDF_SLOT_AR; sx = (w - sw) / 2; sy = 0;
+    // Photo wider than slot — left/right strips cropped; X offset varies, Y locked
+    sh = h; sw = h * PDF_SLOT_AR; sx = (w - sw) * offX; sy = 0;
   } else {
-    // Photo taller than slot — top/bottom strips cropped off
-    sw = w; sh = w / PDF_SLOT_AR; sx = 0; sy = (h - sh) / 2;
+    // Photo taller than slot — top/bottom strips cropped; Y offset varies, X locked
+    sw = w; sh = w / PDF_SLOT_AR; sx = 0; sy = (h - sh) * offY;
   }
   // Stroke/dash sized in image-pixel space; viewBox handles zoom scaling
   const sk = Math.max(2, Math.min(w, h) * 0.005);
   // Dim path: outer rect minus inner safe rect, fill-rule:evenodd dims outside
   const dimPath = 'M0,0 H'+w+' V'+h+' H0 Z M'+sx+','+sy+' h'+sw+' v'+sh+' h'+(-sw)+' Z';
   svg.setAttribute('viewBox', '0 0 '+w+' '+h);
-  svg.innerHTML =
-    '<path d="'+dimPath+'" fill="rgba(20,24,26,.42)" fill-rule="evenodd"/>' +
-    '<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="none" stroke="#4a5c3f" stroke-width="'+sk+'" stroke-dasharray="'+(sk*5)+','+(sk*4)+'"/>';
+  // Build persistent SVG structure once; update attributes thereafter so drag-frame
+  // updates are cheap. Order matters: drag-capture rect FIRST (bottom of stack) so
+  // the dim path renders over the cropped strips and the dashed outline over both.
+  // The dim path's evenodd hole at the safe area lets clicks there hit the rect beneath.
+  let dragRect = svg.querySelector('.safe-rect');
+  if(!dragRect){
+    svg.innerHTML =
+      '<rect class="safe-rect" fill="rgba(0,0,0,0)"/>' +
+      '<path class="safe-dim" fill="rgba(20,24,26,.42)" fill-rule="evenodd"/>' +
+      '<rect class="safe-outline" fill="none" stroke="#4a5c3f"/>';
+    dragRect = svg.querySelector('.safe-rect');
+    dragRect.addEventListener('pointerdown', onSafePointerDown);
+    // Stop touchstart bubbling to lb-area's swipe handler when draggable, so dragging
+    // the safe area never gets misread as a swipe-to-next-photo on mobile.
+    dragRect.addEventListener('touchstart', e => {
+      if(svg.classList.contains('draggable')) e.stopPropagation();
+    }, {passive: true});
+  }
+  dragRect.setAttribute('x', sx); dragRect.setAttribute('y', sy);
+  dragRect.setAttribute('width', sw); dragRect.setAttribute('height', sh);
+  svg.querySelector('.safe-dim').setAttribute('d', dimPath);
+  const outline = svg.querySelector('.safe-outline');
+  outline.setAttribute('x', sx); outline.setAttribute('y', sy);
+  outline.setAttribute('width', sw); outline.setAttribute('height', sh);
+  outline.setAttribute('stroke-width', sk);
+  outline.setAttribute('stroke-dasharray', (sk*5)+','+(sk*4));
   svg.classList.add('show');
+  syncSafeDraggable();
+}
+
+// Toggles the .draggable class on #lb-safe, which CSS uses to enable
+// pointer-events + grab cursor on the inner .safe-rect. Called from
+// updateSafeArea, the tab-switch handler, and the crop-toggle handler.
+function syncSafeDraggable(){
+  const svg = $('lb-safe');
+  if(!svg) return;
+  svg.classList.toggle('draggable', lbTab === 'xform' && !cropping);
+}
+
+// Drag handler attached once to the inner .safe-rect (in updateSafeArea on
+// first build). Uses temporary document-level pointermove/up listeners so the
+// drag completes even if the cursor leaves the rect mid-drag.
+function onSafePointerDown(e){
+  const svg = $('lb-safe');
+  if(!svg.classList.contains('draggable')) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const ph = lbPh(); if(!ph) return;
+  const img = $('lb-img'); if(!img.naturalWidth) return;
+  const w = img.naturalWidth, h = img.naturalHeight;
+  let sw, sh;
+  if(w/h > PDF_SLOT_AR){ sh = h; sw = h * PDF_SLOT_AR; }
+  else                 { sw = w; sh = w / PDF_SLOT_AR; }
+  const rangeX = w - sw, rangeY = h - sh;  // available drag range in image-pixel space
+  const startX = e.clientX, startY = e.clientY;
+  const startOffX = (typeof ph.safeOffsetX === 'number') ? ph.safeOffsetX : 0.5;
+  const startOffY = (typeof ph.safeOffsetY === 'number') ? ph.safeOffsetY : 0.5;
+  svg.classList.add('dragging');
+  if(e.target.setPointerCapture){
+    try { e.target.setPointerCapture(e.pointerId); } catch(_){ }
+  }
+  const onMove = (ev) => {
+    // Screen-px delta → image-px (divide by zoom) → fraction of available range
+    const dx = (ev.clientX - startX) / lbZoom;
+    const dy = (ev.clientY - startY) / lbZoom;
+    let newX = startOffX, newY = startOffY;
+    if(rangeX > 0) newX = Math.max(0, Math.min(1, startOffX + dx / rangeX));
+    if(rangeY > 0) newY = Math.max(0, Math.min(1, startOffY + dy / rangeY));
+    ph.safeOffsetX = newX; ph.safeOffsetY = newY;
+    updateSafeArea();
+  };
+  const onUp = () => {
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+    svg.classList.remove('dragging');
+    if(typeof markDirty === 'function') markDirty();
+  };
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+  document.addEventListener('pointercancel', onUp);
 }
 let zIndT;function showZInd(){const e=$('zoom-ind');e.textContent=Math.round(lbZoom*100)+'%';e.classList.add('show');clearTimeout(zIndT);zIndT=setTimeout(()=>e.classList.remove('show'),1100)}
 
@@ -3144,6 +3232,9 @@ function applyCrop(){
     ctx.drawImage(si, Math.round(x),Math.round(y),Math.round(w),Math.round(h), 0,0,Math.round(w),Math.round(h));
     ph.cropSrc=cv.toDataURL('image/jpeg',.95);
     ph.annotations=[];
+    // Reset safe-area offset — the new image is a different image; old framing no longer applies
+    ph.safeOffsetX=0.5;
+    ph.safeOffsetY=0.5;
     cropping=false;
     // Clear the crop overlay from draw canvas
     const dc=$('lb-dc'); if(dc){const c=dc.getContext('2d');c.clearRect(0,0,dc.width,dc.height)}
@@ -3160,7 +3251,7 @@ function rotatePh(deg){
   si.onload=()=>{
     if(Math.abs(deg)===90||Math.abs(deg)===270){cv.width=si.height;cv.height=si.width}else{cv.width=si.width;cv.height=si.height}
     const ctx=cv.getContext('2d');ctx.translate(cv.width/2,cv.height/2);ctx.rotate(deg*Math.PI/180);ctx.drawImage(si,-si.width/2,-si.height/2);
-    ph.cropSrc=cv.toDataURL('image/jpeg',.95);ph.annotations=[];loadLbImg().then(()=>renderPanel());toast(`Rotated ${deg>0?'right':'left'}`);
+    ph.cropSrc=cv.toDataURL('image/jpeg',.95);ph.annotations=[];ph.safeOffsetX=0.5;ph.safeOffsetY=0.5;loadLbImg().then(()=>renderPanel());toast(`Rotated ${deg>0?'right':'left'}`);
   };si.src=src;
 }
 
@@ -3765,6 +3856,13 @@ async function compPh(ph,q,mw){
 function buildReport(pds,meta){
   const ds=meta.date?new Date(meta.date+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'';
   const refLabel=meta.refType==='project'?'Project #':'Claim #';
+  // Per-photo CSS object-position from the user-dragged safe-area offset.
+  // Defaults to "50% 50%" (centered) which matches the legacy export behavior.
+  const objPos = ph => {
+    const x = (typeof ph.safeOffsetX === 'number') ? ph.safeOffsetX : 0.5;
+    const y = (typeof ph.safeOffsetY === 'number') ? ph.safeOffsetY : 0.5;
+    return (x*100).toFixed(2)+'% '+(y*100).toFixed(2)+'%';
+  };
 
   // ── Company header block ──
   // FREE TIER: never render a company header, even if a saved profile
@@ -3810,7 +3908,7 @@ function buildReport(pds,meta){
     const cpHdr  = cp.header ? '<div class="photo-hdr">'+esc(cp.header)+'</div>' : '';
     const cpDesc = cp.desc   ? '<div class="photo-desc">'+esc(cp.desc)+'</div>' : '';
     coverPhotoBlock='<div class="photo-row">'
-      +'<div class="photo-img-col"><img src="'+cp.es+'" alt="Photo 1"/></div>'
+      +'<div class="photo-img-col"><img src="'+cp.es+'" alt="Photo 1" style="object-position:'+objPos(cp)+'"/></div>'
       +'<div class="photo-info-col"><div class="photo-num">Photo 1 of '+pds.length+'</div>'+cpHdr+cpDesc+'</div>'
       +'</div>';
   }
@@ -3857,7 +3955,7 @@ function buildReport(pds,meta){
       const phHdr  = ph.header ? '<div class="photo-hdr">'+esc(ph.header)+'</div>' : '';
       const phDesc = ph.desc   ? '<div class="photo-desc">'+esc(ph.desc)+'</div>' : '';
       return '<div class="photo-row">'
-        +'<div class="photo-img-col"><img src="'+ph.es+'" alt="Photo '+ph.num+'"/></div>'
+        +'<div class="photo-img-col"><img src="'+ph.es+'" alt="Photo '+ph.num+'" style="object-position:'+objPos(ph)+'"/></div>'
         +'<div class="photo-info-col">'
         +'<div class="photo-num">Photo '+ph.num+' of '+pds.length+'</div>'
         +phHdr+phDesc
