@@ -423,6 +423,16 @@ img{max-width:100%;height:auto}
 #upgrade-modal .um-btn-secondary{background:#f1f5f9;color:#334155}
 #upgrade-modal .um-btn-secondary:hover{background:#e2e8f0}
 #upgrade-modal .um-foot{margin-top:14px;font-size:11px;color:#94a3b8}
+/* In-app waitlist form (Phase 2b: Kit-backed gate-source signal capture) */
+#upgrade-modal .um-form{display:flex;flex-direction:column;gap:8px}
+#upgrade-modal .um-email{width:100%;padding:11px 13px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:14px;font-family:inherit;color:#0f172a;background:#fff;transition:border-color .14s,background .14s;-webkit-appearance:none}
+#upgrade-modal .um-email:focus{outline:none;border-color:#5a7048;background:#f6f7f1}
+#upgrade-modal .um-email::placeholder{color:#94a3b8}
+#upgrade-modal .um-form .um-btn-primary{width:100%}
+#upgrade-modal .um-form .um-btn-primary:disabled{opacity:.6;cursor:wait;transform:none;box-shadow:0 4px 12px rgba(74,92,63,.25)}
+#upgrade-modal .um-status{font-size:12px;line-height:1.4;min-height:1.2em;text-align:center;font-weight:500}
+#upgrade-modal .um-status.success{color:#15803d}
+#upgrade-modal .um-status.error{color:#dc2626}
 </style>
 </head>
 <body>
@@ -436,10 +446,20 @@ img{max-width:100%;height:auto}
     <div class="um-icon" id="um-icon">✨</div>
     <div class="um-title" id="um-title">Go Pro</div>
     <div class="um-sub" id="um-sub">Unlock unlimited photos, custom branding, and watermark-free PDFs.</div>
-    <div class="um-actions">
-      <a class="um-btn um-btn-primary" id="um-waitlist-btn" href="https://snaptofile.com/pro" target="_blank" rel="noopener">Join the Pro waitlist</a>
+    <form class="um-form" id="um-form" novalidate>
+      <input
+        type="email"
+        class="um-email"
+        id="um-email"
+        name="email_address"
+        placeholder="your@work-email.com"
+        autocomplete="email"
+        required
+      />
+      <button class="um-btn um-btn-primary" id="um-submit-btn" type="submit">Notify me when Pro launches</button>
+      <div class="um-status" id="um-status" role="status" aria-live="polite"></div>
       <button class="um-btn um-btn-secondary" id="um-close-btn" type="button">Not right now</button>
-    </div>
+    </form>
     <div class="um-foot">Pro launches soon — waitlist members get early pricing.</div>
   </div>
 </div>
@@ -866,8 +886,9 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'free';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-04-21 18:15 UTC · pdf-name·ui (fix)';
-const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
+const BUILD_STAMP       = '2026-05-01 · in-app waitlist (kit)';
+const KIT_PRO_FORM_ID   = '9393913';                          // Kit form: "SnapToFile — Pro Waitlist (In-App)"
+const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Legacy — kept for backwards compat; not used after Phase 2b
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
 const PRO_WATERMARK     = '<svg class="stf-wm-ico" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 V24 H66" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 L66 24" stroke="#64748b" stroke-width="5"/><circle cx="37" cy="46" r="12" stroke="#64748b" stroke-width="5" fill="none"/><circle cx="37" cy="46" r="4" fill="#64748b"/></svg><span class="stf-wm-txt">Documented with <b>SnapToFile</b> &middot; snaptofile.com</span>';
@@ -886,24 +907,39 @@ const FREE_CLEV = [
 })();
 
 /* ─── UPGRADE MODAL HELPER ───────────────────────────── */
-// Call showUpgrade({title, sub, icon}) whenever a gated feature is hit.
-// Opens a non-blocking modal with a waitlist CTA. User can dismiss freely.
+// Call showUpgrade({title, sub, icon, gateSource}) whenever a gated
+// feature is hit. Opens a non-blocking modal with an inline waitlist
+// form. The gateSource is sent to Kit as a custom field so we can see
+// which gates drive the most signups (transform / magnify / photo_cap_*
+// / compression_dial / stf_photo_cap).
+let currentGateSource = 'unknown';
 function showUpgrade(opts){
   opts = opts || {};
-  const modal = document.getElementById('upgrade-modal');
-  const title = document.getElementById('um-title');
-  const sub   = document.getElementById('um-sub');
-  const icon  = document.getElementById('um-icon');
-  const wl    = document.getElementById('um-waitlist-btn');
-  if(title) title.textContent = opts.title || 'Go Pro';
-  if(sub)   sub.textContent   = opts.sub   || 'Unlock unlimited photos, custom branding, and watermark-free PDFs.';
-  if(icon)  icon.textContent  = opts.icon  || '✨';
-  if(wl)    wl.href           = WAITLIST_URL;
+  const modal  = document.getElementById('upgrade-modal');
+  const title  = document.getElementById('um-title');
+  const sub    = document.getElementById('um-sub');
+  const icon   = document.getElementById('um-icon');
+  const email  = document.getElementById('um-email');
+  const submit = document.getElementById('um-submit-btn');
+  const status = document.getElementById('um-status');
+  if(title)  title.textContent  = opts.title || 'Go Pro';
+  if(sub)    sub.textContent    = opts.sub   || 'Unlock unlimited photos, custom branding, and watermark-free PDFs.';
+  if(icon)   icon.textContent   = opts.icon  || '✨';
+  // Reset form state on every open — don't carry over success/error from a previous gate
+  if(email){ email.value = ''; email.disabled = false; }
+  if(submit){ submit.disabled = false; submit.textContent = 'Notify me when Pro launches'; }
+  if(status){ status.textContent = ''; status.className = 'um-status'; }
+  currentGateSource = opts.gateSource || 'unknown';
   if(modal) modal.classList.add('open');
 }
 (function wireUpgradeModal(){
-  const modal = document.getElementById('upgrade-modal');
-  const close = document.getElementById('um-close-btn');
+  const modal  = document.getElementById('upgrade-modal');
+  const close  = document.getElementById('um-close-btn');
+  const form   = document.getElementById('um-form');
+  const email  = document.getElementById('um-email');
+  const submit = document.getElementById('um-submit-btn');
+  const status = document.getElementById('um-status');
+
   if(close) close.onclick = function(){ if(modal) modal.classList.remove('open'); };
   if(modal) modal.addEventListener('click', function(e){
     if(e.target === modal) modal.classList.remove('open');
@@ -911,6 +947,51 @@ function showUpgrade(opts){
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape' && modal && modal.classList.contains('open')){
       modal.classList.remove('open');
+    }
+  });
+
+  // Form submit — POST to Kit with the email + gate_source custom field
+  if(form) form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    if(!email || !submit || !status) return;
+
+    const addr = (email.value || '').trim();
+    // Minimal client-side check; Kit does its own server-side validation
+    if(!addr || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)){
+      status.textContent = 'Please enter a valid email.';
+      status.className   = 'um-status error';
+      return;
+    }
+
+    submit.disabled    = true;
+    email.disabled     = true;
+    submit.textContent = 'Adding you to the list…';
+    status.textContent = '';
+    status.className   = 'um-status';
+
+    try{
+      const resp = await fetch('https://app.kit.com/forms/'+KIT_PRO_FORM_ID+'/subscriptions', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body:    JSON.stringify({
+          email_address: addr,
+          fields: { gate_source: currentGateSource }
+        })
+      });
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      // Kit returns 200 with JSON on success; we don't need to inspect the body
+      status.textContent = '✓ You\'re on the list. We\'ll email you when Pro launches.';
+      status.className   = 'um-status success';
+      submit.textContent = 'Done';
+      // Auto-close after a beat so the user sees the confirmation
+      setTimeout(function(){ if(modal) modal.classList.remove('open'); }, 2200);
+    } catch(err){
+      console.error('[SnapToFile] Kit submission failed:', err);
+      submit.disabled    = false;
+      email.disabled     = false;
+      submit.textContent = 'Try again';
+      status.textContent = 'Couldn\'t reach the waitlist server. Check your connection and try again.';
+      status.className   = 'um-status error';
     }
   });
 })();
@@ -955,7 +1036,8 @@ function showUpgrade(opts){
       showUpgrade({
         title: 'Precision Compression Dial',
         sub:   'Dial in the exact file size you need to fit under any carrier email limit. Live preview shows estimated PDF size as you turn. Included with SnapToFile Pro.',
-        icon:  '🎯'
+        icon:  '🎯',
+        gateSource: 'compression_dial'
       });
     });
     if(copts.parentNode){
@@ -1531,7 +1613,8 @@ async function stfLoadFromFile(file){
       setTimeout(()=>showUpgrade({
         title: 'More photos in this file',
         sub:   'This project contains '+stfOriginalCount+' photos. Free accounts display the first '+FREE_PHOTO_CAP+'. Upgrade to Pro to load all '+stfOriginalCount+' photos — plus unlimited photos on new reports, custom branding, and watermark-free PDFs.',
-        icon:  '📂'
+        icon:  '📂',
+        gateSource: 'stf_photo_cap'
       }), 900);
     } else {
       toast('✓ Opened "'+(p.name||'project')+'" — '+photos.length+' photo'+(photos.length!==1?'s':''));
@@ -1733,7 +1816,8 @@ async function handleFiles(files){
       showUpgrade({
         title: 'Photo limit reached',
         sub:   'Free accounts hold up to '+FREE_PHOTO_CAP+' photos per report. Upgrade to Pro for unlimited photos.',
-        icon:  '📸'
+        icon:  '📸',
+        gateSource: 'photo_cap_full'
       });
       return;
     }
@@ -1746,7 +1830,8 @@ async function handleFiles(files){
       setTimeout(()=>showUpgrade({
         title: 'Photo limit reached',
         sub:   'You\'ve hit the '+FREE_PHOTO_CAP+'-photo limit. Upgrade to Pro for unlimited photos, custom branding, and watermark-free PDFs.',
-        icon:  '📸'
+        icon:  '📸',
+        gateSource: 'photo_cap_partial'
       }), 900);
     }
   }
@@ -2105,17 +2190,17 @@ function bindPanel(){
   document.querySelectorAll('.lp-cta[data-upgrade]').forEach(b=>b.onclick=()=>{
     const src=b.dataset.upgrade;
     const msg={
-      xform:{title:'Transform Tools are Pro',sub:'Crop, rotate, and zoom are included with SnapToFile Pro along with unlimited photos, custom branding, and watermark-free PDFs.',icon:'✂️'}
+      xform:{title:'Transform Tools are Pro',sub:'Crop, rotate, and zoom are included with SnapToFile Pro along with unlimited photos, custom branding, and watermark-free PDFs.',icon:'✂️',gateSource:'transform'}
     };
-    showUpgrade(msg[src] || {});
+    showUpgrade(msg[src] || {gateSource: src});
   });
   // Annot tools — locked tools intercept and open upgrade modal
   document.querySelectorAll('.ltool[data-tool]').forEach(b=>b.onclick=()=>{
     if(b.dataset.locked === '1'){
       const map={
-        magnify:{title:'Magnifier is Pro',sub:'Drop a zoom-in callout onto any detail — cracked shingles, dented flashing, chipped paint — so adjusters can see what you see. Included with SnapToFile Pro.',icon:'🔍'}
+        magnify:{title:'Magnifier is Pro',sub:'Drop a zoom-in callout onto any detail — cracked shingles, dented flashing, chipped paint — so adjusters can see what you see. Included with SnapToFile Pro.',icon:'🔍',gateSource:'magnify'}
       };
-      showUpgrade(map[b.dataset.tool] || {});
+      showUpgrade(map[b.dataset.tool] || {gateSource: b.dataset.tool});
       return;
     }
     lbTool=b.dataset.tool;
