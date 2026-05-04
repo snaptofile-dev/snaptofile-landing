@@ -1,17 +1,15 @@
-// api/_debug-key-shape.js
+// api/debug-key-shape.js
 // TEMPORARY diagnostic endpoint. Reports the SHAPE of LICENSE_PRIVATE_KEY
 // without leaking its contents. Used to diagnose Vercel env var paste issues.
 //
 // THIS FILE WILL BE DELETED AFTER CHUNK 5 DIAGNOSIS IS COMPLETE.
-// The leading underscore in the filename is just to mark it for deletion;
-// Vercel still routes it as /api/_debug-key-shape.
 //
 // Returns:
 //   {
 //     present: bool,                 // env var exists at all
 //     length: number,                // total character count
-//     starts_with: string,           // first 20 chars (BEGIN marker is not secret)
-//     ends_with: string,             // last 20 chars (END marker is not secret)
+//     starts_with: string,           // first 30 chars (BEGIN marker is not secret)
+//     ends_with: string,             // last 30 chars (END marker is not secret)
 //     contains_newline_lf: bool,     // has \n
 //     contains_newline_crlf: bool,   // has \r\n (Windows-style)
 //     contains_literal_backslash_n: bool, // has the two-char sequence \n
@@ -21,8 +19,6 @@
 //     normalized_starts_with: string,// after normalizePemString runs
 //     normalized_line_count: number, // after normalizePemString runs
 //   }
-
-import { readFileSync } from 'node:fs';
 
 export default async function handler(req, res) {
   const raw = process.env.LICENSE_PRIVATE_KEY;
