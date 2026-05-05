@@ -577,6 +577,51 @@ img{max-width:100%;height:auto}
   #lic-gate .lg-title{font-size:23px}
   #lic-gate .lg-body{font-size:13px}
 }
+
+/* ═══ LICENSE STATE BANNER (chunk 6B) ═══════════════════════
+   Below-topbar strip that signals subscription state. Two
+   variants: .past-due (yellow, app still works) and
+   .export-only (red, "new content" affordances hidden).
+   In normal flow (not sticky) so it scrolls away with content
+   on long pages — its job is to be impossible to miss on first
+   load, not to nag persistently.
+   ═══════════════════════════════════════════════════════════ */
+#lic-banner{
+  display:flex;align-items:center;gap:10px;
+  padding:10px clamp(12px,4vw,18px);
+  font-size:13px;line-height:1.5;
+  border-bottom:1px solid;
+  font-family:'Instrument Sans',system-ui,sans-serif;
+}
+#lic-banner.past-due{
+  background:#fef9c3;color:#713f12;border-bottom-color:#facc15;
+}
+#lic-banner.export-only{
+  background:#fef2f2;color:#7f1d1d;border-bottom-color:#fca5a5;
+}
+#lic-banner .lic-banner-icon{font-size:16px;flex-shrink:0;line-height:1}
+#lic-banner .lic-banner-text{flex:1;min-width:0}
+#lic-banner .lic-banner-text strong{font-weight:700}
+#lic-banner .lic-banner-link{
+  color:inherit;font-weight:700;text-decoration:underline;
+  text-underline-offset:2px;text-decoration-thickness:1.5px;
+  white-space:nowrap;
+}
+#lic-banner .lic-banner-link:hover{text-decoration-thickness:2px}
+@media (max-width:520px){
+  #lic-banner{font-size:12px;padding:9px 14px;gap:8px}
+  #lic-banner .lic-banner-icon{font-size:14px}
+}
+
+/* Export-only mode: hide "add new content" affordances.
+   Annotations, crop, profile edits, PDF export, and .stf
+   load/save remain fully functional (per Stripe Plan §8
+   lockdown scope settled 2026-05-04). */
+body.lic-export-only #fab-upload,
+body.lic-export-only #fab-camera,
+body.lic-export-only #dz{
+  display:none !important;
+}
 </style>
 <!-- Vercel Web Analytics (loads only when served from Vercel domain; silently no-ops when offline / standalone) -->
 <script defer src="/_vercel/insights/script.js"></script>
@@ -664,6 +709,9 @@ img{max-width:100%;height:auto}
     </button>
   </div>
 </div>
+
+<!-- ═══ LICENSE STATE BANNER (chunk 6B; populated by JS bootstrap) ═══ -->
+<div id="lic-banner" role="status" aria-live="polite" style="display:none"></div>
 
 <!-- MAIN -->
 <div id="main">
@@ -1065,7 +1113,7 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-05-04 · license gate (chunk 6A)';
+const BUILD_STAMP       = '2026-05-04 · state routing (chunk 6B)';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
@@ -1122,11 +1170,15 @@ const FREE_CLEV = [
   if(el) el.textContent = BUILD_STAMP;
 })();
 
-/* ─── PRO LICENSE GATE — helpers ──────────────────────
-   Pulled out of the IIFE so Chunk 6B can re-use them for
-   the background re-validation flow. No state held outside
-   localStorage; safe to call from anywhere.
+/* ─── PRO LICENSE GATE — helpers (Chunks 6A + 6B) ──────
+   Pulled out of the bootstrap so the activation form
+   handler, the state router, and the background re-
+   validation flow can all share the same helpers without
+   duplication. No state held outside localStorage; safe
+   to call from anywhere.
    ───────────────────────────────────────────────────── */
+
+// — 6A: device ID + license key normalization —
 
 // Get-or-create a stable per-browser device ID.
 // Decision (Stripe Plan §8, 2026-04-27): use a localStorage UUID, NOT a
@@ -1146,19 +1198,14 @@ function getOrCreateDeviceId(){
     return id;
   } catch(_){
     // localStorage blocked (private mode, strict privacy settings).
-    // Fall back to an in-memory ID so the user can at least try to
-    // activate; the resulting JWT won't survive a reload — they'll get
-    // a clear "couldn't save" error and a path to fix browser settings.
     return 'stf-ephemeral-' + Math.random().toString(36).slice(2);
   }
 }
 
-// Normalize a user-pasted license key. Accepts any of:
-//   "stf-abcd-efgh-ijkl-mnop", "STF ABCD EFGH IJKL MNOP",
-//   "STFABCDEFGHIJKLMNOP", any case, with or without separators.
-// Returns canonical "STF-XXXX-XXXX-XXXX-XXXX" or null if shape is wrong.
-// Mirrors lib/license.js#normalizeLicenseKey on the server, so client-side
-// validation rejects malformed input before it ever hits /api/activate.
+// Normalize a user-pasted license key. Accepts any case,
+// with or without separators. Returns canonical
+// "STF-XXXX-XXXX-XXXX-XXXX" or null if shape is wrong.
+// Mirrors lib/license.js#normalizeLicenseKey on the server.
 function normalizeLicenseKeyClient(raw){
   if(typeof raw !== 'string') return null;
   const cleaned = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
@@ -1168,79 +1215,280 @@ function normalizeLicenseKeyClient(raw){
   return 'STF-' + body.slice(0,4) + '-' + body.slice(4,8) + '-' + body.slice(8,12) + '-' + body.slice(12,16);
 }
 
-/* ─── PRO LICENSE GATE ───────────────────────────────────
-   Pro builds only. On first load, checks for a stored
-   license token. If absent, shows the activation screen.
-   On submit, POSTs to /api/activate, gets back a signed
-   JWT, stores it, and reloads so the app re-initializes
-   in the activated state.
+// — 6B: Web Crypto Ed25519 verifier —
 
-   NOTE: This 6A pass only checks token EXISTENCE, not its
-   signature. Chunk 6B adds Web Crypto verification + state
-   routing (active / past_due / canceled). For now, anyone
-   with dev tools can inject a string into localStorage and
-   bypass the gate — that hole closes in 6B.
-   ─────────────────────────────────────────────────────── */
-(function licenseGate(){
-  if(!IS_PRO) return;
+// Decode a base64url string (JWT-flavored: '-' for '+', '_' for '/',
+// no padding) into a Uint8Array. Browsers don't have a built-in
+// helper for this; atob() needs base64 (not base64url).
+function base64UrlDecode(str){
+  let s = String(str).replace(/-/g, '+').replace(/_/g, '/');
+  while(s.length % 4) s += '=';
+  const bin = atob(s);
+  const out = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
 
-  const gate = document.getElementById('lic-gate');
-  if(!gate) return;
+// Cache the imported public key. Web Crypto's importKey is fast but
+// not free, and this gets called on every page load.
+let _licensePublicKey = null;
+async function importLicensePublicKey(){
+  if(_licensePublicKey) return _licensePublicKey;
+  // The constant LICENSE_PUBLIC_KEY_RAW_B64 is the 32-byte raw Ed25519
+  // public key, Base64-encoded. Source: One_Time_Use/STF_PUBLIC_KEY.txt.
+  const raw = base64UrlDecode(LICENSE_PUBLIC_KEY_RAW_B64);
+  _licensePublicKey = await crypto.subtle.importKey(
+    'raw', raw, { name: 'Ed25519' }, false, ['verify']
+  );
+  return _licensePublicKey;
+}
 
-  function hasStoredToken(){
-    try {
-      const t = localStorage.getItem(LICENSE_TOKEN_KEY);
-      return typeof t === 'string' && t.length > 20;
-    } catch(_){
-      return false;
-    }
+// Verify a JWT signed by /api/activate or /api/validate.
+// Returns one of:
+//   { valid: true,  payload, expired: false }
+//   { valid: true,  payload, expired: true  }
+//   { valid: false, reason: 'malformed'|'bad_signature'|'wrong_issuer'|'wrong_audience' }
+//
+// 'expired' is set when payload.exp < now. Signature is still verified
+// in that case — we want to know whether the token was signed by us,
+// even if it's stale, so the router can decide whether to refresh.
+async function verifyLicenseToken(jwt){
+  if(typeof jwt !== 'string' || !jwt.includes('.')){
+    return { valid: false, reason: 'malformed' };
+  }
+  const parts = jwt.split('.');
+  if(parts.length !== 3) return { valid: false, reason: 'malformed' };
+  const headerB64  = parts[0];
+  const payloadB64 = parts[1];
+  const sigB64     = parts[2];
+
+  let payload;
+  try {
+    const payloadBytes = base64UrlDecode(payloadB64);
+    payload = JSON.parse(new TextDecoder('utf-8').decode(payloadBytes));
+  } catch(_){
+    return { valid: false, reason: 'malformed' };
   }
 
-  if(hasStoredToken()){
-    gate.style.display = 'none';
+  // Issuer + audience checks. Cheap, fail-fast on tokens that aren't ours.
+  if(payload.iss !== 'snaptofile.com') return { valid: false, reason: 'wrong_issuer' };
+  if(payload.aud !== 'snaptofile-pro') return { valid: false, reason: 'wrong_audience' };
+
+  // Signature verification.
+  let sigOk = false;
+  try {
+    const sig = base64UrlDecode(sigB64);
+    const msg = new TextEncoder().encode(headerB64 + '.' + payloadB64);
+    const key = await importLicensePublicKey();
+    sigOk = await crypto.subtle.verify({ name: 'Ed25519' }, key, sig, msg);
+  } catch(_){
+    sigOk = false;
+  }
+  if(!sigOk) return { valid: false, reason: 'bad_signature' };
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  const expired = typeof payload.exp === 'number' && payload.exp < nowSec;
+  return { valid: true, payload: payload, expired: expired };
+}
+
+// — 6B: re-validation —
+
+// Hit /api/validate to refresh the JWT. Used in two places:
+//   1. From the state router when the stored token is expired
+//      (synchronously, before deciding the UI state).
+//   2. As a background fire-and-forget when the token has ≤7 days
+//      left (results land in localStorage for the next page load).
+//
+// Returns:
+//   { ok: true,  payload, status }       — token refreshed and stored
+//   { ok: false, reason: 'forbidden' }   — backend said 403 (drop to export-only per Stripe Plan §8)
+//   { ok: false, reason: 'not_found' }   — backend said 404 (license missing — also export-only)
+//   { ok: false, reason: 'offline'|'network'|'server_error_NNN'|... }
+async function tryRevalidate(payload){
+  if(typeof navigator !== 'undefined' && navigator.onLine === false){
+    return { ok: false, reason: 'offline' };
+  }
+  let resp;
+  try {
+    resp = await fetch(LICENSE_API_VALIDATE, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ license_key: payload.license_key, device_id: payload.device_id })
+    });
+  } catch(_){
+    return { ok: false, reason: 'network' };
+  }
+  if(resp.ok){
+    const data = await resp.json();
+    // Verify the new token before trusting its claims (defense in depth).
+    const newResult = await verifyLicenseToken(data.token);
+    if(!newResult.valid){
+      return { ok: false, reason: 'verify_failed_after_refresh' };
+    }
+    try {
+      localStorage.setItem(LICENSE_TOKEN_KEY, data.token);
+      const meta = JSON.parse(localStorage.getItem(LICENSE_META_KEY) || '{}');
+      meta.subscription_status = data.subscription_status;
+      meta.devices_used        = data.devices_used;
+      meta.devices_max         = data.devices_max;
+      meta.expires_at          = data.expires_at;
+      if(data.activated_at) meta.activated_at = data.activated_at;
+      localStorage.setItem(LICENSE_META_KEY, JSON.stringify(meta));
+    } catch(_){ /* storage blocked — proceed in-memory */ }
+    return { ok: true, payload: newResult.payload, status: data.subscription_status };
+  }
+  if(resp.status === 403) return { ok: false, reason: 'forbidden' };
+  if(resp.status === 404) return { ok: false, reason: 'not_found' };
+  return { ok: false, reason: 'server_error_' + resp.status };
+}
+
+// Background re-validation: only fires if ≤7 days remain on the token.
+// Fire-and-forget — the result lands in localStorage for the next page
+// load, but we don't block the current render on it.
+async function maybeBackgroundRevalidate(payload){
+  if(!payload || typeof payload.exp !== 'number') return;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const daysLeft = (payload.exp - nowSec) / 86400;
+  if(daysLeft > REVALIDATE_AT_DAYS_LEFT) return;
+  try { await tryRevalidate(payload); } catch(_){ /* swallow */ }
+}
+
+// — 6B: state router —
+
+// Map a Stripe subscription_status to one of our four UI states.
+function stateFromStatus(status){
+  if(status === 'active' || status === 'trialing') return 'active';
+  if(status === 'past_due') return 'past_due';
+  // canceled, unpaid, incomplete, incomplete_expired, paused, etc.
+  return 'export_only';
+}
+
+// Single async entry point that decides what UI state to render.
+// Returns { state, payload? } where state is one of:
+//   'unactivated' | 'active' | 'past_due' | 'export_only'
+async function routeLicenseState(){
+  let tokenStr;
+  try { tokenStr = localStorage.getItem(LICENSE_TOKEN_KEY); }
+  catch(_){ tokenStr = null; }
+
+  if(!tokenStr) return { state: 'unactivated' };
+
+  const result = await verifyLicenseToken(tokenStr);
+
+  // Tampered, malformed, or wrong-iss/aud token: wipe and treat as
+  // unactivated. This closes the dev-tools-injection hole that 6A
+  // knowingly left open.
+  if(!result.valid){
+    try {
+      localStorage.removeItem(LICENSE_TOKEN_KEY);
+      localStorage.removeItem(LICENSE_META_KEY);
+    } catch(_){}
+    return { state: 'unactivated' };
+  }
+
+  // Signature-valid token. If expired, try to refresh.
+  if(result.expired){
+    const refresh = await tryRevalidate(result.payload);
+    if(refresh.ok){
+      return { state: stateFromStatus(refresh.status), payload: refresh.payload };
+    }
+    // Couldn't refresh (offline, 403, 404, or other failure): per locked
+    // decision (Stripe Plan §8), drop to export-only silently.
+    return { state: 'export_only', payload: result.payload, reason: refresh.reason };
+  }
+
+  // Signature-valid, not expired. Use the status claim.
+  return { state: stateFromStatus(result.payload.subscription_status), payload: result.payload };
+}
+
+// — 6B: state appliers (DOM side-effects) —
+
+// Apply a license state to the DOM. Sets a body class for CSS rules
+// to target, and (where relevant) populates the banner element.
+// Idempotent — safe to call again after a background re-validation.
+function applyLicenseState(state, payload){
+  const banner = document.getElementById('lic-banner');
+  const body   = document.body;
+
+  body.classList.remove('lic-active', 'lic-past-due', 'lic-export-only', 'lic-unactivated');
+  if(banner) banner.classList.remove('past-due', 'export-only');
+
+  if(state === 'active'){
+    body.classList.add('lic-active');
+    if(banner) banner.style.display = 'none';
     return;
   }
 
-  // No token → show gate, lock body scroll, focus input on next tick
-  // (next-tick focus gives better mobile keyboard behavior than immediate).
+  if(state === 'past_due'){
+    body.classList.add('lic-past-due');
+    if(banner){
+      banner.classList.add('past-due');
+      banner.innerHTML = '<span class="lic-banner-icon" aria-hidden="true">\u26A0\uFE0F</span>'
+        + '<span class="lic-banner-text"><strong>Payment issue.</strong> '
+        + 'We weren\u2019t able to charge your card. '
+        + 'Please update your payment method or your subscription will be paused soon. '
+        + '<a class="lic-banner-link" href="mailto:hello@snaptofile.com?subject=Payment%20issue%20on%20SnapToFile%20Pro">Email us for help</a>.</span>';
+      banner.style.display = '';
+    }
+    return;
+  }
+
+  if(state === 'export_only'){
+    body.classList.add('lic-export-only');
+    if(banner){
+      banner.classList.add('export-only');
+      banner.innerHTML = '<span class="lic-banner-icon" aria-hidden="true">\uD83D\uDEAB</span>'
+        + '<span class="lic-banner-text"><strong>Subscription not active.</strong> '
+        + 'You can still open existing reports, edit annotations, and export to PDF. '
+        + 'Add-photo, camera, and drag-drop are paused. '
+        + '<a class="lic-banner-link" href="mailto:hello@snaptofile.com?subject=Reactivate%20SnapToFile%20Pro">Email us to reactivate</a>.</span>';
+      banner.style.display = '';
+    }
+    return;
+  }
+
+  // 'unactivated' — banner stays hidden; the activation gate is the UI.
+  body.classList.add('lic-unactivated');
+}
+
+// Show the activation gate (used when state === 'unactivated').
+function showActivationGate(){
+  const gate = document.getElementById('lic-gate');
+  if(!gate) return;
   gate.classList.add('open');
-  const prevOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
+  setTimeout(function(){
+    try { document.getElementById('lic-gate-key').focus(); } catch(_){}
+  }, 120);
+}
 
-  const form      = document.getElementById('lic-gate-form');
-  const keyEl     = document.getElementById('lic-gate-key');
-  const errorEl   = document.getElementById('lic-gate-error');
-  const submitBtn = document.getElementById('lic-gate-submit');
-  const buyBtn    = document.getElementById('lic-gate-buy');
+// Wire the activation form's submit + Buy button + auto-uppercase.
+// Same behavior as 6A; just extracted so the bootstrap can call it
+// after deciding to show the gate.
+function wireActivationForm(){
+  const form     = document.getElementById('lic-gate-form');
+  const keyEl    = document.getElementById('lic-gate-key');
+  const errorEl  = document.getElementById('lic-gate-error');
+  const submitBtn= document.getElementById('lic-gate-submit');
+  const buyBtn   = document.getElementById('lic-gate-buy');
+  if(!form || !keyEl || !errorEl || !submitBtn) return;
 
-  setTimeout(function(){ try{ keyEl.focus(); }catch(_){} }, 120);
+  function showError(msg){ errorEl.textContent = msg; errorEl.style.display = 'block'; }
+  function clearError(){ errorEl.style.display = 'none'; errorEl.textContent = ''; }
 
-  function showError(msg){
-    errorEl.textContent = msg;
-    errorEl.style.display = 'block';
-  }
-  function clearError(){
-    errorEl.style.display = 'none';
-    errorEl.textContent = '';
-  }
-
-  // Auto-uppercase as the user types (license keys are uppercase).
-  // Preserves cursor position so typing doesn't feel jumpy.
+  // Auto-uppercase as the user types, preserving cursor position.
   keyEl.addEventListener('input', function(){
     const cur = keyEl.value;
     const upd = cur.toUpperCase();
     if(cur !== upd){
       const pos = keyEl.selectionStart;
       keyEl.value = upd;
-      try{ keyEl.setSelectionRange(pos, pos); }catch(_){}
+      try { keyEl.setSelectionRange(pos, pos); } catch(_){}
     }
     clearError();
   });
 
-  // [Buy SnapToFile Pro] → /api/checkout
-  // The checkout endpoint redirects to Stripe Hosted Checkout. We use a
-  // form POST because that's how the existing endpoint expects to be hit
-  // and it lets the browser follow the 303 redirect cleanly.
+  // [Buy SnapToFile Pro] → POST /api/checkout (303s to Stripe Checkout).
   if(buyBtn){
     buyBtn.addEventListener('click', function(ev){
       ev.preventDefault();
@@ -1252,7 +1500,6 @@ function normalizeLicenseKeyClient(raw){
     });
   }
 
-  // Activation submit
   form.addEventListener('submit', function(ev){
     ev.preventDefault();
     clearError();
@@ -1261,14 +1508,13 @@ function normalizeLicenseKeyClient(raw){
     const norm = normalizeLicenseKeyClient(raw);
     if(!norm){
       showError('That doesn\u2019t look like a SnapToFile license key. The format is STF-XXXX-XXXX-XXXX-XXXX.');
-      try{ keyEl.focus(); }catch(_){}
+      try { keyEl.focus(); } catch(_){}
       return;
     }
 
     submitBtn.disabled = true;
     const origLabel = submitBtn.textContent;
     submitBtn.textContent = 'Activating\u2026';
-
     const deviceId = getOrCreateDeviceId();
 
     fetch(LICENSE_API_ACTIVATE, {
@@ -1283,7 +1529,6 @@ function normalizeLicenseKeyClient(raw){
       })
       .then(function(r){
         if(r.ok){
-          // 200: activation succeeded. Store token + meta.
           try {
             localStorage.setItem(LICENSE_TOKEN_KEY, r.data.token);
             localStorage.setItem(LICENSE_META_KEY, JSON.stringify({
@@ -1301,20 +1546,10 @@ function normalizeLicenseKeyClient(raw){
             submitBtn.textContent = origLabel;
             return;
           }
-          // Fade out, then reload so the app re-initializes in the
-          // activated state. Reload is simpler than wiring every app
-          // feature to react to mid-session activation.
-          gate.style.opacity = '0';
-          setTimeout(function(){
-            document.body.style.overflow = prevOverflow || '';
-            location.reload();
-          }, 240);
+          // Reload so the bootstrap re-runs with the fresh token.
+          setTimeout(function(){ location.reload(); }, 240);
           return;
         }
-
-        // Non-200: handle each documented error code with tailored copy.
-        // Documented in api/activate.js: 400 invalid, 404 not_found,
-        // 403 inactive, 409 device_limit_reached, 500 server error.
         const err = (r.data && r.data.error) || 'unknown';
         if(r.status === 400 && err === 'invalid_license_key'){
           showError('That license key wasn\u2019t recognized. Double-check it against your welcome email.');
@@ -1336,12 +1571,43 @@ function normalizeLicenseKeyClient(raw){
         submitBtn.textContent = origLabel;
       })
       .catch(function(){
-        // Network error / CORS / DNS failure
         showError('Couldn\u2019t reach the activation server. Check your internet connection and try again.');
         submitBtn.disabled = false;
         submitBtn.textContent = origLabel;
       });
   });
+}
+
+// — 6B: bootstrap —
+
+// Replaces the 6A IIFE. Decides license state on load, applies the
+// corresponding UI, wires the activation form if needed, and triggers
+// a background re-validation when ≤7 days remain on a valid token.
+//
+// Async because Web Crypto's verify is async. The brief delay before
+// the activation gate appears for unactivated users is typically <50ms
+// and is invisible to most users; activated users see no gate at all.
+(async function licenseBootstrap(){
+  if(!IS_PRO) return;
+  let result;
+  try {
+    result = await routeLicenseState();
+  } catch(e){
+    // Router shouldn't throw, but if Web Crypto is somehow unavailable
+    // (very old browser, or crypto.subtle blocked by HTTP origin), fail
+    // closed: drop to export-only rather than silently letting the app run.
+    console.error('[license] routeLicenseState failed:', e);
+    result = { state: 'export_only' };
+  }
+
+  applyLicenseState(result.state, result.payload);
+
+  if(result.state === 'unactivated'){
+    showActivationGate();
+    wireActivationForm();
+  } else if(result.payload){
+    maybeBackgroundRevalidate(result.payload);
+  }
 })();
 
 /* ─── UPGRADE MODAL HELPER ───────────────────────────── */
