@@ -469,14 +469,15 @@ img{max-width:100%;height:auto}
   .dial-center-num{font-size:21px}
 }
 
-/* ═══ PRO EMAIL GATE ═══════════════════════════════════════
-   Shown once per device before first use of Pro. Captures
-   emails for the eventual paywall notification + founder promo
-   code (Option 2 path per SnapToFile_Cleanup planning). Uses
+/* ═══ PRO LICENSE GATE ═══════════════════════════════════
+   Replaces the old PRO EMAIL GATE on 2026-05-04 (Stripe Plan
+   Chunk 6A). Full-screen takeover until the user activates
+   with their license key. POSTs to /api/activate, gets back
+   a signed Ed25519 JWT, stores it, and unlocks the app.
    Syne + Instrument Sans to match the generator's brand
    system — Fraunces is reserved for landing/editorial surfaces.
-   ════════════════════════════════════════════════════════ */
-#pro-gate{
+   ═══════════════════════════════════════════════════════ */
+#lic-gate{
   position:fixed;inset:0;z-index:10050;
   background:linear-gradient(180deg,rgba(15,23,42,.72) 0%,rgba(15,23,42,.85) 100%);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
@@ -485,50 +486,53 @@ img{max-width:100%;height:auto}
   font-family:'Instrument Sans',system-ui,sans-serif;
   transition:opacity .22s ease-out;
 }
-#pro-gate.open{display:flex}
-#pro-gate .pg-card{
+#lic-gate.open{display:flex}
+#lic-gate .lg-card{
   background:#faf8f3;border-radius:16px;
   max-width:480px;width:100%;
   padding:34px 30px 26px;
   box-shadow:0 25px 60px -15px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
-  animation:pg-in .28s cubic-bezier(.2,.9,.35,1);
+  animation:lg-in .28s cubic-bezier(.2,.9,.35,1);
   position:relative;
 }
-@keyframes pg-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-#pro-gate .pg-logo{display:flex;align-items:center;gap:10px;margin-bottom:22px}
-#pro-gate .pg-logo-ico{width:32px;height:32px;flex-shrink:0}
-#pro-gate .pg-logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:-.01em;color:#0f172a}
-#pro-gate .pg-logo-sep{width:1px;height:16px;background:#cbd5e1}
-#pro-gate .pg-logo-tag{font-size:11px;color:#64748b;font-weight:500;letter-spacing:.02em}
-#pro-gate .pg-eyebrow{
+@keyframes lg-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+#lic-gate .lg-logo{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+#lic-gate .lg-logo-ico{width:32px;height:32px;flex-shrink:0}
+#lic-gate .lg-logo-name{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:-.01em;color:#0f172a}
+#lic-gate .lg-logo-sep{width:1px;height:16px;background:#cbd5e1}
+#lic-gate .lg-logo-tag{font-size:11px;color:#64748b;font-weight:500;letter-spacing:.02em}
+#lic-gate .lg-eyebrow{
   font-size:10px;font-weight:700;color:#4a5c3f;
   text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px;
 }
-#pro-gate .pg-title{
+#lic-gate .lg-title{
   font-family:'Syne',sans-serif;
   font-size:27px;line-height:1.18;font-weight:800;
   color:#0f172a;letter-spacing:-.025em;margin-bottom:14px;
 }
-#pro-gate .pg-body{font-size:14px;line-height:1.6;color:#334155;margin-bottom:22px}
-#pro-gate .pg-body em{font-style:italic;color:#1e293b;font-weight:500}
-#pro-gate .pg-form{display:flex;flex-direction:column;gap:10px}
-#pro-gate .pg-label{
+#lic-gate .lg-body{font-size:14px;line-height:1.6;color:#334155;margin-bottom:22px}
+#lic-gate .lg-body em{font-style:italic;color:#1e293b;font-weight:600}
+#lic-gate .lg-form{display:flex;flex-direction:column;gap:10px}
+#lic-gate .lg-label{
   font-size:11px;font-weight:600;color:#475569;
   text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;display:block;
 }
-#pro-gate .pg-input{
+#lic-gate .lg-input{
   width:100%;padding:12px 14px;
   border:1.5px solid #cbd5e1;border-radius:10px;
   font-size:15px;color:#0f172a;background:#fff;
-  font-family:inherit;transition:border-color .14s,box-shadow .14s;
+  font-family:'SF Mono',Menlo,Consolas,monospace;
+  letter-spacing:.04em;
+  transition:border-color .14s,box-shadow .14s;
   -webkit-appearance:none;appearance:none;
 }
-#pro-gate .pg-input:focus{outline:none;border-color:#5a7048;box-shadow:0 0 0 3px rgba(90,112,72,.15)}
-#pro-gate .pg-error{
+#lic-gate .lg-input:focus{outline:none;border-color:#5a7048;box-shadow:0 0 0 3px rgba(90,112,72,.15)}
+#lic-gate .lg-error{
   display:none;font-size:12px;color:#b91c1c;
-  padding:8px 10px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;
+  padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
+  line-height:1.5;
 }
-#pro-gate .pg-submit{
+#lic-gate .lg-submit{
   margin-top:8px;width:100%;padding:14px 18px;
   background:linear-gradient(135deg,#4a5c3f 0%,#5a7048 100%);
   color:#fff;border:none;border-radius:10px;
@@ -538,19 +542,40 @@ img{max-width:100%;height:auto}
   transition:transform .12s,box-shadow .14s,opacity .14s;
   -webkit-tap-highlight-color:transparent;
 }
-#pro-gate .pg-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 18px rgba(74,92,63,.4)}
-#pro-gate .pg-submit:active:not(:disabled){transform:translateY(0)}
-#pro-gate .pg-submit:disabled{opacity:.65;cursor:wait}
-#pro-gate .pg-foot{
+#lic-gate .lg-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 18px rgba(74,92,63,.4)}
+#lic-gate .lg-submit:active:not(:disabled){transform:translateY(0)}
+#lic-gate .lg-submit:disabled{opacity:.65;cursor:wait}
+#lic-gate .lg-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:22px 0 12px;
+  font-size:10.5px;color:#94a3b8;font-weight:600;
+  text-transform:uppercase;letter-spacing:.1em;
+}
+#lic-gate .lg-divider::before,
+#lic-gate .lg-divider::after{
+  content:'';flex:1;height:1px;background:#e2e8f0;
+}
+#lic-gate .lg-buy{
+  display:block;text-align:center;
+  background:#fff;color:#1e293b;
+  border:1.5px solid #cbd5e1;border-radius:10px;
+  padding:13px 18px;font-size:14px;font-weight:600;
+  text-decoration:none;cursor:pointer;
+  font-family:inherit;
+  transition:border-color .14s,background .14s,color .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+#lic-gate .lg-buy:hover{border-color:#4a5c3f;background:#f0f1ea;color:#4a5c3f}
+#lic-gate .lg-foot{
   margin-top:18px;padding-top:16px;border-top:1px solid #e2e8f0;
   font-size:11px;color:#64748b;line-height:1.55;
 }
-#pro-gate .pg-foot a{color:#4a5c3f;text-decoration:underline;text-decoration-color:#b3c19e;text-underline-offset:2px}
-#pro-gate .pg-foot a:hover{text-decoration-color:#4a5c3f}
+#lic-gate .lg-foot a{color:#4a5c3f;text-decoration:underline;text-decoration-color:#b3c19e;text-underline-offset:2px}
+#lic-gate .lg-foot a:hover{text-decoration-color:#4a5c3f}
 @media (max-width:520px){
-  #pro-gate .pg-card{padding:26px 22px 22px}
-  #pro-gate .pg-title{font-size:23px}
-  #pro-gate .pg-body{font-size:13px}
+  #lic-gate .lg-card{padding:26px 22px 22px}
+  #lic-gate .lg-title{font-size:23px}
+  #lic-gate .lg-body{font-size:13px}
 }
 </style>
 <!-- Vercel Web Analytics (loads only when served from Vercel domain; silently no-ops when offline / standalone) -->
@@ -558,11 +583,11 @@ img{max-width:100%;height:auto}
 </head>
 <body>
 
-<!-- ═══ PRO EMAIL GATE (Pro builds only, shown once per device) ═══ -->
-<div id="pro-gate" role="dialog" aria-modal="true" aria-labelledby="pg-title">
-  <div class="pg-card">
-    <div class="pg-logo">
-      <div class="pg-logo-ico">
+<!-- ═══ PRO LICENSE GATE (Pro builds only — full-screen until activated) ═══ -->
+<div id="lic-gate" role="dialog" aria-modal="true" aria-labelledby="lg-title">
+  <div class="lg-card">
+    <div class="lg-logo">
+      <div class="lg-logo-ico">
         <svg width="32" height="32" viewBox="0 0 80 80" fill="none" aria-hidden="true">
           <path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#0f172a" stroke-width="3.2" stroke-linejoin="miter" fill="#fff"/>
           <path d="M50 8 V24 H66" stroke="#0f172a" stroke-width="3.2" stroke-linejoin="miter"/>
@@ -576,25 +601,27 @@ img{max-width:100%;height:auto}
           </g>
         </svg>
       </div>
-      <div class="pg-logo-name">SnapToFile</div>
-      <div class="pg-logo-sep"></div>
-      <div class="pg-logo-tag">Pro preview</div>
+      <div class="lg-logo-name">SnapToFile</div>
+      <div class="lg-logo-sep"></div>
+      <div class="lg-logo-tag">Pro</div>
     </div>
-    <div class="pg-eyebrow">Early access</div>
-    <h2 class="pg-title" id="pg-title">You&rsquo;re in before the paywall.</h2>
-    <p class="pg-body">
-      SnapToFile Pro is free during this preview period. Before we introduce a subscription, we&rsquo;ll email you ahead of time with a promo code for <em>three months free</em> &mdash; our way of saying thanks for helping us build it.
+    <div class="lg-eyebrow">Activate this device</div>
+    <h2 class="lg-title" id="lg-title">Welcome to SnapToFile Pro.</h2>
+    <p class="lg-body">
+      Paste the license key from your welcome email to unlock this device. Your subscription covers up to <em>3 devices</em>.
     </p>
-    <form class="pg-form" id="pro-gate-form" novalidate>
+    <form class="lg-form" id="lic-gate-form" novalidate>
       <div>
-        <label class="pg-label" for="pro-gate-email">Your email</label>
-        <input class="pg-input" type="email" id="pro-gate-email" name="email_address" placeholder="name@company.com" autocomplete="email" inputmode="email" required/>
+        <label class="lg-label" for="lic-gate-key">License key</label>
+        <input class="lg-input" type="text" id="lic-gate-key" placeholder="STF-XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" required/>
       </div>
-      <div id="pro-gate-error" class="pg-error" role="alert" aria-live="polite"></div>
-      <button type="submit" class="pg-submit" id="pro-gate-submit">Continue to Pro &nbsp;&rarr;</button>
+      <div id="lic-gate-error" class="lg-error" role="alert" aria-live="polite"></div>
+      <button type="submit" class="lg-submit" id="lic-gate-submit">Activate this device &nbsp;&rarr;</button>
     </form>
-    <div class="pg-foot">
-      One email when Pro pricing launches, plus a founder promo code. Nothing else &mdash; unsubscribe any time. See our <a href="https://snaptofile.com/privacy" target="_blank" rel="noopener">privacy notice</a>.
+    <div class="lg-divider"><span>Don&rsquo;t have a license yet?</span></div>
+    <button type="button" class="lg-buy" id="lic-gate-buy">Buy SnapToFile Pro &mdash; $15/month</button>
+    <div class="lg-foot">
+      Lost your key or need help? <a href="mailto:hello@snaptofile.com">hello@snaptofile.com</a>
     </div>
   </div>
 </div>
@@ -1038,33 +1065,48 @@ img{max-width:100%;height:auto}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-05-01 · pro gate kit-wired';
+const BUILD_STAMP       = '2026-05-04 · license gate (chunk 6A)';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
 
-/* ─── PRO EMAIL GATE CONFIG ─────────────────────────────
-   Captures email before first Pro access so we can notify
-   users + deliver a founder promo code before the Stripe
-   paywall launches (Option 2 path).
+/* ─── PRO LICENSE GATE CONFIG ──────────────────────────────
+   License-key activation. New visitors paste their STF-XXXX-...
+   key from the welcome email; the Pro HTML POSTs it to
+   /api/activate, gets back a signed Ed25519 JWT, stores it
+   in localStorage, and unlocks the app on a reload.
 
-   SETUP STEPS (one-time, before deploying):
-     1. In Kit, create a new Form: "SnapToFile Pro Early Access"
-     2. Add a Tag to the form: pro-early-access-2026
-        (gives you a clean segment for the pre-paywall email)
-     3. Copy the form's numeric ID from Kit's embed code
-     4. Paste it as KIT_PRO_FORM_ID below
-     5. KIT_ACCOUNT_UID is the same as the landing-page form
+   Backend contract: api/activate.js, api/validate.js, lib/jwt.js.
+   Decisions log: SnapToFile_Stripe_Subscription_Plan.md §8
+     (multi-device N=3, JWT 14-day TTL, re-validate at ≤7 days).
 
-   The gate only runs when IS_PRO is true and shows once per
-   device (localStorage). Submits to Kit's public form API.
-   If the user is offline at submit time, we queue locally
-   and retry on next load so a field user isn't blocked.
+   Chunk 6A (this file) only checks token EXISTENCE on load.
+   Chunk 6B will add Web Crypto signature verification + state
+   routing (active / past_due / export-only).
    ─────────────────────────────────────────────────────── */
-const KIT_PRO_FORM_ID   = '9357466';                          // Kit form: "SnapToFile Pro Early Access" (separate from the in-app gates)
-const KIT_ACCOUNT_UID   = '89da877a42';                       // same as landing page
-const GATE_STORAGE_KEY  = 'stf_pro_gate_v1';
-const GATE_PENDING_KEY  = 'stf_pro_gate_pending_v1';
+
+// Ed25519 public key — raw 32 bytes, Base64-encoded.
+// Source: One_Time_Use/STF_PUBLIC_KEY.txt (the SPKI-wrapped PEM).
+// The PEM's prefix "MCowBQYDK2VwAyEA" is the SPKI Ed25519 OID + length;
+// what's left is the 32-byte raw key — that's what Web Crypto wants
+// when imported with format='raw' in Chunk 6B.
+const LICENSE_PUBLIC_KEY_RAW_B64 = 'HiS3IouCD1dKNsNk6LosEE/FxjfJjp4o6/bzkx79pnE=';
+
+// API endpoints — relative URLs, same origin as this HTML when served
+// at /app/pro on snaptofile.com.
+const LICENSE_API_BASE     = '';
+const LICENSE_API_ACTIVATE = LICENSE_API_BASE + '/api/activate';
+const LICENSE_API_VALIDATE = LICENSE_API_BASE + '/api/validate';
+const CHECKOUT_URL         = LICENSE_API_BASE + '/api/checkout';
+
+// JWT re-validation threshold (days remaining). Stripe Plan §8 = 7.
+// Used in Chunk 6B; declared here so all license-gate config sits together.
+const REVALIDATE_AT_DAYS_LEFT = 7;
+
+// localStorage keys — versioned so future migrations are non-destructive.
+const LICENSE_TOKEN_KEY  = 'stf_license_token_v1';   // the signed JWT string
+const LICENSE_DEVICE_KEY = 'stf_device_id_v1';       // stable UUID for this browser
+const LICENSE_META_KEY   = 'stf_license_meta_v1';    // cached meta (key last4, devices_used, etc.)
 const PRO_WATERMARK     = '<svg class="stf-wm-ico" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 V24 H66" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 L66 24" stroke="#64748b" stroke-width="5"/><circle cx="37" cy="46" r="12" stroke="#64748b" stroke-width="5" fill="none"/><circle cx="37" cy="46" r="4" fill="#64748b"/></svg><span class="stf-wm-txt">Documented with <b>SnapToFile</b> &middot; snaptofile.com</span>';
 
 /* Compression levels — Pro gets 5, Free gets 3 evenly-spaced shrink levels */
@@ -1080,63 +1122,98 @@ const FREE_CLEV = [
   if(el) el.textContent = BUILD_STAMP;
 })();
 
-/* ─── PRO EMAIL GATE ─────────────────────────────────────
-   Pro builds only. Captures user email before first access
-   and stores a localStorage flag so the gate only shows once
-   per device. Defensive binding so a failure here can never
-   block the rest of the app from initializing.
+/* ─── PRO LICENSE GATE — helpers ──────────────────────
+   Pulled out of the IIFE so Chunk 6B can re-use them for
+   the background re-validation flow. No state held outside
+   localStorage; safe to call from anywhere.
+   ───────────────────────────────────────────────────── */
+
+// Get-or-create a stable per-browser device ID.
+// Decision (Stripe Plan §8, 2026-04-27): use a localStorage UUID, NOT a
+// browser-fingerprint hash. Clearing storage = new device, accepted as
+// user action. This trades some piracy resistance for legitimacy: real
+// users who clear cookies don't get locked out of their own license.
+function getOrCreateDeviceId(){
+  try {
+    let id = localStorage.getItem(LICENSE_DEVICE_KEY);
+    if(id && typeof id === 'string' && id.length >= 8) return id;
+    // crypto.randomUUID() is in every browser we support (Safari 15.4+,
+    // Chrome 92+, Firefox 95+ — all 2022 or earlier).
+    id = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+      ? crypto.randomUUID()
+      : 'stf-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
+    localStorage.setItem(LICENSE_DEVICE_KEY, id);
+    return id;
+  } catch(_){
+    // localStorage blocked (private mode, strict privacy settings).
+    // Fall back to an in-memory ID so the user can at least try to
+    // activate; the resulting JWT won't survive a reload — they'll get
+    // a clear "couldn't save" error and a path to fix browser settings.
+    return 'stf-ephemeral-' + Math.random().toString(36).slice(2);
+  }
+}
+
+// Normalize a user-pasted license key. Accepts any of:
+//   "stf-abcd-efgh-ijkl-mnop", "STF ABCD EFGH IJKL MNOP",
+//   "STFABCDEFGHIJKLMNOP", any case, with or without separators.
+// Returns canonical "STF-XXXX-XXXX-XXXX-XXXX" or null if shape is wrong.
+// Mirrors lib/license.js#normalizeLicenseKey on the server, so client-side
+// validation rejects malformed input before it ever hits /api/activate.
+function normalizeLicenseKeyClient(raw){
+  if(typeof raw !== 'string') return null;
+  const cleaned = raw.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if(cleaned.length !== 19 || !cleaned.startsWith('STF')) return null;
+  const body = cleaned.slice(3);
+  if(!/^[A-Z0-9]{16}$/.test(body)) return null;
+  return 'STF-' + body.slice(0,4) + '-' + body.slice(4,8) + '-' + body.slice(8,12) + '-' + body.slice(12,16);
+}
+
+/* ─── PRO LICENSE GATE ───────────────────────────────────
+   Pro builds only. On first load, checks for a stored
+   license token. If absent, shows the activation screen.
+   On submit, POSTs to /api/activate, gets back a signed
+   JWT, stores it, and reloads so the app re-initializes
+   in the activated state.
+
+   NOTE: This 6A pass only checks token EXISTENCE, not its
+   signature. Chunk 6B adds Web Crypto verification + state
+   routing (active / past_due / canceled). For now, anyone
+   with dev tools can inject a string into localStorage and
+   bypass the gate — that hole closes in 6B.
    ─────────────────────────────────────────────────────── */
-(function proGate(){
+(function licenseGate(){
   if(!IS_PRO) return;
 
-  const gate = document.getElementById('pro-gate');
+  const gate = document.getElementById('lic-gate');
   if(!gate) return;
 
-  // Helper: post to Kit's public form API. no-cors because Kit doesn't
-  // set CORS headers for the public form endpoint — means we can't
-  // read the response, but POST still lands on Kit's side.
-  function submitToKit(email){
-    const fd = new FormData();
-    fd.append('email_address', email);
-    return fetch(
-      'https://app.kit.com/forms/' + KIT_PRO_FORM_ID + '/subscriptions',
-      { method: 'POST', body: fd, mode: 'no-cors' }
-    );
+  function hasStoredToken(){
+    try {
+      const t = localStorage.getItem(LICENSE_TOKEN_KEY);
+      return typeof t === 'string' && t.length > 20;
+    } catch(_){
+      return false;
+    }
   }
 
-  // Retry any previously-queued offline submission on every load.
-  try {
-    const pending = localStorage.getItem(GATE_PENDING_KEY);
-    if(pending){
-      const p = JSON.parse(pending);
-      if(p && p.email){
-        submitToKit(p.email)
-          .then(function(){ try{ localStorage.removeItem(GATE_PENDING_KEY); }catch(_){} })
-          .catch(function(){ /* still offline or Kit unreachable — try again next load */ });
-      }
-    }
-  } catch(_){ /* ignore malformed pending entry */ }
+  if(hasStoredToken()){
+    gate.style.display = 'none';
+    return;
+  }
 
-  // If the gate has already been passed on this device, stay hidden.
-  try {
-    if(localStorage.getItem(GATE_STORAGE_KEY)){
-      gate.style.display = 'none';
-      return;
-    }
-  } catch(_){ /* localStorage blocked (e.g. strict privacy mode) — still show gate */ }
-
-  // Show gate and lock body scroll underneath.
+  // No token → show gate, lock body scroll, focus input on next tick
+  // (next-tick focus gives better mobile keyboard behavior than immediate).
   gate.classList.add('open');
   const prevOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
 
-  const form      = document.getElementById('pro-gate-form');
-  const emailEl   = document.getElementById('pro-gate-email');
-  const errorEl   = document.getElementById('pro-gate-error');
-  const submitBtn = document.getElementById('pro-gate-submit');
+  const form      = document.getElementById('lic-gate-form');
+  const keyEl     = document.getElementById('lic-gate-key');
+  const errorEl   = document.getElementById('lic-gate-error');
+  const submitBtn = document.getElementById('lic-gate-submit');
+  const buyBtn    = document.getElementById('lic-gate-buy');
 
-  // Autofocus on next tick (better mobile keyboard behavior than immediate).
-  setTimeout(function(){ try{ emailEl.focus(); }catch(_){} }, 120);
+  setTimeout(function(){ try{ keyEl.focus(); }catch(_){} }, 120);
 
   function showError(msg){
     errorEl.textContent = msg;
@@ -1146,77 +1223,123 @@ const FREE_CLEV = [
     errorEl.style.display = 'none';
     errorEl.textContent = '';
   }
-  emailEl.addEventListener('input', clearError);
 
-  function grantAccess(email){
-    // Save the grant locally so the gate doesn't reappear on this device.
-    try {
-      localStorage.setItem(GATE_STORAGE_KEY, JSON.stringify({
-        email: email,
-        grantedAt: new Date().toISOString(),
-        buildAtGrant: BUILD_STAMP,
-        v: 1
-      }));
-    } catch(_){ /* storage blocked; gate will re-show next visit but user still gets in now */ }
+  // Auto-uppercase as the user types (license keys are uppercase).
+  // Preserves cursor position so typing doesn't feel jumpy.
+  keyEl.addEventListener('input', function(){
+    const cur = keyEl.value;
+    const upd = cur.toUpperCase();
+    if(cur !== upd){
+      const pos = keyEl.selectionStart;
+      keyEl.value = upd;
+      try{ keyEl.setSelectionRange(pos, pos); }catch(_){}
+    }
+    clearError();
+  });
 
-    // Fade out, then unlock body.
-    gate.style.opacity = '0';
-    setTimeout(function(){
-      gate.classList.remove('open');
-      gate.style.display = 'none';
-      gate.style.opacity = '';
-      document.body.style.overflow = prevOverflow || '';
-    }, 220);
+  // [Buy SnapToFile Pro] → /api/checkout
+  // The checkout endpoint redirects to Stripe Hosted Checkout. We use a
+  // form POST because that's how the existing endpoint expects to be hit
+  // and it lets the browser follow the 303 redirect cleanly.
+  if(buyBtn){
+    buyBtn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      const f = document.createElement('form');
+      f.method = 'POST';
+      f.action = CHECKOUT_URL;
+      document.body.appendChild(f);
+      f.submit();
+    });
   }
 
+  // Activation submit
   form.addEventListener('submit', function(ev){
     ev.preventDefault();
     clearError();
 
-    const email = (emailEl.value || '').trim();
-
-    // Light client-side email validation.
-    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
-      showError('Please enter a valid email.');
-      try{ emailEl.focus(); }catch(_){}
-      return;
-    }
-
-    // Safety check: if the form ID hasn't been configured yet, don't
-    // silently drop emails. Log a clear warning and still grant access
-    // so devs testing locally aren't blocked.
-    if(!KIT_PRO_FORM_ID || KIT_PRO_FORM_ID.indexOf('REPLACE_ME') === 0){
-      console.warn('[pro-gate] KIT_PRO_FORM_ID is not configured. Email will be captured to localStorage only.');
-      try {
-        localStorage.setItem(GATE_PENDING_KEY, JSON.stringify({
-          email: email,
-          queuedAt: new Date().toISOString(),
-          reason: 'form-id-not-configured'
-        }));
-      } catch(_){}
-      grantAccess(email);
+    const raw  = (keyEl.value || '').trim();
+    const norm = normalizeLicenseKeyClient(raw);
+    if(!norm){
+      showError('That doesn\u2019t look like a SnapToFile license key. The format is STF-XXXX-XXXX-XXXX-XXXX.');
+      try{ keyEl.focus(); }catch(_){}
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Saving…';
+    const origLabel = submitBtn.textContent;
+    submitBtn.textContent = 'Activating\u2026';
 
-    submitToKit(email)
-      .then(function(){
-        // no-cors hides the actual response; assume success on resolved promise
-        grantAccess(email);
+    const deviceId = getOrCreateDeviceId();
+
+    fetch(LICENSE_API_ACTIVATE, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ license_key: norm, device_id: deviceId })
+    })
+      .then(function(resp){
+        return resp.json().then(function(data){
+          return { ok: resp.ok, status: resp.status, data: data };
+        });
+      })
+      .then(function(r){
+        if(r.ok){
+          // 200: activation succeeded. Store token + meta.
+          try {
+            localStorage.setItem(LICENSE_TOKEN_KEY, r.data.token);
+            localStorage.setItem(LICENSE_META_KEY, JSON.stringify({
+              license_key_last4:   norm.slice(-4),
+              subscription_status: r.data.subscription_status,
+              devices_used:        r.data.devices_used,
+              devices_max:         r.data.devices_max,
+              expires_at:          r.data.expires_at,
+              activated_at:        r.data.activated_at,
+              activated_on_device: deviceId
+            }));
+          } catch(_){
+            showError('Couldn\u2019t save the license to this browser. Make sure private browsing or storage blockers aren\u2019t enabled, then try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = origLabel;
+            return;
+          }
+          // Fade out, then reload so the app re-initializes in the
+          // activated state. Reload is simpler than wiring every app
+          // feature to react to mid-session activation.
+          gate.style.opacity = '0';
+          setTimeout(function(){
+            document.body.style.overflow = prevOverflow || '';
+            location.reload();
+          }, 240);
+          return;
+        }
+
+        // Non-200: handle each documented error code with tailored copy.
+        // Documented in api/activate.js: 400 invalid, 404 not_found,
+        // 403 inactive, 409 device_limit_reached, 500 server error.
+        const err = (r.data && r.data.error) || 'unknown';
+        if(r.status === 400 && err === 'invalid_license_key'){
+          showError('That license key wasn\u2019t recognized. Double-check it against your welcome email.');
+        } else if(r.status === 400){
+          showError('Something looked wrong with the activation request. Please try again.');
+        } else if(r.status === 404){
+          showError('We couldn\u2019t find that license. Make sure you copied the full key from your welcome email, or contact support.');
+        } else if(r.status === 403 && err === 'subscription_inactive'){
+          const status = (r.data && r.data.subscription_status) || 'inactive';
+          showError('This subscription is currently \u201C' + status + '.\u201D Reactivate the subscription, or email hello@snaptofile.com for help.');
+        } else if(r.status === 409 && err === 'device_limit_reached'){
+          const used = (r.data && r.data.devices_used) || 3;
+          const max  = (r.data && r.data.devices_max)  || 3;
+          showError('This license is already on ' + used + ' of ' + max + ' devices. Deactivate one of those devices first, then try again. Need help? Email hello@snaptofile.com.');
+        } else {
+          showError('Activation failed (' + r.status + '). Please try again. If this keeps happening, email hello@snaptofile.com.');
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = origLabel;
       })
       .catch(function(){
-        // Network error — queue for retry and still grant access so a
-        // field user who's offline right now isn't locked out of Pro.
-        try {
-          localStorage.setItem(GATE_PENDING_KEY, JSON.stringify({
-            email: email,
-            queuedAt: new Date().toISOString(),
-            reason: 'offline'
-          }));
-        } catch(_){}
-        grantAccess(email);
+        // Network error / CORS / DNS failure
+        showError('Couldn\u2019t reach the activation server. Check your internet connection and try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = origLabel;
       });
   });
 })();
