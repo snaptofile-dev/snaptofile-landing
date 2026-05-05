@@ -622,6 +622,127 @@ body.lic-export-only #fab-camera,
 body.lic-export-only #dz{
   display:none !important;
 }
+
+/* ═══ SETTINGS DRAWER (Chunk 6C) ═══════════════════════
+   Right-side slide-out panel anchored to the gear icon in the
+   topbar. Reads license meta from stf_license_meta_v1; never
+   touches the network. "Manage subscription" is a Chunk 7
+   placeholder (mailto fallback). "Deactivate this device" clears
+   all three localStorage keys and reloads to the activation gate.
+   ═══════════════════════════════════════════════════════ */
+#lic-settings-backdrop{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(15,23,42,.45);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;
+  transition:opacity .22s ease-out;
+}
+#lic-settings-backdrop.open{opacity:1;pointer-events:auto}
+
+#lic-settings{
+  position:fixed;top:0;right:0;bottom:0;z-index:9100;
+  width:340px;max-width:90vw;
+  background:#faf8f3;
+  display:flex;flex-direction:column;
+  box-shadow:-12px 0 36px rgba(15,23,42,.22);
+  transform:translateX(100%);
+  transition:transform .26s cubic-bezier(.2,.85,.35,1);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  -webkit-overflow-scrolling:touch;
+}
+#lic-settings.open{transform:translateX(0)}
+
+.lic-settings-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 14px;border-bottom:1px solid #e8dfc6;
+  flex-shrink:0;
+}
+.lic-settings-head h2{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:18px;
+  color:#0f172a;letter-spacing:-.01em;margin:0;
+}
+.lic-settings-close{
+  background:none;border:0;cursor:pointer;color:#64748b;
+  padding:4px;line-height:0;border-radius:6px;
+  transition:background .14s,color .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+.lic-settings-close:hover{background:#e8dfc6;color:#0f172a}
+
+.lic-settings-body{
+  flex:1;overflow-y:auto;padding:8px 20px 16px;
+  -webkit-overflow-scrolling:touch;
+}
+.lic-settings-section{padding:14px 0;border-bottom:1px solid #e8dfc6}
+.lic-settings-section:last-of-type{border-bottom:0}
+.lic-settings-eyebrow{
+  font-size:10px;font-weight:700;color:#4a5c3f;
+  text-transform:uppercase;letter-spacing:.14em;
+  margin-bottom:10px;
+}
+.lic-settings-rows{display:flex;flex-direction:column;gap:0}
+.lic-settings-row{
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:9px 0;border-bottom:1px dashed #d9cfb9;
+  font-size:13px;gap:14px;
+}
+.lic-settings-row:last-child{border-bottom:0}
+.lic-settings-row .k{
+  color:#6b6b6b;font-weight:500;
+  text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;
+  flex-shrink:0;
+}
+.lic-settings-row .v{
+  color:#1a1a1a;font-weight:500;text-align:right;
+  word-break:break-all;min-width:0;
+}
+.lic-settings-row .v.mono{
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  font-size:12.5px;letter-spacing:0.02em;
+}
+.lic-settings-row .v .pill{
+  display:inline-block;background:#4a5c3f;color:#f5efe6;
+  padding:2px 9px;border-radius:99px;font-size:11px;
+  font-weight:600;letter-spacing:.04em;
+}
+.lic-settings-row .v.muted{color:#94a3b8;font-style:italic;font-weight:400}
+
+.lic-settings-actions{display:flex;flex-direction:column;gap:9px}
+.lic-settings-btn{
+  display:block;width:100%;padding:11px 14px;
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;
+  border-radius:8px;border:1.5px solid;text-align:center;
+  text-decoration:none;
+  transition:transform .12s,background .14s,border-color .14s,color .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+.lic-settings-btn:hover{transform:translateY(-1px)}
+.lic-settings-btn:active{transform:translateY(0)}
+.lic-settings-btn-primary{
+  background:#4a5c3f;color:#f5efe6;border-color:#33432b;
+}
+.lic-settings-btn-primary:hover{background:#33432b}
+.lic-settings-btn-danger{
+  background:transparent;color:#b8542a;border-color:#b8542a;
+}
+.lic-settings-btn-danger:hover{background:#fef2f2;color:#9a4622}
+
+.lic-settings-foot{
+  padding:14px 20px;border-top:1px solid #e8dfc6;
+  font-size:11px;color:#6b6b6b;line-height:1.55;
+  flex-shrink:0;
+}
+.lic-settings-foot a{color:#4a5c3f;text-decoration:underline;
+  text-decoration-color:#b3c19e;text-underline-offset:2px}
+.lic-settings-foot a:hover{text-decoration-color:#4a5c3f}
+
+@media (max-width:520px){
+  #lic-settings{width:100%;max-width:100%}
+  .lic-settings-head{padding:14px 16px 12px}
+  .lic-settings-body{padding:8px 16px 16px}
+  .lic-settings-foot{padding:12px 16px}
+}
 </style>
 <!-- Vercel Web Analytics (loads only when served from Vercel domain; silently no-ops when offline / standalone) -->
 <script defer src="/_vercel/insights/script.js"></script>
@@ -688,6 +809,36 @@ body.lic-export-only #dz{
   </div>
 </div>
 
+<!-- ═══ SETTINGS DRAWER (Chunk 6C — right-side slide-out, gear icon trigger) ═══ -->
+<div id="lic-settings-backdrop" aria-hidden="true"></div>
+<aside id="lic-settings" role="dialog" aria-modal="true" aria-labelledby="lic-settings-title" aria-hidden="true">
+  <header class="lic-settings-head">
+    <h2 id="lic-settings-title">Settings</h2>
+    <button type="button" class="lic-settings-close" id="lic-settings-close" aria-label="Close settings">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+  <div class="lic-settings-body">
+    <div class="lic-settings-section">
+      <div class="lic-settings-eyebrow">License</div>
+      <div class="lic-settings-rows" id="lic-settings-rows">
+        <!-- Populated by JS each time the drawer opens -->
+      </div>
+    </div>
+    <div class="lic-settings-section lic-settings-actions">
+      <button type="button" class="lic-settings-btn lic-settings-btn-primary" id="lic-settings-portal">
+        Manage subscription
+      </button>
+      <button type="button" class="lic-settings-btn lic-settings-btn-danger" id="lic-settings-deactivate">
+        Deactivate this device
+      </button>
+    </div>
+  </div>
+  <footer class="lic-settings-foot">
+    Need help? <a href="mailto:hello@snaptofile.com">hello@snaptofile.com</a>
+  </footer>
+</aside>
+
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="brand">
@@ -702,6 +853,9 @@ body.lic-export-only #dz{
     <button class="btn btn-ghost btn-sm" id="btn-cols">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       <span id="colslbl">3-up</span>
+    </button>
+    <button class="btn btn-ghost btn-sm btn-icon" id="btn-settings" title="Settings" aria-label="Settings">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     </button>
     <button class="btn btn-primary btn-sm" id="btn-exp" style="display:none">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -1113,7 +1267,7 @@ body.lic-export-only #dz{
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-05-04 · state routing (chunk 6B)';
+const BUILD_STAMP       = '2026-05-04 · settings drawer (chunk 6C)';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
@@ -1333,6 +1487,7 @@ async function tryRevalidate(payload){
       meta.devices_max         = data.devices_max;
       meta.expires_at          = data.expires_at;
       if(data.activated_at) meta.activated_at = data.activated_at;
+      if(data.email)        meta.email        = data.email;
       localStorage.setItem(LICENSE_META_KEY, JSON.stringify(meta));
     } catch(_){ /* storage blocked — proceed in-memory */ }
     return { ok: true, payload: newResult.payload, status: data.subscription_status };
@@ -1533,6 +1688,7 @@ function wireActivationForm(){
             localStorage.setItem(LICENSE_TOKEN_KEY, r.data.token);
             localStorage.setItem(LICENSE_META_KEY, JSON.stringify({
               license_key_last4:   norm.slice(-4),
+              email:               r.data.email || null,
               subscription_status: r.data.subscription_status,
               devices_used:        r.data.devices_used,
               devices_max:         r.data.devices_max,
@@ -1577,6 +1733,165 @@ function wireActivationForm(){
       });
   });
 }
+
+/* ─── SETTINGS DRAWER (Chunk 6C) ─────────────────────
+   Right-side drawer accessible via the gear icon in the topbar.
+   Shows license meta + Deactivate / Manage subscription buttons.
+   No backend calls — reads stf_license_meta_v1, writes only to
+   localStorage (for deactivate). The /api/portal endpoint doesn't
+   exist until Chunk 7, so "Manage subscription" falls back to mailto.
+   ──────────────────────────────────── */
+
+// Local escape — small + self-contained so the drawer code never
+// implicitly depends on the page-level esc() being defined yet.
+function escSettings(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Format an ISO timestamp as "May 18, 2026". Returns — on bad input.
+function fmtSettingsDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+}
+
+// Read meta from localStorage. Returns {} if missing/corrupt.
+function readLicenseMeta(){
+  try {
+    const raw = localStorage.getItem(LICENSE_META_KEY);
+    if(!raw) return {};
+    return JSON.parse(raw) || {};
+  } catch(_){ return {}; }
+}
+
+// Render the License section's rows from meta. Email and last4 may
+// both be present, only one, or neither (older tokens issued before
+// email was added in 6C). Render gracefully in every case.
+function renderSettingsRows(){
+  const wrap = document.getElementById('lic-settings-rows');
+  if(!wrap) return;
+  const m = readLicenseMeta();
+  const rows = [];
+
+  // Email row — only shown if known.
+  if(m.email){
+    rows.push(
+      '<div class="lic-settings-row"><span class="k">Email</span>'+
+      '<span class="v">'+escSettings(m.email)+'</span></div>'
+    );
+  }
+
+  // License row — last4 if known, else "unknown".
+  if(m.license_key_last4){
+    rows.push(
+      '<div class="lic-settings-row"><span class="k">License</span>'+
+      '<span class="v mono">···· '+escSettings(m.license_key_last4)+'</span></div>'
+    );
+  } else if(!m.email){
+    // Neither email nor last4 — surface that something's off.
+    rows.push(
+      '<div class="lic-settings-row"><span class="k">License</span>'+
+      '<span class="v muted">unknown</span></div>'
+    );
+  }
+
+  // Devices pill — only when both numbers known.
+  if(typeof m.devices_used === 'number' && typeof m.devices_max === 'number'){
+    rows.push(
+      '<div class="lic-settings-row"><span class="k">Devices</span>'+
+      '<span class="v"><span class="pill">'+m.devices_used+' of '+m.devices_max+'</span></span></div>'
+    );
+  }
+
+  // Token expiry — the JWT exp, not the subscription billing date.
+  if(m.expires_at){
+    rows.push(
+      '<div class="lic-settings-row"><span class="k">Token expires</span>'+
+      '<span class="v">'+escSettings(fmtSettingsDate(m.expires_at))+'</span></div>'
+    );
+  }
+
+  // First-activation date.
+  if(m.activated_at){
+    rows.push(
+      '<div class="lic-settings-row"><span class="k">Activated</span>'+
+      '<span class="v">'+escSettings(fmtSettingsDate(m.activated_at))+'</span></div>'
+    );
+  }
+
+  wrap.innerHTML = rows.join('');
+}
+
+function openSettingsDrawer(){
+  const drawer  = document.getElementById('lic-settings');
+  const backdrop= document.getElementById('lic-settings-backdrop');
+  if(!drawer || !backdrop) return;
+  renderSettingsRows();
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden', 'false');
+  backdrop.classList.add('open');
+}
+
+function closeSettingsDrawer(){
+  const drawer  = document.getElementById('lic-settings');
+  const backdrop= document.getElementById('lic-settings-backdrop');
+  if(!drawer || !backdrop) return;
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden', 'true');
+  backdrop.classList.remove('open');
+}
+
+// Wire everything once on parse. Safe even if the gear icon is
+// missing (Free tier currently doesn't render it; this still no-ops).
+(function wireSettingsDrawer(){
+  if(!IS_PRO) return;
+  const gear     = document.getElementById('btn-settings');
+  const closeBtn = document.getElementById('lic-settings-close');
+  const backdrop = document.getElementById('lic-settings-backdrop');
+  const portal   = document.getElementById('lic-settings-portal');
+  const deact    = document.getElementById('lic-settings-deactivate');
+
+  if(gear)     gear.addEventListener('click',     openSettingsDrawer);
+  if(closeBtn) closeBtn.addEventListener('click', closeSettingsDrawer);
+  if(backdrop) backdrop.addEventListener('click', closeSettingsDrawer);
+
+  // Esc to close. Scoped to drawer-open so it doesn't fight other Esc handlers.
+  document.addEventListener('keydown', function(ev){
+    if(ev.key !== 'Escape') return;
+    const drawer = document.getElementById('lic-settings');
+    if(drawer && drawer.classList.contains('open')) closeSettingsDrawer();
+  });
+
+  // "Manage subscription" — Chunk 7 placeholder via mailto.
+  // When /api/portal ships in Chunk 7 this swaps to a fetch + redirect.
+  if(portal){
+    portal.addEventListener('click', function(){
+      window.location.href = 'mailto:hello@snaptofile.com'
+        + '?subject=Manage%20my%20SnapToFile%20Pro%20subscription';
+    });
+  }
+
+  // "Deactivate this device" — confirms first because the next
+  // re-activation will burn a fresh device slot (stf_device_id_v1
+  // also gets cleared, so /api/activate sees a brand-new device).
+  if(deact){
+    deact.addEventListener('click', function(){
+      const ok = confirm(
+        'Sign out of SnapToFile Pro on this device?\n\n'+
+        'You\u2019ll need your license key to sign back in, and this will use one of your 3 device slots.'
+      );
+      if(!ok) return;
+      try {
+        localStorage.removeItem(LICENSE_TOKEN_KEY);
+        localStorage.removeItem(LICENSE_META_KEY);
+        localStorage.removeItem(LICENSE_DEVICE_KEY);
+      } catch(_){}
+      // Reload — the bootstrap will land on the activation gate.
+      location.reload();
+    });
+  }
+})();
 
 // — 6B: bootstrap —
 
