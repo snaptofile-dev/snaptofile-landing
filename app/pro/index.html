@@ -1267,7 +1267,7 @@ body.lic-export-only #dz{
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-05-04 · settings drawer (chunk 6C)';
+const BUILD_STAMP       = '2026-05-05 · /api/portal wired (chunk 7)';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
@@ -1299,6 +1299,7 @@ const LICENSE_PUBLIC_KEY_RAW_B64 = 'HiS3IouCD1dKNsNk6LosEE/FxjfJjp4o6/bzkx79pnE=
 const LICENSE_API_BASE     = '';
 const LICENSE_API_ACTIVATE = LICENSE_API_BASE + '/api/activate';
 const LICENSE_API_VALIDATE = LICENSE_API_BASE + '/api/validate';
+const LICENSE_API_PORTAL   = LICENSE_API_BASE + '/api/portal';
 const CHECKOUT_URL         = LICENSE_API_BASE + '/api/checkout';
 
 // JWT re-validation threshold (days remaining). Stripe Plan §8 = 7.
@@ -1582,7 +1583,7 @@ function applyLicenseState(state, payload){
         + '<span class="lic-banner-text"><strong>Payment issue.</strong> '
         + 'We weren\u2019t able to charge your card. '
         + 'Please update your payment method or your subscription will be paused soon. '
-        + '<a class="lic-banner-link" href="mailto:hello@snaptofile.com?subject=Payment%20issue%20on%20SnapToFile%20Pro">Email us for help</a>.</span>';
+        + '<a class="lic-banner-link lic-portal-action" href="#" role="button">Update payment method</a>.</span>';
       banner.style.display = '';
     }
     return;
@@ -1596,7 +1597,7 @@ function applyLicenseState(state, payload){
         + '<span class="lic-banner-text"><strong>Subscription not active.</strong> '
         + 'You can still open existing reports, edit annotations, and export to PDF. '
         + 'Add-photo, camera, and drag-drop are paused. '
-        + '<a class="lic-banner-link" href="mailto:hello@snaptofile.com?subject=Reactivate%20SnapToFile%20Pro">Email us to reactivate</a>.</span>';
+        + '<a class="lic-banner-link lic-portal-action" href="#" role="button">Manage subscription</a>.</span>';
       banner.style.display = '';
     }
     return;
@@ -1604,6 +1605,100 @@ function applyLicenseState(state, payload){
 
   // 'unactivated' — banner stays hidden; the activation gate is the UI.
   body.classList.add('lic-unactivated');
+}
+
+// — Chunk 7: Stripe Customer Portal —
+//
+// Opens the Stripe Customer Portal so the user can manage their
+// subscription (update card, cancel, view invoices, change billing
+// email). Used by:
+//   - "Manage subscription" button in the settings drawer
+//   - Action links in the past_due / export_only banners
+//
+// On success: redirects the current tab to Stripe's hosted portal.
+// On failure: offers a mailto fallback so the user can still reach us.
+//
+// triggerEl is optional — if provided, we briefly disable it during the
+// fetch so a double-click doesn't fire two requests.
+async function openCustomerPortal(triggerEl){
+  let tokenStr = null;
+  let deviceId = null;
+  try {
+    tokenStr = localStorage.getItem(LICENSE_TOKEN_KEY);
+    deviceId = localStorage.getItem(LICENSE_DEVICE_KEY);
+  } catch(_){}
+
+  if(!tokenStr || !deviceId){
+    alert('Please activate this device first.');
+    return;
+  }
+
+  // Pull license_key off the token claims. We trust this client-side
+  // because /api/portal re-verifies the device against Airtable anyway.
+  let licenseKey = null;
+  try {
+    const result = await verifyLicenseToken(tokenStr);
+    if(result && result.payload) licenseKey = result.payload.license_key;
+  } catch(_){}
+
+  if(!licenseKey){
+    alert('Couldn’t read your license. Please re-activate this device.');
+    return;
+  }
+
+  let originalLabel = null;
+  if(triggerEl){
+    originalLabel = triggerEl.textContent;
+    triggerEl.disabled = true;
+    triggerEl.textContent = 'Opening…';
+  }
+
+  let resp;
+  try {
+    resp = await fetch(LICENSE_API_PORTAL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ license_key: licenseKey, device_id: deviceId })
+    });
+  } catch(_){
+    portalFailFallback(triggerEl, originalLabel);
+    return;
+  }
+
+  if(!resp.ok){
+    portalFailFallback(triggerEl, originalLabel);
+    return;
+  }
+
+  let data;
+  try { data = await resp.json(); } catch(_){ data = null; }
+
+  if(!data || !data.url){
+    portalFailFallback(triggerEl, originalLabel);
+    return;
+  }
+
+  // Success — redirect this tab to Stripe's hosted portal.
+  window.location.href = data.url;
+}
+
+// Fallback when /api/portal can't be reached or returns an error.
+// Re-enables the trigger and offers a mailto so the user can still
+// reach us. Native confirm() is fine for this — the failure path is
+// rare and a custom modal isn't worth the code.
+function portalFailFallback(triggerEl, originalLabel){
+  if(triggerEl){
+    triggerEl.disabled = false;
+    if(originalLabel != null) triggerEl.textContent = originalLabel;
+  }
+  const wantsEmail = confirm(
+    'Couldn’t reach the billing portal.\n\n'+
+    'Email hello@snaptofile.com instead?'
+  );
+  if(wantsEmail){
+    window.location.href = 'mailto:hello@snaptofile.com'
+      + '?subject=Manage%20my%20SnapToFile%20Pro%20subscription';
+  }
 }
 
 // Show the activation gate (used when state === 'unactivated').
@@ -1863,12 +1958,23 @@ function closeSettingsDrawer(){
     if(drawer && drawer.classList.contains('open')) closeSettingsDrawer();
   });
 
-  // "Manage subscription" — Chunk 7 placeholder via mailto.
-  // When /api/portal ships in Chunk 7 this swaps to a fetch + redirect.
+  // "Manage subscription" — opens the Stripe Customer Portal via /api/portal.
   if(portal){
     portal.addEventListener('click', function(){
-      window.location.href = 'mailto:hello@snaptofile.com'
-        + '?subject=Manage%20my%20SnapToFile%20Pro%20subscription';
+      openCustomerPortal(portal);
+    });
+  }
+
+  // Banner action links (past_due / export_only) are dynamically
+  // rendered into innerHTML, so we delegate clicks from the banner.
+  // Any element with class 'lic-portal-action' opens the portal.
+  const banner = document.getElementById('lic-banner');
+  if(banner){
+    banner.addEventListener('click', function(ev){
+      const link = ev.target.closest && ev.target.closest('.lic-portal-action');
+      if(!link) return;
+      ev.preventDefault();
+      openCustomerPortal(link);
     });
   }
 
@@ -4820,3 +4926,4 @@ render();
 
 </body>
 </html>
+
