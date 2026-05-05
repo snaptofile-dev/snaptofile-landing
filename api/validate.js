@@ -114,6 +114,8 @@ export default async function handler(req, res) {
 
   // Sign refreshed token
   const activatedAt = fields.activated_at || new Date().toISOString();
+  const email       = fields.email || null;
+
   let token;
   try {
     token = await signLicenseToken({
@@ -121,6 +123,7 @@ export default async function handler(req, res) {
       deviceId,
       subscriptionStatus: status,
       activatedAt,
+      email,
     });
   } catch (err) {
     console.error('[validate] token signing failed:', err);
@@ -134,6 +137,7 @@ export default async function handler(req, res) {
     devices_used:        deviceList.length,
     devices_max:         MAX_DEVICES,
     activated_at:        activatedAt,
+    email,
   });
 }
 
