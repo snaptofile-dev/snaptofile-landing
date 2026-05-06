@@ -198,6 +198,93 @@ body.sel-mode .csel{opacity:1}
 #fab-camera.visible{display:flex}
 #fab-camera:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(15,23,42,.45)}
 
+/* ── CAMERA-AGAIN BAR ── */
+#cam-again-bar{
+  position:fixed;bottom:calc(82px + env(safe-area-inset-bottom));left:50%;
+  transform:translateX(-50%);z-index:60;display:none;
+  background:var(--navy);border-radius:50px;
+  padding:6px 10px 6px 6px;
+  box-shadow:0 4px 20px rgba(15,23,42,.45);
+  align-items:center;gap:6px;white-space:nowrap;
+}
+#cam-again-bar.visible{display:flex}
+#cam-again-bar .cab-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:0 13px;height:36px;border-radius:20px;
+  font-size:12px;font-weight:600;border:none;cursor:pointer;
+  font-family:inherit;-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#cam-again-bar .cab-take{background:var(--blue);color:#fff}
+#cam-again-bar .cab-take:hover{background:#33432b}
+#cam-again-bar .cab-done{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8)}
+#cam-again-bar .cab-done:hover{background:rgba(255,255,255,.2)}
+
+/* ── IN-APP CAMERA VIEWFINDER ── */
+#cam-vf{
+  position:fixed;inset:0;z-index:900;
+  background:#000;display:none;flex-direction:column;overflow:hidden;
+}
+#cam-vf.open{display:flex}
+#cam-vf video{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;
+}
+#cam-flash{
+  position:absolute;inset:0;z-index:2;
+  background:#fff;opacity:0;pointer-events:none;
+}
+#cam-flash.flash{animation:cam-flash-anim .22s ease-out forwards}
+@keyframes cam-flash-anim{0%{opacity:.9}100%{opacity:0}}
+#cam-vf-top{
+  position:absolute;top:0;left:0;right:0;z-index:3;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:max(16px,env(safe-area-inset-top)) 16px 14px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.55) 0%,transparent 100%);
+}
+#cam-vf-bot{
+  position:absolute;bottom:0;left:0;right:0;z-index:3;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 36px max(28px,calc(env(safe-area-inset-bottom) + 20px));
+  background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 100%);
+}
+#cam-capture{
+  width:76px;height:76px;border-radius:50%;
+  background:rgba(255,255,255,.95);border:none;cursor:pointer;
+  box-shadow:0 0 0 4px rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:transform .1s;
+}
+#cam-capture:active{transform:scale(.9)}
+#cam-capture::after{
+  content:'';width:60px;height:60px;border-radius:50%;
+  background:#fff;display:block;
+}
+.cam-ctrl{
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(0,0,0,.45);border:1.5px solid rgba(255,255,255,.3);
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:background .14s;
+}
+.cam-ctrl:active{background:rgba(255,255,255,.2)}
+#cam-count{
+  font-size:13px;font-weight:700;color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.6);
+  letter-spacing:.02em;min-width:80px;text-align:center;
+}
+#cam-vf-err{
+  position:absolute;inset:0;z-index:4;
+  background:rgba(0,0,0,.85);
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:#fff;text-align:center;padding:36px;gap:16px;
+}
+#cam-vf-err.show{display:flex}
+#cam-vf-err p{font-size:15px;line-height:1.6;color:rgba(255,255,255,.8)}
+
 /* ── PHOTO GRID ── */
 #pgrid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:clamp(8px,2vw,12px)}
 
@@ -881,6 +968,41 @@ body.sel-mode .csel{opacity:1}
   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
 </button>
 
+<!-- CAMERA-AGAIN BAR (fallback for browsers without getUserMedia) -->
+<div id="cam-again-bar">
+  <button type="button" class="cab-btn cab-take" id="cam-again-btn">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    Take another photo
+  </button>
+  <button type="button" class="cab-btn cab-done" id="cam-done-btn">✓ Done</button>
+</div>
+
+<!-- IN-APP CAMERA VIEWFINDER (getUserMedia — camera stays open between shots) -->
+<div id="cam-vf" role="dialog" aria-modal="true" aria-label="Camera">
+  <video id="cam-video" playsinline autoplay muted></video>
+  <canvas id="cam-canvas" style="display:none"></canvas>
+  <div id="cam-flash"></div>
+  <div id="cam-vf-err">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/><line x1="2" y1="2" x2="22" y2="22" stroke-width="2.5"/></svg>
+    <p id="cam-vf-err-msg">Camera access was denied.<br>Allow camera access in your browser settings and try again.</p>
+    <button type="button" class="cam-ctrl" id="cam-err-close" style="width:auto;border-radius:20px;padding:0 20px;height:42px;font-size:13px;font-weight:600;font-family:inherit">Close</button>
+  </div>
+  <div id="cam-vf-top">
+    <button type="button" class="cam-ctrl" id="cam-close" aria-label="Close camera">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div id="cam-count">Ready</div>
+    <div style="width:48px"></div>
+  </div>
+  <div id="cam-vf-bot">
+    <div style="width:48px"></div>
+    <button type="button" id="cam-capture" aria-label="Take photo"></button>
+    <button type="button" class="cam-ctrl" id="cam-flip" aria-label="Switch camera">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
+    </button>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -900,7 +1022,7 @@ body.sel-mode .csel{opacity:1}
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'free';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-05-01 · in-app waitlist (kit)';
+const BUILD_STAMP       = '2026-05-06 · in-app camera viewfinder';
 const KIT_PRO_FORM_ID   = '9393913';                          // Kit form: "SnapToFile — Pro Waitlist (In-App)"
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Legacy — kept for backwards compat; not used after Phase 2b
 const IS_PRO            = (TIER === 'pro');
@@ -1698,7 +1820,7 @@ window.addEventListener('beforeunload', e=>{
     if(fabCam)fabCam.classList.toggle('visible',v);
   },{threshold:0}).observe($('dz'));
   fab.onclick=()=>$('fi').click();
-  if(fabCam)fabCam.onclick=()=>$('fi-cam').click();
+  if(fabCam)fabCam.onclick=openViewfinder;
 })();
 
 /* ─── ANNOTATION THUMBNAIL ────────────────────────────── */
@@ -1754,15 +1876,120 @@ $('fi').onchange=e=>{
   if(files.length)handleFiles(files);
   e.target.value='';
 };
-// Camera capture input — opens rear camera directly
+// Camera capture input — simple one-shot handler for direct triggers.
 $('fi-cam').onchange=e=>{
   const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
   if(files.length)handleFiles(files);
   e.target.value='';
 };
+// openCamera — fresh <input> per shot + cam-again bar (fallback when
+// getUserMedia is unavailable).
+function showCamAgainBar(){ const b=document.getElementById('cam-again-bar'); if(b)b.classList.add('visible'); }
+function hideCamAgainBar(){ const b=document.getElementById('cam-again-bar'); if(b)b.classList.remove('visible'); }
+function openCamera(){
+  hideCamAgainBar();
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/*'; inp.setAttribute('capture','environment');
+  inp.style.cssText='position:absolute;width:1px;height:1px;opacity:0;pointer-events:none';
+  document.body.appendChild(inp);
+  inp.onchange=function(e){
+    const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
+    try{document.body.removeChild(inp);}catch(_){}
+    if(files.length){ handleFiles(files); showCamAgainBar(); }
+  };
+  inp.click();
+}
+$('cam-again-btn').onclick=openCamera;
+$('cam-done-btn').onclick=hideCamAgainBar;
+
+/* ─── IN-APP CAMERA VIEWFINDER ────────────────────────────────
+   getUserMedia keeps the camera open between shots.
+   Free tier: cap warning fires on the 13th photo attempt
+   and clearly tells the user the photo will not be saved
+   and that SnapToFile Pro removes the limit.
+   ───────────────────────────────────────────────────── */
+let camStream=null, camFacing='environment', camSessionCnt=0;
+
+function camUpdateCount(){
+  const el=$('cam-count'); if(!el) return;
+  el.textContent=camSessionCnt===0?'Ready':camSessionCnt+' photo'+(camSessionCnt!==1?'s':'');
+}
+async function camStartStream(){
+  const video=$('cam-video'), errDiv=$('cam-vf-err');
+  if(errDiv) errDiv.classList.remove('show');
+  if(video)  video.style.visibility='';
+  camStopStream();
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:camFacing},width:{ideal:1920},height:{ideal:1080}},audio:false
+    });
+    if(video){video.srcObject=camStream;await video.play();}
+  }catch(err){
+    if(video)  video.style.visibility='hidden';
+    if(errDiv) errDiv.classList.add('show');
+    const msg=$('cam-vf-err-msg');
+    if(msg){
+      if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError')
+        msg.innerHTML='Camera access was denied.<br>Allow camera access in your browser settings, then try again.';
+      else if(err.name==='NotFoundError')
+        msg.innerHTML='No camera was found on this device.';
+      else
+        msg.innerHTML='Could not start the camera.<br>'+esc(err.message||err.name);
+    }
+  }
+}
+function camStopStream(){
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  const video=$('cam-video'); if(video)video.srcObject=null;
+}
+function openViewfinder(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){openCamera();return;}
+  camSessionCnt=0; camUpdateCount();
+  const vf=$('cam-vf'); if(vf)vf.classList.add('open');
+  document.body.style.overflow='hidden';
+  camStartStream();
+}
+function closeViewfinder(){
+  camStopStream();
+  const vf=$('cam-vf'); if(vf)vf.classList.remove('open');
+  document.body.style.overflow='';
+}
+function camCapture(){
+  const video=$('cam-video'),canvas=$('cam-canvas'),flash=$('cam-flash');
+  if(!video||!canvas||!camStream) return;
+  const vw=video.videoWidth,vh=video.videoHeight;
+  if(!vw||!vh) return;
+  const compress=true; // free tier always compresses
+  const MAX=1920,QUALITY=0.82;
+  const sc=Math.min(1,MAX/Math.max(vw,vh));
+  canvas.width=Math.round(vw*sc); canvas.height=Math.round(vh*sc);
+  canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+  const dataUrl=canvas.toDataURL('image/jpeg',QUALITY);
+  if(flash){flash.classList.remove('flash');void flash.offsetWidth;flash.classList.add('flash');}
+  // Free tier cap — 13th photo attempt: warn clearly, close viewfinder
+  if(photos.length>=FREE_PHOTO_CAP){
+    showUpgrade({
+      title: 'Photo limit reached — this photo was not saved',
+      sub:   'Free accounts hold up to '+FREE_PHOTO_CAP+' photos per report. '+
+             'Upgrade to SnapToFile Pro for unlimited photos, custom branding, and watermark-free PDFs.',
+      icon:  '📸'
+    });
+    closeViewfinder(); return;
+  }
+  const ph={id:uid(),src:dataUrl,thumbSrc:dataUrl,header:'',desc:'',annotations:[],cropSrc:null};
+  photos.push(ph); camSessionCnt++; camUpdateCount(); markDirty(); render();
+  buildThumb(ph).then(()=>render());
+}
+$('cam-close').onclick    =closeViewfinder;
+$('cam-err-close').onclick=closeViewfinder;
+$('cam-capture').onclick  =camCapture;
+$('cam-flip').onclick=function(){camFacing=(camFacing==='environment'?'user':'environment');camStartStream();};
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){const vf=$('cam-vf');if(vf&&vf.classList.contains('open'))closeViewfinder();}
+});
 // Dropzone buttons trigger the hidden inputs
 $('btn-gallery').onclick=()=>$('fi').click();
-$('btn-camera').onclick=()=>$('fi-cam').click();
+$('btn-camera').onclick=openViewfinder;
 // Clicking anywhere on the dropzone (not on a button) also opens gallery
 $('dz').onclick=e=>{if(e.target===$('dz')||e.target.tagName==='H3'||e.target.tagName==='P'||e.target.tagName==='svg'||e.target.tagName==='path')$('fi').click()};
 
