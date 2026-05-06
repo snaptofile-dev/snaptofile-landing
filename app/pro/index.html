@@ -737,6 +737,38 @@ body.lic-export-only #dz{
   text-decoration-color:#b3c19e;text-underline-offset:2px}
 .lic-settings-foot a:hover{text-decoration-color:#4a5c3f}
 
+/* ── IMPORT COMPRESSION TOGGLE ── */
+.stf-toggle-row{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:12px 0;border-bottom:1px dashed #d9cfb9;gap:14px;
+}
+.stf-toggle-row:last-child{border-bottom:0}
+.stf-toggle-label{
+  font-size:12.5px;font-weight:600;color:#1a1a1a;line-height:1.3;
+  flex:1;min-width:0;
+}
+.stf-toggle-hint{
+  font-size:11px;color:#6b6b6b;font-weight:400;margin-top:3px;line-height:1.4;
+}
+.stf-toggle{
+  position:relative;display:inline-block;
+  width:42px;height:24px;flex-shrink:0;margin-top:1px;
+}
+.stf-toggle input{opacity:0;width:0;height:0;position:absolute}
+.stf-toggle-track{
+  position:absolute;inset:0;border-radius:99px;
+  background:#d9cfb9;transition:background .18s;cursor:pointer;
+}
+.stf-toggle input:checked + .stf-toggle-track{background:#4a5c3f}
+.stf-toggle-track::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);
+  transition:transform .18s;
+}
+.stf-toggle input:checked + .stf-toggle-track::after{transform:translateX(18px)}
+.stf-toggle input:focus-visible + .stf-toggle-track{outline:2px solid #4a5c3f;outline-offset:2px}
+
 @media (max-width:520px){
   #lic-settings{width:100%;max-width:100%}
   .lic-settings-head{padding:14px 16px 12px}
@@ -830,6 +862,20 @@ body.lic-export-only #dz{
         <!-- Populated by JS each time the drawer opens -->
       </div>
     </div>
+    <div class="lic-settings-section" id="lic-settings-import-section">
+      <div class="lic-settings-eyebrow">Import</div>
+      <div class="stf-toggle-row">
+        <div class="stf-toggle-label">
+          Compress photos on import
+          <div class="stf-toggle-hint">Recommended. Keeps reports fast and mobile-friendly. Turn off only if you need original resolution for litigation or chain-of-custody.</div>
+        </div>
+        <label class="stf-toggle" aria-label="Compress photos on import">
+          <input type="checkbox" id="pref-autocompress" checked>
+          <span class="stf-toggle-track"></span>
+        </label>
+      </div>
+    </div>
+
     <div class="lic-settings-section lic-settings-actions">
       <button type="button" class="lic-settings-btn lic-settings-btn-primary" id="lic-settings-portal">
         Manage subscription
@@ -1315,6 +1361,7 @@ const REVALIDATE_AT_DAYS_LEFT = 7;
 const LICENSE_TOKEN_KEY  = 'stf_license_token_v1';   // the signed JWT string
 const LICENSE_DEVICE_KEY = 'stf_device_id_v1';       // stable UUID for this browser
 const LICENSE_META_KEY   = 'stf_license_meta_v1';    // cached meta (key last4, devices_used, etc.)
+const PREF_AUTOCOMPRESS_KEY = 'stf_pref_autocompress_v1'; // 'false' = off; anything else = on (default ON)
 const PRO_WATERMARK     = '<svg class="stf-wm-ico" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 V24 H66" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 L66 24" stroke="#64748b" stroke-width="5"/><circle cx="37" cy="46" r="12" stroke="#64748b" stroke-width="5" fill="none"/><circle cx="37" cy="46" r="4" fill="#64748b"/></svg><span class="stf-wm-txt">Documented with <b>SnapToFile</b> &middot; snaptofile.com</span>';
 
 /* Compression levels — Pro gets 5, Free gets 3 evenly-spaced shrink levels */
@@ -1323,6 +1370,22 @@ const FREE_CLEV = [
   { q: 0.72, mw: 1200, label: 'Medium Compression', desc: '1200px · 72% quality', badge: '~50% smaller', badgeBg: '#fef9c3', badgeFg: '#a16207' },
   { q: 0.50, mw:  900, label: 'Heavy Compression',  desc: '900px · 50% quality',  badge: '~75% smaller', badgeBg: '#ffedd5', badgeFg: '#ea580c' }
 ];
+
+/* ── IMPORT COMPRESSION PREFERENCE ──────────────────────
+   Default: ON. Stored as string 'false' when the user turns it off.
+   getAutoCompress() is the single source of truth for readURL().    */
+function getAutoCompress(){
+  try{ return localStorage.getItem(PREF_AUTOCOMPRESS_KEY) !== 'false'; }
+  catch(_){ return true; }
+}
+function setAutoCompress(val){
+  try{ localStorage.setItem(PREF_AUTOCOMPRESS_KEY, val ? 'true' : 'false'); }
+  catch(_){}
+}
+function syncAutoCompressToggle(){
+  const cb = document.getElementById('pref-autocompress');
+  if(cb) cb.checked = getAutoCompress();
+}
 
 /* ─── BUILD STAMP DISPLAY (bottom-left corner chip) ─── */
 (function initBuildStamp(){
@@ -1938,6 +2001,7 @@ function openSettingsDrawer(){
   const backdrop= document.getElementById('lic-settings-backdrop');
   if(!drawer || !backdrop) return;
   renderSettingsRows();
+  syncAutoCompressToggle(); // keep toggle in sync with stored pref
   drawer.classList.add('open');
   drawer.setAttribute('aria-hidden', 'false');
   backdrop.classList.add('open');
@@ -1965,6 +2029,12 @@ function closeSettingsDrawer(){
   if(gear)     gear.addEventListener('click',     openSettingsDrawer);
   if(closeBtn) closeBtn.addEventListener('click', closeSettingsDrawer);
   if(backdrop) backdrop.addEventListener('click', closeSettingsDrawer);
+
+  // Save the compression toggle pref whenever the user flips it.
+  const acToggle = document.getElementById('pref-autocompress');
+  if(acToggle) acToggle.addEventListener('change', function(){
+    setAutoCompress(this.checked);
+  });
 
   // Esc to close. Scoped to drawer-open so it doesn't fight other Esc handlers.
   document.addEventListener('keydown', function(ev){
