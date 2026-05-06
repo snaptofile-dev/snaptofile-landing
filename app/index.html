@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -207,8 +207,11 @@ body.sel-mode .csel{opacity:1}
 .pcard.selected{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue3)}
 .pcard.dragging{opacity:.4}.pcard.drag-over{border-color:var(--blue2);background:var(--blue4)}
 /* Touch drag handle — grip dots, touch-only */
-.cdrag-handle{display:none;align-items:center;justify-content:center;padding:5px 0 3px;color:var(--slatel);touch-action:none;cursor:grab;border-bottom:1px solid var(--border)}
+.cdrag-handle{display:none;align-items:center;justify-content:center;padding:9px 0 7px;min-height:34px;color:var(--slatel);touch-action:none;cursor:grab;border-bottom:1px solid var(--border);background:var(--bg)}
 @media(hover:none){.cdrag-handle{display:flex}}
+/* Suppress browser image context menu on long-press */
+.pcard{-webkit-touch-callout:none}
+.cimg img{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 /* Ghost card following the finger during touch drag */
 .touch-drag-ghost{position:fixed;z-index:500;pointer-events:none;width:140px;height:88px;border-radius:var(--r);overflow:hidden;background:#fff center/cover;border:2px solid var(--blue);opacity:.88;transform:scale(1.04) rotate(1.2deg);box-shadow:0 16px 40px rgba(15,23,42,.3)}
 
@@ -1940,6 +1943,7 @@ function makeCard(ph,idx){
 
   c.draggable=true;
 
+  c.addEventListener('contextmenu',e=>e.preventDefault());
   // Long-press to enter selection mode (mobile multi-select, ~500ms)
   let _lpTimer=null;
   c.addEventListener('touchstart',e=>{
