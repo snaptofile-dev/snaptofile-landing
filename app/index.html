@@ -2736,24 +2736,32 @@ window.addEventListener('mouseup',()=>{
 
   // Also end crop drag on window mouseup (in case mouse leaves canvas)
   window.addEventListener('mouseup',()=>{ if(cropDrag) endCD(); });
+  // Also end crop drag on window touchend (in case finger lifts outside canvas)
+  window.addEventListener('touchend',()=>{ if(cropDrag) endCD(); },{passive:true});
 
   // Touch support — pan tool or two-finger touch = pan; single finger = draw
   let touchPanStart=null, touchPanOrig=null;
   dc.addEventListener('touchstart',e=>{
-    if(lbTab!=='annot')return;
-    // Two fingers OR pan tool = pan
-    if(e.touches.length===2||(lbTool==='pan')){
+    // Two fingers OR pan tool = pan (annot tab only)
+    if(e.touches.length===2||(lbTab==='annot'&&lbTool==='pan')){
       e.preventDefault();
       const t=e.touches[0];
       touchPanStart={x:t.clientX,y:t.clientY};
       const a=$('lb-area');touchPanOrig={x:a.scrollLeft,y:a.scrollTop};
       return;
     }
+    // ── CROP MODE (touch) ──
+    if(lbTab==='xform' && cropping){
+      e.preventDefault();
+      const p=gp(e);
+      startCD(p.x,p.y,30); // 30px tap target for touch fingers
+      return;
+    }
+    if(lbTab!=='annot')return;
     e.preventDefault();
     const p=gp(e);lbDrawing=true;lbDStart=p;lbDCur=p;if(lbTool==='freehand')lbDPts=[p];
   },{passive:false});
   dc.addEventListener('touchmove',e=>{
-    if(lbTab!=='annot')return;
     if(touchPanStart){
       e.preventDefault();
       const t=e.touches[0];
@@ -2762,6 +2770,13 @@ window.addEventListener('mouseup',()=>{
       a.scrollTop=touchPanOrig.y-(t.clientY-touchPanStart.y);
       return;
     }
+    // ── CROP MODE (touch) ──
+    if(lbTab==='xform' && cropping){
+      e.preventDefault();
+      if(cropDrag){ const p=gp(e); doCD(p.x,p.y); }
+      return;
+    }
+    if(lbTab!=='annot')return;
     if(!lbDrawing)return;
     e.preventDefault();
     const p=gp(e);lbDCur=p;if(lbTool==='freehand')lbDPts.push(p);
@@ -2770,6 +2785,11 @@ window.addEventListener('mouseup',()=>{
   },{passive:false});
   dc.addEventListener('touchend',e=>{
     touchPanStart=null; touchPanOrig=null; // always clear pan state
+    // ── CROP MODE (touch) ──
+    if(lbTab==='xform' && cropping && cropDrag){
+      endCD();
+      return;
+    }
     if(!lbDrawing)return;lbDrawing=false;
     const ctx=dc.getContext('2d');ctx.clearRect(0,0,dc.width,dc.height);
     const ph=lbPh();if(!ph)return;
@@ -2985,11 +3005,12 @@ function drawCropOverlay(){
 function canvasToPx(cx,cy){ return {x:cx/lbZoom, y:cy/lbZoom}; }
 
 /* Hit-test which part of the crop box a canvas-space point is in */
-function cropHitTest(cx,cy){
+// hitR: canvas-pixel hit radius. Default 11 (mouse); pass 30 for touch.
+function cropHitTest(cx,cy,hitR=HANDLE_R+4){
   if(!cropping) return null;
   const {x,y,w,h}=cropBox;
   const bx=x*lbZoom,by=y*lbZoom,bw=w*lbZoom,bh=h*lbZoom;
-  const HR=HANDLE_R+4; // slightly bigger hit area
+  const HR=hitR;
   if(Math.hypot(cx-bx,      cy-by     )<HR) return 'tl';
   if(Math.hypot(cx-(bx+bw), cy-by     )<HR) return 'tr';
   if(Math.hypot(cx-bx,      cy-(by+bh))<HR) return 'bl';
@@ -3006,8 +3027,8 @@ function updateCropCursor(cx,cy){
 }
 
 /* Start a crop drag */
-function startCD(canvasX, canvasY){
-  cropMoveMode=cropHitTest(canvasX,canvasY);
+function startCD(canvasX, canvasY, hitR=HANDLE_R+4){
+  cropMoveMode=cropHitTest(canvasX,canvasY,hitR);
   cropMoveStart={cx:canvasX,cy:canvasY};
   cropMoveSnap={...cropBox};
   cropDrag=true;
