@@ -2836,7 +2836,7 @@ window.addEventListener('beforeunload', e=>{
     if(fabCam)fabCam.classList.toggle('visible',v);
   },{threshold:0}).observe($('dz'));
   fab.onclick=()=>$('fi').click();
-  if(fabCam)fabCam.onclick=()=>$('fi-cam').click();
+  if(fabCam)fabCam.onclick=openCameraLoop;
 })();
 
 /* ─── ANNOTATION THUMBNAIL ────────────────────────────── */
@@ -2892,26 +2892,40 @@ $('fi').onchange=e=>{
   if(files.length)handleFiles(files);
   e.target.value='';
 };
-// Camera capture input — opens rear camera directly.
-// On Android, after each shot the camera closes; we re-trigger it
-// automatically so the user can keep shooting. The natural exit is the
-// device Back button, which returns with no file (files.length===0),
-// so the loop stops and the user lands back in the app.
+// Camera capture input — simple one-shot handler (used only for direct
+// programmatic triggers; the camera button uses openCameraLoop below).
 $('fi-cam').onchange=e=>{
   const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
-  if(files.length){
-    handleFiles(files);
-    e.target.value='';
-    // Re-open camera for next shot. 400ms lets Android fully dismiss
-    // the camera activity before we re-trigger it.
-    setTimeout(()=>$('fi-cam').click(),400);
-  } else {
-    e.target.value='';
-  }
+  if(files.length)handleFiles(files);
+  e.target.value='';
 };
+// openCameraLoop — creates a FRESH <input> element for every shot so
+// Android's onchange fires reliably every time (reusing the same input
+// element causes onchange to stop firing after the 1st or 2nd photo).
+// User exits the loop naturally with the device Back button, which
+// returns with no file selected (files.length===0), ending the loop.
+function openCameraLoop(){
+  const inp=document.createElement('input');
+  inp.type='file';
+  inp.accept='image/*';
+  inp.setAttribute('capture','environment');
+  inp.style.cssText='position:absolute;width:1px;height:1px;opacity:0;pointer-events:none';
+  document.body.appendChild(inp);
+  inp.onchange=function(e){
+    const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
+    try{document.body.removeChild(inp);}catch(_){}
+    if(files.length){
+      handleFiles(files);
+      // Small delay lets Android fully dismiss the camera before reopening
+      setTimeout(openCameraLoop,400);
+    }
+    // If files is empty (Back button pressed), loop ends naturally
+  };
+  inp.click();
+}
 // Dropzone buttons trigger the hidden inputs
 $('btn-gallery').onclick=()=>$('fi').click();
-$('btn-camera').onclick=()=>$('fi-cam').click();
+$('btn-camera').onclick=openCameraLoop;
 // Clicking anywhere on the dropzone (not on a button) also opens gallery
 $('dz').onclick=e=>{if(e.target===$('dz')||e.target.tagName==='H3'||e.target.tagName==='P'||e.target.tagName==='svg'||e.target.tagName==='path')$('fi').click()};
 
