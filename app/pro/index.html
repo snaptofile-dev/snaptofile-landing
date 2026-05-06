@@ -222,6 +222,78 @@ body.sel-mode .csel{opacity:1}
 #cam-again-bar .cab-done{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8)}
 #cam-again-bar .cab-done:hover{background:rgba(255,255,255,.2)}
 
+/* ── IN-APP CAMERA VIEWFINDER ── */
+#cam-vf{
+  position:fixed;inset:0;z-index:900;
+  background:#000;display:none;flex-direction:column;overflow:hidden;
+}
+#cam-vf.open{display:flex}
+#cam-vf video{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;
+}
+/* Flash on capture */
+#cam-flash{
+  position:absolute;inset:0;z-index:2;
+  background:#fff;opacity:0;pointer-events:none;
+}
+#cam-flash.flash{animation:cam-flash-anim .22s ease-out forwards}
+@keyframes cam-flash-anim{0%{opacity:.9}100%{opacity:0}}
+/* Top bar */
+#cam-vf-top{
+  position:absolute;top:0;left:0;right:0;z-index:3;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:max(16px,env(safe-area-inset-top)) 16px 14px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.55) 0%,transparent 100%);
+}
+/* Bottom bar */
+#cam-vf-bot{
+  position:absolute;bottom:0;left:0;right:0;z-index:3;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 36px max(28px,calc(env(safe-area-inset-bottom) + 20px));
+  background:linear-gradient(to top,rgba(0,0,0,.65) 0%,transparent 100%);
+}
+/* Shutter button */
+#cam-capture{
+  width:76px;height:76px;border-radius:50%;
+  background:rgba(255,255,255,.95);border:none;cursor:pointer;
+  box-shadow:0 0 0 4px rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:transform .1s;
+}
+#cam-capture:active{transform:scale(.9)}
+#cam-capture::after{
+  content:'';width:60px;height:60px;border-radius:50%;
+  background:#fff;display:block;
+}
+/* Close / flip buttons */
+.cam-ctrl{
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(0,0,0,.45);border:1.5px solid rgba(255,255,255,.3);
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:background .14s;
+}
+.cam-ctrl:active{background:rgba(255,255,255,.2)}
+/* Photo count */
+#cam-count{
+  font-size:13px;font-weight:700;color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.6);
+  letter-spacing:.02em;min-width:80px;text-align:center;
+}
+/* Permission / error overlay */
+#cam-vf-err{
+  position:absolute;inset:0;z-index:4;
+  background:rgba(0,0,0,.85);
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:#fff;text-align:center;padding:36px;gap:16px;
+}
+#cam-vf-err.show{display:flex}
+#cam-vf-err p{font-size:15px;line-height:1.6;color:rgba(255,255,255,.8)}
+
 /* ── PHOTO GRID ── */
 #pgrid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:clamp(8px,2vw,12px)}
 
@@ -1346,6 +1418,35 @@ body.lic-export-only #dz{
   <button type="button" class="cab-btn cab-done" id="cam-done-btn">✓ Done</button>
 </div>
 
+<!-- IN-APP CAMERA VIEWFINDER (getUserMedia — camera stays open between shots) -->
+<div id="cam-vf" role="dialog" aria-modal="true" aria-label="Camera">
+  <video id="cam-video" playsinline autoplay muted></video>
+  <canvas id="cam-canvas" style="display:none"></canvas>
+  <div id="cam-flash"></div>
+  <!-- Permission / error state -->
+  <div id="cam-vf-err">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/><line x1="2" y1="2" x2="22" y2="22" stroke-width="2.5"/></svg>
+    <p id="cam-vf-err-msg">Camera access was denied.<br>Allow camera access in your browser settings and try again.</p>
+    <button type="button" class="cam-ctrl" id="cam-err-close" style="width:auto;border-radius:20px;padding:0 20px;height:42px;font-size:13px;font-weight:600;font-family:inherit">Close</button>
+  </div>
+  <!-- Top bar: close left, count centre, spacer right -->
+  <div id="cam-vf-top">
+    <button type="button" class="cam-ctrl" id="cam-close" aria-label="Close camera">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div id="cam-count">Ready</div>
+    <div style="width:48px"></div>
+  </div>
+  <!-- Bottom bar: spacer left, shutter centre, flip right -->
+  <div id="cam-vf-bot">
+    <div style="width:48px"></div>
+    <button type="button" id="cam-capture" aria-label="Take photo"></button>
+    <button type="button" class="cam-ctrl" id="cam-flip" aria-label="Switch camera">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
+    </button>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -1365,7 +1466,7 @@ body.lic-export-only #dz{
    single flip above controls the entire tier behavior.
    ─────────────────────────────────────────────────────── */
 const TIER              = 'pro';                              // 'pro' | 'free'
-const BUILD_STAMP       = '2026-05-05 · /api/portal wired (chunk 7)';
+const BUILD_STAMP       = '2026-05-06 · in-app camera viewfinder';
 const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Pro waitlist landing (single-page for now)
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
@@ -2869,7 +2970,7 @@ window.addEventListener('beforeunload', e=>{
     if(fabCam)fabCam.classList.toggle('visible',v);
   },{threshold:0}).observe($('dz'));
   fab.onclick=()=>$('fi').click();
-  if(fabCam)fabCam.onclick=openCamera;
+  if(fabCam)fabCam.onclick=openViewfinder;
 })();
 
 /* ─── ANNOTATION THUMBNAIL ────────────────────────────── */
@@ -2968,9 +3069,127 @@ function openCamera(){
 $('cam-again-btn').onclick=openCamera;   // real tap — opens camera reliably
 $('cam-done-btn').onclick=hideCamAgainBar;
 
+/* ─── IN-APP CAMERA VIEWFINDER ───────────────────────────────
+   Uses MediaDevices.getUserMedia so the camera stays open
+   between shots. The shutter button is always a real tap so
+   there are no gesture-restriction issues on any platform.
+   Falls back to openCamera() (file input) if getUserMedia is
+   unavailable (old browsers, non-HTTPS).
+   ───────────────────────────────────────────────────── */
+let camStream     = null;
+let camFacing     = 'environment'; // rear camera by default
+let camSessionCnt = 0;
+
+function camUpdateCount(){
+  const el=$('cam-count');
+  if(!el) return;
+  el.textContent = camSessionCnt===0 ? 'Ready'
+    : camSessionCnt+' photo'+(camSessionCnt!==1?'s':'');
+}
+
+async function camStartStream(){
+  const video  = $('cam-video');
+  const errDiv = $('cam-vf-err');
+  if(errDiv) errDiv.classList.remove('show');
+  if(video)  video.style.visibility='';
+  camStopStream();
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ ideal:camFacing }, width:{ ideal:1920 }, height:{ ideal:1080 } },
+      audio: false
+    });
+    if(video){ video.srcObject=camStream; await video.play(); }
+  } catch(err){
+    if(video)  video.style.visibility='hidden';
+    if(errDiv) errDiv.classList.add('show');
+    const msg=$('cam-vf-err-msg');
+    if(msg){
+      if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){
+        msg.innerHTML='Camera access was denied.<br>Allow camera access in your browser settings, then try again.';
+      } else if(err.name==='NotFoundError'){
+        msg.innerHTML='No camera was found on this device.';
+      } else {
+        msg.innerHTML='Could not start the camera.<br>'+esc(err.message||err.name);
+      }
+    }
+  }
+}
+
+function camStopStream(){
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  const video=$('cam-video');
+  if(video){ video.srcObject=null; }
+}
+
+function openViewfinder(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    openCamera(); return; // graceful fallback
+  }
+  camSessionCnt=0;
+  camUpdateCount();
+  const vf=$('cam-vf');
+  if(vf) vf.classList.add('open');
+  document.body.style.overflow='hidden';
+  camStartStream();
+}
+
+function closeViewfinder(){
+  camStopStream();
+  const vf=$('cam-vf');
+  if(vf) vf.classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function camCapture(){
+  const video  = $('cam-video');
+  const canvas = $('cam-canvas');
+  const flash  = $('cam-flash');
+  if(!video||!canvas||!camStream) return;
+  const vw=video.videoWidth, vh=video.videoHeight;
+  if(!vw||!vh) return; // stream not ready yet
+
+  // Same compression settings as readURL
+  const compress = IS_PRO ? getAutoCompress() : true;
+  const MAX      = compress ? 1920 : 2400;
+  const QUALITY  = compress ? 0.82 : 0.92;
+  const sc       = Math.min(1, MAX/Math.max(vw,vh));
+  canvas.width   = Math.round(vw*sc);
+  canvas.height  = Math.round(vh*sc);
+  canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+  const dataUrl  = canvas.toDataURL('image/jpeg',QUALITY);
+
+  // White flash feedback
+  if(flash){ flash.classList.remove('flash'); void flash.offsetWidth; flash.classList.add('flash'); }
+
+  // Free tier cap
+  if(!IS_PRO&&photos.length>=FREE_PHOTO_CAP){
+    showUpgrade({ title:'Photo limit reached', sub:'Free accounts hold up to '+FREE_PHOTO_CAP+' photos. Upgrade to Pro for unlimited photos.', icon:'📸' });
+    closeViewfinder(); return;
+  }
+
+  // Add photo directly — we already have a compressed JPEG from the canvas
+  const ph={id:uid(),src:dataUrl,thumbSrc:dataUrl,header:'',desc:'',annotations:[],cropSrc:null};
+  photos.push(ph);
+  camSessionCnt++;
+  camUpdateCount();
+  markDirty();
+  render();
+  // Build proper 600px thumb in background (needed later if user annotates)
+  buildThumb(ph).then(()=>render());
+}
+
+// Wire viewfinder buttons
+$('cam-close').onclick    = closeViewfinder;
+$('cam-err-close').onclick= closeViewfinder;
+$('cam-capture').onclick  = camCapture;
+$('cam-flip').onclick     = function(){ camFacing=(camFacing==='environment'?'user':'environment'); camStartStream(); };
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){ const vf=$('cam-vf'); if(vf&&vf.classList.contains('open')) closeViewfinder(); }
+});
+
 // Dropzone buttons trigger the hidden inputs
 $('btn-gallery').onclick=()=>$('fi').click();
-$('btn-camera').onclick=openCamera;
+$('btn-camera').onclick=openViewfinder;
 // Clicking anywhere on the dropzone (not on a button) also opens gallery
 $('dz').onclick=e=>{if(e.target===$('dz')||e.target.tagName==='H3'||e.target.tagName==='P'||e.target.tagName==='svg'||e.target.tagName==='path')$('fi').click()};
 
