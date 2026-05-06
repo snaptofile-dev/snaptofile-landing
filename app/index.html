@@ -206,6 +206,11 @@ body.sel-mode .csel{opacity:1}
 .pcard:hover{box-shadow:0 4px 20px rgba(15,23,42,.12);border-color:#cbd5e1}
 .pcard.selected{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue3)}
 .pcard.dragging{opacity:.4}.pcard.drag-over{border-color:var(--blue2);background:var(--blue4)}
+/* Touch drag handle — grip dots, touch-only */
+.cdrag-handle{display:none;align-items:center;justify-content:center;padding:5px 0 3px;color:var(--slatel);touch-action:none;cursor:grab;border-bottom:1px solid var(--border)}
+@media(hover:none){.cdrag-handle{display:flex}}
+/* Ghost card following the finger during touch drag */
+.touch-drag-ghost{position:fixed;z-index:500;pointer-events:none;width:140px;height:88px;border-radius:var(--r);overflow:hidden;background:#fff center/cover;border:2px solid var(--blue);opacity:.88;transform:scale(1.04) rotate(1.2deg);box-shadow:0 16px 40px rgba(15,23,42,.3)}
 
 .cimg{position:relative;background:#f1f5f9;overflow:hidden;cursor:pointer}
 .cimg img{display:block;width:100%;height:clamp(120px,25vw,200px);object-fit:cover;transition:transform .18s}
@@ -1061,6 +1066,7 @@ window.addEventListener('error', function(ev){
 });
 /* ─── STATE ───────────────────────────────────────────── */
 let photos=[], selected=new Set(), gridCols=3, compLv=1, dragSrc=null, dragGroup=[];
+let tdSrc=null, tdGroup=[], tdGhost=null, tdOverId=null; // touch drag state
 // Lightbox
 let lbId=null, lbTab='annot', lbZoom=1;
 let lbDrawing=false, lbDStart=null, lbDCur=null, lbDPts=[];
@@ -1982,6 +1988,63 @@ function makeCard(ph,idx){
     photos=rest;
     render();
   });
+
+  // ── TOUCH DRAG REORDER ──────────────────────────────
+  const dh=document.createElement('div');
+  dh.className='cdrag-handle';
+  dh.innerHTML='<svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><circle cx="5" cy="2" r="1.4"/><circle cx="11" cy="2" r="1.4"/><circle cx="5" cy="6" r="1.4"/><circle cx="11" cy="6" r="1.4"/><circle cx="5" cy="10" r="1.4"/><circle cx="11" cy="10" r="1.4"/></svg>';
+  dh.title='Drag to reorder';
+  dh.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse') return;
+    e.preventDefault();
+    dh.setPointerCapture(e.pointerId);
+    if(!selected.has(ph.id)){selected.clear();selected.add(ph.id);lastSelectedId=ph.id;render();}
+    tdSrc=ph.id;
+    tdGroup=[...photos.filter(p=>selected.has(p.id)).map(p=>p.id)];
+    const img=c.querySelector('.cimg img');
+    tdGhost=document.createElement('div');
+    tdGhost.className='touch-drag-ghost';
+    if(img) tdGhost.style.backgroundImage='url('+img.src+')';
+    if(tdGroup.length>1) tdGhost.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(74,92,63,.72);color:#fff;font-weight:700;font-size:14px">'+tdGroup.length+' photos</div>';
+    tdGhost.style.left=(e.clientX-70)+'px';
+    tdGhost.style.top=(e.clientY-44)+'px';
+    document.body.appendChild(tdGhost);
+    document.querySelectorAll('.pcard').forEach(el=>{if(tdGroup.includes(el.dataset.id))el.classList.add('dragging');});
+  });
+  dh.addEventListener('pointermove',e=>{
+    if(!tdGhost) return;
+    tdGhost.style.left=(e.clientX-70)+'px';
+    tdGhost.style.top=(e.clientY-44)+'px';
+    tdGhost.style.visibility='hidden';
+    const el=document.elementFromPoint(e.clientX,e.clientY);
+    tdGhost.style.visibility='';
+    const tc=el?.closest('[data-id]');
+    if(tdOverId) document.querySelector('[data-id="'+tdOverId+'"]')?.classList.remove('drag-over');
+    tdOverId=null;
+    if(tc&&!tdGroup.includes(tc.dataset.id)){tdOverId=tc.dataset.id;tc.classList.add('drag-over');}
+    const y=e.clientY,vh=window.innerHeight;
+    if(y<90) window.scrollBy(0,-12);
+    else if(y>vh-90) window.scrollBy(0,12);
+  });
+  const _tdEnd=()=>{
+    if(!tdSrc) return;
+    if(tdGhost){tdGhost.remove();tdGhost=null;}
+    document.querySelectorAll('.pcard.dragging').forEach(el=>el.classList.remove('dragging'));
+    if(tdOverId){
+      document.querySelector('[data-id="'+tdOverId+'"]')?.classList.remove('drag-over');
+      if(tdOverId!==tdSrc){
+        const dragged=photos.filter(p=>tdGroup.includes(p.id));
+        const rest=photos.filter(p=>!tdGroup.includes(p.id));
+        const insertAt=rest.findIndex(p=>p.id===tdOverId);
+        if(insertAt>=0){rest.splice(insertAt,0,...dragged);photos=rest;markDirty();render();}
+      }
+    }
+    tdSrc=null;tdGroup=[];tdOverId=null;
+  };
+  dh.addEventListener('pointerup',_tdEnd);
+  dh.addEventListener('pointercancel',_tdEnd);
+  c.insertBefore(dh,c.firstChild);
+
   return c;
 }
 
