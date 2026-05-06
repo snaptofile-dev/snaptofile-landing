@@ -166,6 +166,11 @@ img{max-width:100%;height:auto}
 #abar{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:8px clamp(10px,3vw,14px);margin-bottom:12px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;box-shadow:var(--sh);position:sticky;top:52px;z-index:20;transition:box-shadow .2s}
 #abar.stuck{box-shadow:0 4px 18px rgba(15,23,42,.13);border-color:#cbd5e1}
 .act-hint{font-size:10px;color:var(--slatel);margin-left:auto;display:none}
+/* ── MOBILE MULTI-SELECT ── */
+#btn-select-mode{display:none}
+@media(hover:none){#btn-select-mode{display:inline-flex}}
+body.sel-mode .csel{opacity:1}
+.pcard.pressing{outline:2px solid var(--blue);outline-offset:-2px;transition:outline .1s}
 
 /* ── DROPZONE ── */
 #dz{display:block;border:2px dashed #b5c0a8;border-radius:var(--r);padding:clamp(14px,4vw,22px);text-align:center;cursor:pointer;margin-bottom:14px;background:linear-gradient(135deg,#f0f1ea,#f6f7f1);transition:background .18s,border-color .18s;-webkit-tap-highlight-color:transparent}
@@ -1012,6 +1017,7 @@ body.lic-export-only #dz{
   <!-- ACTION BAR -->
   <div id="abar" style="display:none">
     <span style="font-size:12px;font-weight:700;color:var(--navy2)" id="selcnt"></span>
+    <button class="btn btn-light btn-sm" id="btn-select-mode">Select</button>
     <button class="btn btn-light btn-sm" id="btn-selall">Select All</button>
     <button class="btn btn-light btn-sm" id="btn-selnone" style="display:none">Clear</button>
     <button class="btn btn-primary btn-sm" id="btn-bulk" style="display:none">
@@ -3047,12 +3053,12 @@ function makeCard(ph,idx){
   const ib=document.createElement('div');ib.className='cidx';ib.textContent=idx+1;iw.appendChild(ib);
   const sb=document.createElement('div');sb.className='csel'+(sel?' on':'');
   sb.innerHTML=`<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>`;
-  sb.onclick=e=>{e.stopPropagation();toggleSel(ph.id,e)};iw.appendChild(sb);
+  sb.onclick=e=>{e.stopPropagation(); if(!selMode) enterSelMode(ph.id); else toggleSel(ph.id,e);};iw.appendChild(sb);
 
   if(ph.annotations?.length){const ab=document.createElement('div');ab.className='abadge';ab.style.left='7px';ab.style.bottom='6px';ab.textContent='✏️ '+ph.annotations.length;iw.appendChild(ab)}
   if(ph.cropSrc){const cb=document.createElement('div');cb.className='abadge';cb.style.right='7px';cb.style.bottom='6px';cb.style.background='rgba(16,163,74,.85)';cb.textContent='✂️ cropped';iw.appendChild(cb)}
 
-  iw.onclick=()=>openLb(ph.id);
+  iw.onclick=()=>{ if(selMode){ toggleSel(ph.id,null); } else { openLb(ph.id); }};
   c.appendChild(iw);
 
   const body=document.createElement('div');body.className='cbody';
@@ -3067,6 +3073,23 @@ function makeCard(ph,idx){
   body.appendChild(ht);body.appendChild(dt);body.appendChild(acts);c.appendChild(body);
 
   c.draggable=true;
+
+  // Long-press to enter selection mode (mobile multi-select, ~500ms)
+  let _lpTimer=null;
+  c.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1||selMode) return;
+    c.classList.add('pressing');
+    _lpTimer=setTimeout(()=>{
+      c.classList.remove('pressing');
+      if(navigator.vibrate) navigator.vibrate(40);
+      enterSelMode(ph.id);
+    },500);
+  },{passive:true});
+  const _lpCancel=()=>{ clearTimeout(_lpTimer); c.classList.remove('pressing'); };
+  c.addEventListener('touchend',_lpCancel,{passive:true});
+  c.addEventListener('touchmove',_lpCancel,{passive:true});
+  c.addEventListener('touchcancel',_lpCancel,{passive:true});
+
   c.addEventListener('dragstart',e=>{
     // If dragging a selected card, drag the whole group; otherwise drag just this one
     if(!selected.has(ph.id)){ selected.clear(); selected.add(ph.id); lastSelectedId=ph.id; render(); }
@@ -3153,6 +3176,7 @@ function stopDragScroll(){ _stopDS(); }
 
 /* ─── SELECTION ───────────────────────────────────────── */
 let lastSelectedId=null; // anchor point for shift-range selection
+let selMode=false;       // true on mobile after long-press or "Select" tap
 
 function toggleSel(id,e){
   const idx=photos.findIndex(p=>p.id===id);
@@ -3170,9 +3194,16 @@ function toggleSel(id,e){
     selected.has(id)?selected.delete(id):selected.add(id);
     lastSelectedId=id;
   } else {
-    // Plain click — select only this item, set as new anchor
-    if(selected.has(id)&&selected.size===1){ selected.clear(); lastSelectedId=null; }
-    else { selected.clear(); selected.add(id); lastSelectedId=id; }
+    if(selMode){
+      // Mobile selection mode: tap toggles without clearing others
+      selected.has(id)?selected.delete(id):selected.add(id);
+      lastSelectedId=id;
+      if(selected.size===0) exitSelMode();
+    } else {
+      // Desktop: plain click = select only this, set as anchor
+      if(selected.has(id)&&selected.size===1){ selected.clear(); lastSelectedId=null; }
+      else { selected.clear(); selected.add(id); lastSelectedId=id; }
+    }
   }
   render();
 }
@@ -3184,7 +3215,23 @@ function updateSelUI(){
   $('btn-bulk-del').style.display=n>0?'':'none';
 }
 $('btn-selall').onclick=()=>{photos.forEach(p=>selected.add(p.id));lastSelectedId=photos[0]?.id??null;render()};
-$('btn-selnone').onclick=()=>{selected.clear();lastSelectedId=null;render()};
+$('btn-selnone').onclick=()=>{ if(selMode){ exitSelMode(); } else { selected.clear();lastSelectedId=null;render(); }};
+$('btn-select-mode').onclick=()=>{ if(photos.length) enterSelMode(photos[0].id); };
+
+function enterSelMode(id){
+  selMode=true;
+  document.body.classList.add('sel-mode');
+  selected.clear();
+  if(id!=null){ selected.add(id); lastSelectedId=id; }
+  render();
+}
+function exitSelMode(){
+  selMode=false;
+  document.body.classList.remove('sel-mode');
+  selected.clear();
+  lastSelectedId=null;
+  render();
+}
 
 /* ═══════════════════════════════════════════════════════
    LIGHTBOX
