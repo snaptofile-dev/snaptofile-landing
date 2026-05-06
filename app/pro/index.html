@@ -2892,11 +2892,22 @@ $('fi').onchange=e=>{
   if(files.length)handleFiles(files);
   e.target.value='';
 };
-// Camera capture input — opens rear camera directly
+// Camera capture input — opens rear camera directly.
+// On Android, after each shot the camera closes; we re-trigger it
+// automatically so the user can keep shooting. The natural exit is the
+// device Back button, which returns with no file (files.length===0),
+// so the loop stops and the user lands back in the app.
 $('fi-cam').onchange=e=>{
   const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
-  if(files.length)handleFiles(files);
-  e.target.value='';
+  if(files.length){
+    handleFiles(files);
+    e.target.value='';
+    // Re-open camera for next shot. 400ms lets Android fully dismiss
+    // the camera activity before we re-trigger it.
+    setTimeout(()=>$('fi-cam').click(),400);
+  } else {
+    e.target.value='';
+  }
 };
 // Dropzone buttons trigger the hidden inputs
 $('btn-gallery').onclick=()=>$('fi').click();
