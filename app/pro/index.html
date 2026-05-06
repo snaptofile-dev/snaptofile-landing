@@ -198,6 +198,30 @@ body.sel-mode .csel{opacity:1}
 #fab-camera.visible{display:flex}
 #fab-camera:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(15,23,42,.45)}
 
+/* ── CAMERA-AGAIN BAR ── */
+/* Appears after each shot so the user can take another or stop.
+   Positioned above the FABs so it doesn't overlap them. */
+#cam-again-bar{
+  position:fixed;bottom:calc(82px + env(safe-area-inset-bottom));left:50%;
+  transform:translateX(-50%);z-index:60;display:none;
+  background:var(--navy);border-radius:50px;
+  padding:6px 10px 6px 6px;
+  box-shadow:0 4px 20px rgba(15,23,42,.45);
+  align-items:center;gap:6px;white-space:nowrap;
+}
+#cam-again-bar.visible{display:flex}
+#cam-again-bar .cab-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:0 13px;height:36px;border-radius:20px;
+  font-size:12px;font-weight:600;border:none;cursor:pointer;
+  font-family:inherit;-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#cam-again-bar .cab-take{background:var(--blue);color:#fff}
+#cam-again-bar .cab-take:hover{background:#33432b}
+#cam-again-bar .cab-done{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8)}
+#cam-again-bar .cab-done:hover{background:rgba(255,255,255,.2)}
+
 /* ── PHOTO GRID ── */
 #pgrid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:clamp(8px,2vw,12px)}
 
@@ -1312,6 +1336,15 @@ body.lic-export-only #dz{
 <button type="button" id="fab-camera">
   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
 </button>
+
+<!-- CAMERA-AGAIN BAR: appears after each shot; both buttons are real user gestures -->
+<div id="cam-again-bar">
+  <button type="button" class="cab-btn cab-take" id="cam-again-btn">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    Take another photo
+  </button>
+  <button type="button" class="cab-btn cab-done" id="cam-done-btn">✓ Done</button>
+</div>
 
 <script>
 'use strict';
@@ -2836,7 +2869,7 @@ window.addEventListener('beforeunload', e=>{
     if(fabCam)fabCam.classList.toggle('visible',v);
   },{threshold:0}).observe($('dz'));
   fab.onclick=()=>$('fi').click();
-  if(fabCam)fabCam.onclick=openCameraLoop;
+  if(fabCam)fabCam.onclick=openCamera;
 })();
 
 /* ─── ANNOTATION THUMBNAIL ────────────────────────────── */
@@ -2892,19 +2925,28 @@ $('fi').onchange=e=>{
   if(files.length)handleFiles(files);
   e.target.value='';
 };
-// Camera capture input — simple one-shot handler (used only for direct
-// programmatic triggers; the camera button uses openCameraLoop below).
+// Camera capture input — simple one-shot handler for direct triggers.
 $('fi-cam').onchange=e=>{
   const files=[...e.target.files].filter(f=>f.type.startsWith('image/'));
   if(files.length)handleFiles(files);
   e.target.value='';
 };
-// openCameraLoop — creates a FRESH <input> element for every shot so
-// Android's onchange fires reliably every time (reusing the same input
-// element causes onchange to stop firing after the 1st or 2nd photo).
-// User exits the loop naturally with the device Back button, which
-// returns with no file selected (files.length===0), ending the loop.
-function openCameraLoop(){
+
+// openCamera — creates a fresh <input> for one shot and shows the
+// "Take another photo" bar afterward. The bar buttons are real user
+// taps, which is the only reliable cross-platform way to re-open the
+// camera (setTimeout re-triggers are blocked by Android + iOS as
+// non-gesture calls).
+function showCamAgainBar(){
+  const bar=document.getElementById('cam-again-bar');
+  if(bar) bar.classList.add('visible');
+}
+function hideCamAgainBar(){
+  const bar=document.getElementById('cam-again-bar');
+  if(bar) bar.classList.remove('visible');
+}
+function openCamera(){
+  hideCamAgainBar();
   const inp=document.createElement('input');
   inp.type='file';
   inp.accept='image/*';
@@ -2916,16 +2958,19 @@ function openCameraLoop(){
     try{document.body.removeChild(inp);}catch(_){}
     if(files.length){
       handleFiles(files);
-      // Small delay lets Android fully dismiss the camera before reopening
-      setTimeout(openCameraLoop,400);
+      // Show the bar so the user can tap to take another (real gesture)
+      showCamAgainBar();
     }
-    // If files is empty (Back button pressed), loop ends naturally
   };
   inp.click();
 }
+// Wire the camera-again bar buttons
+$('cam-again-btn').onclick=openCamera;   // real tap — opens camera reliably
+$('cam-done-btn').onclick=hideCamAgainBar;
+
 // Dropzone buttons trigger the hidden inputs
 $('btn-gallery').onclick=()=>$('fi').click();
-$('btn-camera').onclick=openCameraLoop;
+$('btn-camera').onclick=openCamera;
 // Clicking anywhere on the dropzone (not on a button) also opens gallery
 $('dz').onclick=e=>{if(e.target===$('dz')||e.target.tagName==='H3'||e.target.tagName==='P'||e.target.tagName==='svg'||e.target.tagName==='path')$('fi').click()};
 
