@@ -42,8 +42,8 @@ export default async function handler(req, res) {
       // Stripe collects email automatically in Checkout. We capture it again from
       // the session in the webhook (Chunk 4) for license generation.
       billing_address_collection: 'auto',
-      success_url: `${process.env.APP_URL}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${process.env.APP_URL}/?checkout=canceled`,
+      success_url: `${process.env.APP_URL}/app/pro?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${process.env.APP_URL}/app/pro?checkout=canceled`,
     });
 
     // 303 redirect so a plain HTML form-POST from /app/pro flows cleanly to

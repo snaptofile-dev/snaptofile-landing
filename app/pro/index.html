@@ -776,6 +776,11 @@ body.lic-export-only #dz{
     <p class="lg-body">
       Paste the license key from your welcome email to unlock this device. Your subscription covers up to <em>3 devices</em>.
     </p>
+    <!-- Post-purchase notice. Shown only when ?checkout=success is in URL. -->
+    <div id="lic-gate-purchase-notice" style="display:none;margin:14px 0 18px;padding:14px 16px;background:#e8efe1;border:1px solid #8a9678;border-radius:8px;color:#33432b;font-size:14px;line-height:1.5;">
+      <strong style="display:block;margin-bottom:4px;">Purchase complete — thank you.</strong>
+      Your license key has been emailed to you. Check your inbox (and spam folder if you don&rsquo;t see it within a minute), then paste the key below to activate this device.
+    </div>
     <form class="lg-form" id="lic-gate-form" novalidate>
       <div>
         <label class="lg-label" for="lic-gate-key">License key</label>
@@ -1722,6 +1727,16 @@ function wireActivationForm(){
   const submitBtn= document.getElementById('lic-gate-submit');
   const buyBtn   = document.getElementById('lic-gate-buy');
   if(!form || !keyEl || !errorEl || !submitBtn) return;
+
+  // Post-purchase notice. Shown when the user lands here from a successful
+  // Stripe Checkout (?checkout=success in the URL). Hidden otherwise.
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('checkout') === 'success'){
+      const notice = document.getElementById('lic-gate-purchase-notice');
+      if(notice) notice.style.display = 'block';
+    }
+  } catch(_){}
 
   function showError(msg){ errorEl.textContent = msg; errorEl.style.display = 'block'; }
   function clearError(){ errorEl.style.display = 'none'; errorEl.textContent = ''; }
