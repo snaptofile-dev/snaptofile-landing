@@ -2233,7 +2233,12 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 // Falls back to the legacy <img> path on older browsers that will typically auto-orient
 // on their own anyway.
 async function readURL(f){
-  const MAX=2400; // Cap dimensions — prevents mobile memory crashes on 12MP+ camera files
+  // Compression settings — driven by the "Compress photos on import" toggle in Settings.
+  // ON (default): 1920px long edge, quality 0.82 — ~10x smaller, visually lossless at PDF sizes.
+  // OFF:          2400px long edge, quality 0.92 — original behavior, for litigation / chain-of-custody.
+  const compress = IS_PRO ? getAutoCompress() : true; // Free tier always compresses
+  const MAX      = compress ? 1920 : 2400;
+  const QUALITY  = compress ? 0.82 : 0.92;
 
   // ── Preferred path: createImageBitmap with orientation correction ──
   if(typeof createImageBitmap==='function'){
@@ -2245,7 +2250,7 @@ async function readURL(f){
       cv.width=w; cv.height=h;
       cv.getContext('2d').drawImage(bmp,0,0,w,h);
       try{bmp.close();}catch(_){}
-      return cv.toDataURL('image/jpeg',0.92);
+      return cv.toDataURL('image/jpeg',QUALITY);
     } catch(_){ /* fall through to legacy path for HEIC etc. */ }
   }
 
@@ -2261,7 +2266,7 @@ async function readURL(f){
       const cv=document.createElement('canvas');
       cv.width=w; cv.height=h;
       cv.getContext('2d').drawImage(img,0,0,w,h);
-      resolve(cv.toDataURL('image/jpeg',0.92));
+      resolve(cv.toDataURL('image/jpeg',QUALITY));
     };
     img.onerror=()=>{
       URL.revokeObjectURL(blobURL);
@@ -2276,7 +2281,7 @@ async function readURL(f){
           const cv=document.createElement('canvas');
           cv.width=w; cv.height=h;
           cv.getContext('2d').drawImage(img2,0,0,w,h);
-          resolve(cv.toDataURL('image/jpeg',0.92));
+          resolve(cv.toDataURL('image/jpeg',QUALITY));
         };
         img2.onerror=()=>reject(new Error('Cannot decode '+f.name));
         img2.src=e.target.result;
