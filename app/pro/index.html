@@ -2975,29 +2975,30 @@ async function handleFiles(files){
   const total=fileList.length;
   let added=0, failed=0;
 
-  // Show live progress toast — updates as each batch completes
+  // Show live progress toast — updates after each photo
   function prog(){
     const done=added+failed;
     toast('Loading '+done+' / '+total+' photos…');
   }
   prog();
 
-  // Process in batches of 3 — prevents browser from choking on
-  // large Google Photos selections where images may need to be
-  // fetched from the cloud before they can be decoded
-  const BATCH=3;
-  for(let i=0;i<fileList.length;i+=BATCH){
-    const batch=fileList.slice(i,i+BATCH);
-    const results=await Promise.allSettled(batch.map(f=>readURL(f)));
-    results.forEach(r=>{
-      if(r.status==='fulfilled'&&r.value){
-        photos.push({id:uid(),src:r.value,header:'',desc:'',annotations:[],cropSrc:null});
+  // Process one at a time — each canvas is fully decoded and stored before
+  // the next one starts. This prevents iOS Safari from holding multiple
+  // 12MP decoded canvases in memory simultaneously, which silently crashes
+  // the tab. Serial is marginally slower but stable at any volume.
+  for(let i=0;i<fileList.length;i++){
+    try{
+      const src=await readURL(fileList[i]);
+      if(src){
+        photos.push({id:uid(),src,header:'',desc:'',annotations:[],cropSrc:null});
         added++;
       } else {
         failed++;
       }
-    });
-    // Re-render incrementally so user sees photos appearing as they load
+    } catch(_){
+      failed++;
+    }
+    // Re-render after each photo so the user sees them appearing one by one
     render();
     prog();
   }
