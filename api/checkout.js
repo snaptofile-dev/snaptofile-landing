@@ -46,7 +46,11 @@ export default async function handler(req, res) {
       cancel_url:  `${process.env.APP_URL}/?checkout=canceled`,
     });
 
-    return res.status(200).json({ url: session.url });
+    // 303 redirect so a plain HTML form-POST from /app/pro flows cleanly to
+    // Stripe's hosted Checkout page. (200 + JSON would render as a blank page
+    // showing the response body — see Chunk 8 cutover bug, 2026-05-05.)
+    res.setHeader('Location', session.url);
+    return res.status(303).end();
   } catch (err) {
     console.error('[checkout] Stripe error:', err);
     return res.status(500).json({
