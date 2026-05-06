@@ -673,7 +673,7 @@ img{max-width:100%;height:auto}
   <div class="modal">
     <div class="modal-handle"></div>
     <h2>Bulk Edit</h2><p class="msub" id="bulk-sub">Leave blank to keep existing values.</p>
-    <label>Header</label><input type="text" id="bh" placeholder="e.g. Storm Damage — Roof"/>
+    <label>Header</label><input type="text" id="bh" placeholder="e.g. Storm Damage — Roof" style="text-transform:uppercase"/>
     <label>Description</label><textarea id="bd" rows="4" placeholder="Shared description…"></textarea>
     <div class="mact"><button class="btn btn-light" id="bulk-no">Cancel</button><button class="btn btn-indigo" id="bulk-yes">Apply</button></div>
   </div>
@@ -1556,6 +1556,7 @@ async function stfLoadFromFile(file){
     photos.forEach(ph=>{
       if(!ph.id) ph.id = uid();
       if(ph.header===undefined) ph.header = '';
+      ph.header=(ph.header||'').toUpperCase();
       if(ph.desc===undefined) ph.desc = '';
       if(!Array.isArray(ph.annotations)) ph.annotations = [];
       if(ph.cropSrc===undefined) ph.cropSrc = null;
@@ -2178,7 +2179,7 @@ ${lbPh()?.cropSrc?`<button class="btn btn-danger btn-sm" id="xc-reset" style="wi
 
 function buildInfoPanel(){
   const ph=lbPh();if(!ph)return'';
-  return`<div class="lf"><label>Header</label><input type="text" id="lb-hdr" value="${esc(ph.header)}" placeholder="Photo header…"/></div>
+  return`<div class="lf"><label>Header</label><input type="text" id="lb-hdr" value="${esc(ph.header)}" placeholder="Photo header…" style="text-transform:uppercase"/></div>
 <div class="lf"><label>Description</label><textarea id="lb-dsc" rows="7" placeholder="Describe what this photo shows…">${esc(ph.desc)}</textarea></div>
 <div style="font-size:10px;color:var(--slatel);margin-top:4px;margin-bottom:4px">✓ Changes save automatically</div>
 <div class="ldiv"></div>
@@ -2240,7 +2241,7 @@ function bindPanel(){
   const si=$('lb-sinfo');if(si)si.onclick=()=>{saveLbInfo();toast('Saved')};
 }
 
-function saveLbInfo(){const ph=lbPh();if(!ph)return;const h=$('lb-hdr'),d=$('lb-dsc');if(h)ph.header=h.value;if(d)ph.desc=d.value;$('lb-title').textContent=ph.header||`Photo ${photos.indexOf(ph)+1}`}
+function saveLbInfo(){const ph=lbPh();if(!ph)return;const h=$('lb-hdr'),d=$('lb-dsc');if(h)ph.header=h.value.toUpperCase();if(d)ph.desc=d.value;$('lb-title').textContent=ph.header||`Photo ${photos.indexOf(ph)+1}`}
 
 /* ─── ZOOM ────────────────────────────────────────────── */
 function fitZoom(){
@@ -3022,7 +3023,7 @@ $('btn-bulk-del').onclick=()=>{
 $('bulk-no').onclick=()=>$('mod-bulk').classList.remove('open');
 $('bulk-yes').onclick=()=>{
   const h=$('bh').value.trim(),d=$('bd').value.trim(),targets=[...selected];
-  photos.forEach(p=>{if(targets.includes(p.id)){if(h)p.header=h;if(d)p.desc=d}});
+  photos.forEach(p=>{if(targets.includes(p.id)){if(h)p.header=h.toUpperCase();if(d)p.desc=d}});
   $('mod-bulk').classList.remove('open');render();toast(`Updated ${targets.length} photos`);
 };
 
