@@ -515,8 +515,12 @@ body.sel-mode .csel{opacity:1}
 @keyframes um-in{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
 #upgrade-modal .um-icon{width:54px;height:54px;margin:0 auto 14px;background:linear-gradient(135deg,#dde3d2 0%,#d6dfd0 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px}
 #upgrade-modal .um-title{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#0f172a;margin-bottom:8px;letter-spacing:-.02em}
-#upgrade-modal .um-sub{font-size:13px;color:#475569;line-height:1.55;margin-bottom:20px}
+#upgrade-modal .um-sub{font-size:13px;color:#475569;line-height:1.55;margin-bottom:12px}
+#upgrade-modal .um-benefits{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:6px}
+#upgrade-modal .um-benefits li{font-size:12px;color:#475569;display:flex;align-items:center;gap:7px;text-align:left}
+#upgrade-modal .um-benefits li::before{content:'✓';color:#4a5c3f;font-weight:700;flex-shrink:0}
 #upgrade-modal .um-actions{display:flex;flex-direction:column;gap:8px}
+#upgrade-modal .um-checkout-btn{display:block;width:100%}
 #upgrade-modal .um-btn{display:block;padding:12px 18px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;border:none;transition:transform .12s,box-shadow .12s;font-family:inherit}
 #upgrade-modal .um-btn-primary{background:linear-gradient(135deg,#4a5c3f 0%,#5a7048 100%);color:#fff;box-shadow:0 4px 12px rgba(74,92,63,.25)}
 #upgrade-modal .um-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(74,92,63,.35)}
@@ -545,22 +549,17 @@ body.sel-mode .csel{opacity:1}
   <div class="um-card">
     <div class="um-icon" id="um-icon">✨</div>
     <div class="um-title" id="um-title">Go Pro</div>
-    <div class="um-sub" id="um-sub">Unlock unlimited photos, custom branding, and watermark-free PDFs.</div>
-    <form class="um-form" id="um-form" novalidate>
-      <input
-        type="email"
-        class="um-email"
-        id="um-email"
-        name="email_address"
-        placeholder="your@work-email.com"
-        autocomplete="email"
-        required
-      />
-      <button class="um-btn um-btn-primary" id="um-submit-btn" type="submit">Notify me when Pro launches</button>
-      <div class="um-status" id="um-status" role="status" aria-live="polite"></div>
+    <div class="um-sub" id="um-sub">Unlock the full SnapToFile toolkit.</div>
+    <ul class="um-benefits">
+      <li>Unlimited photos per report</li>
+      <li>Custom company branding on every PDF</li>
+      <li>Watermark-free exports</li>
+    </ul>
+    <div class="um-actions">
+      <a class="um-btn um-btn-primary" id="um-checkout-btn" href="https://buy.stripe.com/14A8wH9vj2Ls26pbfd8N200" target="_blank" rel="noopener noreferrer">Get Pro — $15 / month</a>
       <button class="um-btn um-btn-secondary" id="um-close-btn" type="button">Not right now</button>
-    </form>
-    <div class="um-foot">Pro launches soon — waitlist members get early pricing.</div>
+    </div>
+    <div class="um-foot">Cancel anytime. No contracts.</div>
   </div>
 </div>
 
@@ -1023,8 +1022,7 @@ body.sel-mode .csel{opacity:1}
    ─────────────────────────────────────────────────────── */
 const TIER              = 'free';                              // 'pro' | 'free'
 const BUILD_STAMP       = '2026-05-06 · in-app camera viewfinder';
-const KIT_PRO_FORM_ID   = '9393913';                          // Kit form: "SnapToFile — Pro Waitlist (In-App)"
-const WAITLIST_URL      = 'https://snaptofile.com/pro';       // Legacy — kept for backwards compat; not used after Phase 2b
+const STRIPE_CHECKOUT_URL = 'https://buy.stripe.com/14A8wH9vj2Ls26pbfd8N200'; // Pro subscription — $15/month
 const IS_PRO            = (TIER === 'pro');
 const FREE_PHOTO_CAP    = 12;                                 // hard cap for free tier
 const PRO_WATERMARK     = '<svg class="stf-wm-ico" viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M10 8 H50 L66 24 V72 H10 Z" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 V24 H66" stroke="#64748b" stroke-width="5" stroke-linejoin="miter"/><path d="M50 8 L66 24" stroke="#64748b" stroke-width="5"/><circle cx="37" cy="46" r="12" stroke="#64748b" stroke-width="5" fill="none"/><circle cx="37" cy="46" r="4" fill="#64748b"/></svg><span class="stf-wm-txt">Documented with <b>SnapToFile</b> &middot; snaptofile.com</span>';
@@ -1059,12 +1057,8 @@ function showUpgrade(opts){
   const submit = document.getElementById('um-submit-btn');
   const status = document.getElementById('um-status');
   if(title)  title.textContent  = opts.title || 'Go Pro';
-  if(sub)    sub.textContent    = opts.sub   || 'Unlock unlimited photos, custom branding, and watermark-free PDFs.';
+  if(sub)    sub.textContent    = opts.sub   || 'Unlock the full SnapToFile toolkit.';
   if(icon)   icon.textContent   = opts.icon  || '✨';
-  // Reset form state on every open — don't carry over success/error from a previous gate
-  if(email){ email.value = ''; email.disabled = false; }
-  if(submit){ submit.disabled = false; submit.textContent = 'Notify me when Pro launches'; }
-  if(status){ status.textContent = ''; status.className = 'um-status'; }
   currentGateSource = opts.gateSource || 'unknown';
   if(modal) modal.classList.add('open');
 }
@@ -1083,51 +1077,6 @@ function showUpgrade(opts){
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape' && modal && modal.classList.contains('open')){
       modal.classList.remove('open');
-    }
-  });
-
-  // Form submit — POST to Kit with the email + gate_source custom field
-  if(form) form.addEventListener('submit', async function(e){
-    e.preventDefault();
-    if(!email || !submit || !status) return;
-
-    const addr = (email.value || '').trim();
-    // Minimal client-side check; Kit does its own server-side validation
-    if(!addr || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)){
-      status.textContent = 'Please enter a valid email.';
-      status.className   = 'um-status error';
-      return;
-    }
-
-    submit.disabled    = true;
-    email.disabled     = true;
-    submit.textContent = 'Adding you to the list…';
-    status.textContent = '';
-    status.className   = 'um-status';
-
-    try{
-      const resp = await fetch('https://app.kit.com/forms/'+KIT_PRO_FORM_ID+'/subscriptions', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body:    JSON.stringify({
-          email_address: addr,
-          fields: { gate_source: currentGateSource }
-        })
-      });
-      if(!resp.ok) throw new Error('HTTP '+resp.status);
-      // Kit returns 200 with JSON on success; we don't need to inspect the body
-      status.textContent = '✓ You\'re on the list. We\'ll email you when Pro launches.';
-      status.className   = 'um-status success';
-      submit.textContent = 'Done';
-      // Auto-close after a beat so the user sees the confirmation
-      setTimeout(function(){ if(modal) modal.classList.remove('open'); }, 2200);
-    } catch(err){
-      console.error('[SnapToFile] Kit submission failed:', err);
-      submit.disabled    = false;
-      email.disabled     = false;
-      submit.textContent = 'Try again';
-      status.textContent = 'Couldn\'t reach the waitlist server. Check your connection and try again.';
-      status.className   = 'um-status error';
     }
   });
 })();
