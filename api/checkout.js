@@ -28,8 +28,13 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server misconfigured' });
   }
 
+  // Optional coupon passed from landing page pop-up offer (e.g. FIRST50).
+  // Stripe disallows allow_promotion_codes + discounts in the same session,
+  // so we swap them: coupon present → auto-apply it; absent → let user enter one.
+  const coupon = typeof req.body?.coupon === 'string' ? req.body.coupon.trim() : null;
+
   try {
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       mode: 'subscription',
       line_items: [
         {
@@ -37,14 +42,22 @@ export default async function handler(req, res) {
           quantity: 1,
         },
       ],
-      // Lets us hand testers 100%-off promo codes in Chunk 7 without rebuilding this endpoint.
-      allow_promotion_codes: true,
       // Stripe collects email automatically in Checkout. We capture it again from
       // the session in the webhook (Chunk 4) for license generation.
       billing_address_collection: 'auto',
       success_url: `${process.env.APP_URL}/app/pro?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${process.env.APP_URL}/app/pro?checkout=canceled`,
-    });
+    };
+
+    if (coupon) {
+      // Auto-apply the coupon — user sees the discount applied before paying.
+      sessionConfig.discounts = [{ coupon }];
+    } else {
+      // No coupon — let users enter promo codes themselves at checkout.
+      sessionConfig.allow_promotion_codes = true;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     // 303 redirect so a plain HTML form-POST from /app/pro flows cleanly to
     // Stripe's hosted Checkout page. (200 + JSON would render as a blank page

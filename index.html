@@ -365,7 +365,7 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
       Try SnapToFile Pro for <b>$7.50</b> — then $15/mo after that. Cancel anytime.<br>
       Use code <code id="offer-code">FIRST50</code> at checkout.
     </p>
-    <a class="offer-btn js-checkout" id="offer-checkout-btn" href="/api/checkout">Get started for $7.50</a>
+    <a class="offer-btn js-checkout" id="offer-checkout-btn" href="/api/checkout" data-coupon="FIRST50">Get started for $7.50</a>
     <div class="offer-fine">Billed monthly after the first month. Cancel anytime. No lock-in.</div>
   </div>
 </div>
@@ -1000,6 +1000,17 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '/api/checkout';
+    /* If the clicked element carries data-coupon, pass it as a hidden field.
+       The backend auto-applies it via Stripe discounts[]. Only the pop-up
+       button has data-coupon set — all other Get Pro buttons go to plain checkout. */
+    const coupon = e.currentTarget.dataset.coupon;
+    if (coupon) {
+      const input = document.createElement('input');
+      input.type  = 'hidden';
+      input.name  = 'coupon';
+      input.value = coupon;
+      form.appendChild(input);
+    }
     document.body.appendChild(form);
     form.submit();
   }
