@@ -365,7 +365,7 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
       Try SnapToFile Pro for <b>$7.50</b> — then $15/mo after that. Cancel anytime.<br>
       Use code <code id="offer-code">FIRST50</code> at checkout.
     </p>
-    <a class="offer-btn" id="offer-checkout-btn" href="/api/checkout">Get started for $7.50</a>
+    <a class="offer-btn js-checkout" id="offer-checkout-btn" href="/api/checkout">Get started for $7.50</a>
     <div class="offer-fine">Billed monthly after the first month. Cancel anytime. No lock-in.</div>
   </div>
 </div>
@@ -393,7 +393,7 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
       <a class="mast-link" href="#pricing">Pricing</a>
       <a class="mast-link" href="#faq">Questions</a>
       <a class="mast-cta-free" href="/app">Try free</a>
-      <a class="mast-cta-pro" href="/api/checkout">Get Pro · $15/mo</a>
+      <a class="mast-cta-pro js-checkout" href="/api/checkout">Get Pro · $15/mo</a>
     </nav>
   </div>
 </header>
@@ -419,7 +419,7 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
           Try it free — no signup
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
-        <a class="btn-secondary" href="/api/checkout">
+        <a class="btn-secondary js-checkout" href="/api/checkout">
           Get Pro · $15/mo
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
@@ -789,7 +789,7 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
           <li class="yes">No SnapToFile footer on PDFs</li>
           <li class="yes">Priority email support</li>
         </ul>
-        <a class="plan-btn plan-btn-pro" href="/api/checkout">Get Pro · $15/mo</a>
+        <a class="plan-btn plan-btn-pro js-checkout" href="/api/checkout">Get Pro · $15/mo</a>
         <div class="plan-fine">Cancel anytime. No lock-in.</div>
       </div>
     </div>
@@ -875,7 +875,7 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
       <div class="foot-col">
         <div class="foot-col-title">Product</div>
         <a href="/app">Free version</a>
-        <a href="/api/checkout">Get Pro</a>
+        <a class="js-checkout" href="/api/checkout">Get Pro</a>
         <a href="#features">What it does</a>
         <a href="#pricing">Pricing</a>
         <a href="#faq">Questions</a>
@@ -993,6 +993,17 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   overlay.addEventListener('click',(e)=>{ if(e.target === overlay) dismiss(); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') dismiss(); });
 })();
+/* ── Checkout links — POST to /api/checkout so the 303 redirect to Stripe works ── */
+(function(){
+  function goToCheckout(e){
+    e.preventDefault();
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/api/checkout';
+    document.body.appendChild(form);
+    form.submit();
+  }
+  document.querySelectorAll('.js-checkout').forEach(el => el.addEventListener('click', goToCheckout));
+})();
 </script>
-</body>
 </html>
