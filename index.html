@@ -20,6 +20,7 @@
   const VIDEO_URL         = "PLACEHOLDER";
   const VIDEO_TITLE       = "SnapToFile — the 3-minute walkthrough";
   const SAMPLE_PDF_URL    = "/samples/SnapToFile-sample-report.pdf";
+  const GUIDE_PDF_URL     = "/guide/SnapToFile_Pro_User_Guide.pdf";
   const STRIPE_CHECKOUT_URL = "/api/checkout";
   /* FIRST50 = 50% off first month. Create in Stripe Dashboard before promoting.
      Backend wiring tracked in Future_Planning.md under FIRST50 coupon task. */
@@ -267,6 +268,29 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
 .how-step p{font-size:14px;color:var(--muted);line-height:1.65}
 .how-arrow{position:absolute;right:-22px;top:50%;transform:translateY(-50%);width:28px;height:28px;background:var(--cream);border:1px solid var(--rule);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--sage);z-index:2}
 .how-step:last-child .how-arrow{display:none}
+/* GUIDE SECTION */
+.guide{padding:clamp(60px,7vw,90px) 0;background:var(--cream-deep);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.guide-hdr{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1.5px solid var(--ink);padding-bottom:14px;margin-bottom:48px;flex-wrap:wrap;gap:12px}
+.guide-hdr h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,44px);letter-spacing:-.02em;line-height:1.05;margin-top:18px}
+.guide-hdr h2 em{font-style:italic;color:var(--sage-deep);font-weight:400}
+.guide-hdr-right{font-family:var(--serif);font-size:17px;line-height:1.6;color:var(--muted);max-width:36ch;align-self:flex-end}
+.guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r-lg);overflow:hidden;margin-bottom:24px}
+.guide-step{background:var(--cream);padding:24px 22px}
+.guide-step.dark{background:var(--ink)}
+.guide-step-num{font-family:var(--serif);font-style:italic;font-weight:400;font-size:28px;color:var(--sage);line-height:1;margin-bottom:8px}
+.guide-step.dark .guide-step-num{color:var(--sage-soft)}
+.guide-step-title{font-family:var(--serif);font-weight:600;font-size:15px;color:var(--ink);margin-bottom:6px;line-height:1.2}
+.guide-step.dark .guide-step-title{color:var(--cream)}
+.guide-step-body{font-size:13px;line-height:1.6;color:var(--muted)}
+.guide-step.dark .guide-step-body{color:rgba(245,239,230,.65)}
+.guide-pro-badge{display:inline-block;background:var(--sage);color:white;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;font-family:var(--sans);vertical-align:middle;margin-left:4px;position:relative;top:-1px}
+.guide-cta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;padding:24px 28px;border:1px solid var(--rule);background:var(--cream);border-radius:var(--r)}
+.guide-cta-copy p{font-size:13px;color:var(--muted);line-height:1.5;margin-top:4px}
+.guide-cta-title{font-family:var(--serif);font-weight:500;font-size:17px;color:var(--ink)}
+.guide-download-btn{display:inline-flex;align-items:center;gap:10px;background:var(--sage);color:white;font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.04em;padding:13px 24px;border-radius:8px;white-space:nowrap;transition:background .18s,transform .15s}
+.guide-download-btn:hover{background:var(--sage-deep);transform:translateY(-1px)}
+@media(max-width:960px){.guide-grid{grid-template-columns:repeat(2,1fr)}.guide-hdr{flex-direction:column}}
+@media(max-width:640px){.guide-grid{grid-template-columns:1fr}.guide-cta{flex-direction:column}}
 /* VIDEO */
 .video{padding:clamp(60px,8vw,100px) 0;background:var(--paper);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .video-hdr{text-align:center;margin-bottom:clamp(36px,4vw,52px);max-width:640px;margin-left:auto;margin-right:auto}
@@ -585,6 +609,77 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
     </div>
   </div>
 </section>
+
+<!-- PRO USER GUIDE -->
+<section class="guide" id="guide">
+  <div class="wrap">
+    <div class="guide-hdr">
+      <div>
+        <div class="eyebrow">Pro User Guide</div>
+        <h2>Everything you need,<br><em>step by step.</em></h2>
+      </div>
+      <p class="guide-hdr-right">New to SnapToFile? This guide walks you through every feature of the Pro generator &mdash; from setup to final export.</p>
+    </div>
+    <div class="guide-grid">
+      <div class="guide-step">
+        <div class="guide-step-num">1</div>
+        <div class="guide-step-title">Company Profile</div>
+        <p class="guide-step-body">Enter your company name, address, and logo once. SnapToFile remembers it for every future report.</p>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-num">2</div>
+        <div class="guide-step-title">Report Information</div>
+        <p class="guide-step-body">Add the insured name, property address, claim number, date of loss, and inspector name.</p>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-num">3</div>
+        <div class="guide-step-title">Upload Photos</div>
+        <p class="guide-step-body">Drag and drop, browse your gallery, or shoot directly from your phone&rsquo;s camera. Add captions to each photo.</p>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-num">4</div>
+        <div class="guide-step-title">Annotate <span class="guide-pro-badge">Pro</span></div>
+        <p class="guide-step-body">Mark up photos with arrows, circles, rectangles, highlights, freehand drawing, text labels, and the magnify tool.</p>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-num">5</div>
+        <div class="guide-step-title">Transform <span class="guide-pro-badge">Pro</span></div>
+        <p class="guide-step-body">Crop, rotate, zoom, and pan any photo directly inside the app &mdash; no external editor needed.</p>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-num">6</div>
+        <div class="guide-step-title">Bulk Edit</div>
+        <p class="guide-step-body">Select multiple photos at once to apply shared captions or other actions across the whole group in one step.</p>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-num">7</div>
+        <div class="guide-step-title">Damage Summary</div>
+        <p class="guide-step-body">Use the template builder to write a structured, professional damage summary &mdash; consistent across every report.</p>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-num">8</div>
+        <div class="guide-step-title">Set Compression <span class="guide-pro-badge">Pro</span></div>
+        <p class="guide-step-body">Dial in the right file size for your delivery method &mdash; maximum quality for the carrier, smaller for email or portals.</p>
+      </div>
+      <div class="guide-step dark">
+        <div class="guide-step-num">9</div>
+        <div class="guide-step-title">Export PDF</div>
+        <p class="guide-step-body">Click Export. Your browser generates a cover page and two-up photo pages &mdash; professionally laid out and ready to send.</p>
+      </div>
+    </div>
+    <div class="guide-cta">
+      <div class="guide-cta-copy">
+        <div class="guide-cta-title">Want the full walkthrough?</div>
+        <p>Download the complete Pro User Guide &mdash; a printable PDF covering every step in detail.</p>
+      </div>
+      <a id="guide-download-btn" href="#" class="guide-download-btn">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M3 17h14"/></svg>
+        Download the guide (PDF)
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- FEATURES -->
 <section class="features" id="features">
   <div class="wrap">
@@ -898,6 +993,12 @@ footer{background:var(--ink);color:var(--cream);padding:clamp(48px,6vw,80px) 0 c
 (function(){
   const link = document.getElementById('sample-pdf-link');
   if(link) link.href = SAMPLE_PDF_URL;
+})();
+
+/* ── Guide PDF download ── */
+(function(){
+  const btn = document.getElementById('guide-download-btn');
+  if(btn && typeof GUIDE_PDF_URL !== 'undefined' && GUIDE_PDF_URL) btn.href = GUIDE_PDF_URL;
 })();
 
 /* ── Video facade ── */
