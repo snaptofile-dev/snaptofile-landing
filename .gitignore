@@ -1,0 +1,4 @@
+# SnapToFile deploy tooling — keep out of repo
+deploy_generators.ps1
+DEPLOY.bat
+obfuscate_helper.cjs
