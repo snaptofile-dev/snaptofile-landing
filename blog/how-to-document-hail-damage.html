@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>How to Document Hail Damage for an Insurance Claim — SnapToFile</title>
+<meta name="description" content="A complete field guide to documenting hail damage for insurance claims. Step-by-step photos, test squares, soft metals, and report writing, from an adjuster with 20 years of experience."/>
+<meta property="og:title" content="How to Document Hail Damage for an Insurance Claim"/>
+<meta property="og:description" content="A complete field guide for adjusters and roofing contractors. Learn the exact sequence for hail documentation that holds up with carriers."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://snaptofile.com/blog/how-to-document-hail-damage"/>
+<link rel="canonical" href="https://snaptofile.com/blog/how-to-document-hail-damage"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M10 8 H50 L66 24 V72 H10 Z' fill='%231a1a1a'/%3E%3Cpath d='M50 8 V24 H66' stroke='%23f5efe6' stroke-width='3' fill='none'/%3E%3Ccircle cx='37' cy='46' r='14' fill='%234a5c3f'/%3E%3Ccircle cx='37' cy='46' r='5' fill='%23f5efe6'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f5efe6;--cream-deep:#ece4d3;--paper:#fbf7ef;
+  --ink:#1a1a1a;--ink-soft:#2d2d2d;--muted:#6b6b6b;
+  --rule:#d9cfb9;--sage:#4a5c3f;--sage-deep:#33432b;--sage-soft:#8a9678;
+  --rust:#b8542a;--gold:#b08d3a;
+  --serif:'Fraunces','Cormorant Garamond',Georgia,serif;
+  --sans:'Inter Tight',-apple-system,BlinkMacSystemFont,sans-serif;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,40px);position:relative;z-index:2}
+
+/* ── MASTHEAD ── */
+header.masthead{border-bottom:1px solid var(--rule);padding:18px 0;background:var(--cream);position:relative;z-index:3}
+.mast-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.mast-brand{display:inline-flex;align-items:center;gap:11px;font-family:var(--serif);font-weight:900;font-size:clamp(22px,2.6vw,30px);letter-spacing:-.02em;line-height:1;color:var(--ink)}
+.mast-brand-icon{flex-shrink:0;width:34px;height:34px;display:block;transition:transform .25s ease}
+.mast-brand:hover .mast-brand-icon{transform:rotate(-4deg) scale(1.04)}
+.mast-brand em{font-style:italic;font-weight:400;color:var(--sage)}
+.mast-right{display:flex;gap:16px;align-items:center}
+.mast-link{font-size:12px;font-weight:500;color:var(--ink-soft);border-bottom:1px solid transparent;transition:border-color .2s}
+.mast-link:hover{border-bottom-color:var(--ink)}
+.mast-cta-pro{background:var(--ink);color:var(--cream);padding:9px 18px;border-radius:30px;font-size:12px;font-weight:600;letter-spacing:.02em;transition:background .18s,transform .18s}
+.mast-cta-pro:hover{background:var(--sage-deep);transform:translateY(-1px)}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{padding:20px 0 0;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.breadcrumb a{color:var(--muted);border-bottom:1px solid var(--rule);transition:color .15s,border-color .15s}
+.breadcrumb a:hover{color:var(--sage);border-color:var(--sage)}
+.breadcrumb span{color:var(--rule)}
+
+/* ── ARTICLE HEADER ── */
+.article-header{padding:clamp(36px,6vw,72px) 0 clamp(28px,4vw,48px)}
+.article-meta{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.article-tag{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);background:var(--sage);padding:5px 12px;border-radius:30px}
+.article-date{font-size:12px;color:var(--muted);font-weight:500}
+.article-readtime{font-size:12px;color:var(--muted);font-weight:500}
+.article-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--rule)}
+h1.article-title{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5.5vw,64px);line-height:1.05;letter-spacing:-.025em;color:var(--ink);margin-bottom:24px;max-width:820px}
+h1.article-title em{font-style:italic;font-weight:400;color:var(--sage-deep)}
+.article-lede{font-family:var(--serif);font-size:clamp(17px,1.6vw,21px);line-height:1.6;color:var(--ink-soft);max-width:680px;margin-bottom:32px}
+.article-byline{display:flex;align-items:center;gap:14px;padding:20px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.byline-avatar{width:44px;height:44px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.byline-avatar span{font-family:var(--serif);font-size:18px;font-weight:500;color:var(--cream);font-style:italic}
+.byline-text .name{font-size:14px;font-weight:600;color:var(--ink)}
+.byline-text .title{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* ── ARTICLE LAYOUT ── */
+.article-layout{display:grid;grid-template-columns:1fr 280px;gap:clamp(32px,5vw,72px);align-items:start;padding:clamp(32px,5vw,56px) 0}
+@media(max-width:860px){.article-layout{grid-template-columns:1fr}}
+
+/* ── ARTICLE BODY ── */
+.article-body{min-width:0}
+.article-body h2{font-family:var(--serif);font-weight:500;font-size:clamp(22px,2.8vw,32px);letter-spacing:-.02em;line-height:1.15;color:var(--ink);margin:clamp(36px,4vw,56px) 0 16px;padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--rule)}
+.article-body h2:first-child{margin-top:0;padding-top:0;border-top:none}
+.article-body h3{font-family:var(--serif);font-weight:500;font-size:clamp(18px,2vw,23px);letter-spacing:-.015em;color:var(--ink);margin:28px 0 12px}
+.article-body p{font-size:clamp(15px,1.2vw,17px);line-height:1.75;color:var(--ink-soft);margin-bottom:20px}
+.article-body p strong{color:var(--ink);font-weight:600}
+.article-body ul,.article-body ol{margin:0 0 20px 0;padding-left:0;list-style:none}
+.article-body ul li,.article-body ol li{font-size:clamp(15px,1.2vw,17px);line-height:1.7;color:var(--ink-soft);padding:6px 0 6px 24px;position:relative;border-bottom:1px solid var(--rule)}
+.article-body ul li:last-child,.article-body ol li:last-child{border-bottom:none}
+.article-body ul li::before{content:"—";position:absolute;left:0;color:var(--sage);font-weight:600}
+.article-body ol{counter-reset:ol}
+.article-body ol li{counter-increment:ol}
+.article-body ol li::before{content:counter(ol);position:absolute;left:0;color:var(--sage);font-weight:700;font-family:var(--serif);font-size:15px}
+.article-body ul li strong,.article-body ol li strong{color:var(--ink);font-weight:600}
+
+/* checklist */
+.checklist{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:24px 28px;margin:28px 0}
+.checklist h4{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}
+.checklist ul{list-style:none;padding:0;margin:0}
+.checklist ul li{font-size:14px;color:var(--ink-soft);padding:7px 0 7px 28px;position:relative;border-bottom:1px solid var(--rule)}
+.checklist ul li:last-child{border-bottom:none}
+.checklist ul li::before{content:"☐";position:absolute;left:0;color:var(--sage);font-size:16px;line-height:1}
+
+/* tidbit callout */
+.tidbit{background:var(--paper);border-left:3px solid var(--sage);border-radius:0 var(--r) var(--r) 0;padding:18px 22px;margin:24px 0;position:relative}
+.tidbit-label{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);margin-bottom:8px}
+.tidbit p{font-size:14px;line-height:1.65;color:var(--ink-soft);margin:0}
+
+/* not-damage box */
+.not-damage{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:20px 24px;margin:20px 0}
+.not-damage h4{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+.not-damage ul{list-style:none;padding:0;margin:0}
+.not-damage ul li{font-size:14px;color:var(--ink-soft);padding:5px 0 5px 20px;position:relative}
+.not-damage ul li::before{content:"✕";position:absolute;left:0;color:var(--rust);font-size:12px;font-weight:700;line-height:1.4}
+
+/* section divider */
+.section-rule{height:1px;background:var(--rule);margin:clamp(32px,4vw,48px) 0}
+
+/* ── SIDEBAR ── */
+.sidebar{position:sticky;top:28px}
+.sidebar-card{background:var(--ink);color:var(--cream);border-radius:var(--r);padding:28px 24px;margin-bottom:20px}
+.sidebar-card h3{font-family:var(--serif);font-size:20px;font-weight:500;line-height:1.2;margin-bottom:10px}
+.sidebar-card h3 em{font-style:italic;font-weight:400;color:var(--sage-soft)}
+.sidebar-card p{font-size:13px;line-height:1.6;color:#b0a898;margin-bottom:20px}
+.sidebar-btn{display:block;background:var(--sage);color:var(--cream);text-align:center;padding:12px 16px;border-radius:var(--r);font-size:13px;font-weight:600;letter-spacing:.03em;transition:background .18s,transform .15s}
+.sidebar-btn:hover{background:var(--sage-deep);transform:translateY(-1px)}
+.sidebar-btn-secondary{display:block;text-align:center;padding:10px 16px;border:1px solid #3a3a3a;border-radius:var(--r);font-size:12px;font-weight:500;color:#b0a898;margin-top:10px;transition:border-color .18s,color .18s}
+.sidebar-btn-secondary:hover{border-color:var(--sage-soft);color:var(--cream)}
+.sidebar-toc{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:22px 20px}
+.sidebar-toc h4{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}
+.sidebar-toc ol{list-style:none;padding:0;margin:0;counter-reset:toc}
+.sidebar-toc ol li{counter-increment:toc;padding:6px 0 6px 24px;position:relative;border-bottom:1px solid var(--rule);font-size:12px;line-height:1.4}
+.sidebar-toc ol li:last-child{border-bottom:none}
+.sidebar-toc ol li::before{content:counter(toc);position:absolute;left:0;color:var(--sage);font-weight:700;font-family:var(--serif);font-size:13px}
+.sidebar-toc ol li a{color:var(--muted);transition:color .15s}
+.sidebar-toc ol li a:hover{color:var(--sage)}
+
+/* ── CTA STRIP ── */
+.cta-strip{background:var(--sage);border-radius:var(--r);padding:clamp(28px,4vw,44px) clamp(24px,4vw,48px);margin:clamp(36px,5vw,56px) 0;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cta-strip-text h3{font-family:var(--serif);font-weight:500;font-size:clamp(20px,2.5vw,28px);color:var(--cream);margin-bottom:8px}
+.cta-strip-text h3 em{font-style:italic;font-weight:400}
+.cta-strip-text p{font-size:14px;color:rgba(245,239,230,.75);max-width:480px;line-height:1.6}
+.cta-strip-btn{background:var(--cream);color:var(--sage-deep);padding:14px 28px;border-radius:var(--r);font-size:14px;font-weight:700;letter-spacing:.02em;white-space:nowrap;flex-shrink:0;transition:background .18s,transform .15s}
+.cta-strip-btn:hover{background:var(--paper);transform:translateY(-1px)}
+
+/* ── AUTHOR BIO ── */
+.author-bio{border-top:1px solid var(--rule);padding:clamp(28px,4vw,40px) 0;display:flex;gap:20px;align-items:flex-start}
+.author-bio-avatar{width:56px;height:56px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.author-bio-avatar span{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--cream);font-style:italic}
+.author-bio-text .name{font-family:var(--serif);font-size:18px;font-weight:500;margin-bottom:6px}
+.author-bio-text p{font-size:14px;line-height:1.65;color:var(--muted)}
+
+/* ── BACK TO BLOG ── */
+.back-link{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--sage);border-bottom:1px solid transparent;transition:border-color .15s;margin:0 0 clamp(24px,3vw,36px)}
+.back-link:hover{border-bottom-color:var(--sage)}
+.back-link svg{transition:transform .15s}
+.back-link:hover svg{transform:translateX(-3px)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--rule);padding:clamp(28px,4vw,40px) 0;margin-top:clamp(40px,6vw,72px)}
+.foot-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-brand{font-family:var(--serif);font-weight:700;font-size:18px;color:var(--ink)}
+.foot-brand em{font-style:italic;font-weight:400;color:var(--sage)}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+.foot-links a{font-size:12px;color:var(--muted);transition:color .15s}
+.foot-links a:hover{color:var(--sage)}
+.foot-copy{font-size:11px;color:var(--rule);margin-top:14px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="mast-row">
+      <a href="/" class="mast-brand">
+        <svg class="mast-brand-icon" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+          <path d="M10 8 H50 L66 24 V72 H10 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+          <path d="M50 8 V24 H66" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+          <path d="M50 8 L66 24" stroke="#1a1a1a" stroke-width="2.5"/>
+          <g transform="translate(37 46)">
+            <circle r="15" fill="none" stroke="#4a5c3f" stroke-width="2.8"/>
+            <g stroke="#4a5c3f" stroke-width="2.8" stroke-linecap="round" fill="none">
+              <path d="M 0 -15 L 5 -3"/><path d="M 13 -7.5 L 5 3"/><path d="M 13 7.5 L 0 6"/>
+              <path d="M 0 15 L -5 3"/><path d="M -13 7.5 L -5 -3"/><path d="M -13 -7.5 L 0 -6"/>
+            </g>
+          </g>
+        </svg>
+        Snap<em>ToFile</em>
+      </a>
+      <div class="mast-right">
+        <a href="/blog" class="mast-link">Blog</a>
+        <a href="/app" class="mast-link">Free Tool</a>
+        <a href="/app/pro" class="mast-cta-pro">Try Pro →</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ARTICLE -->
+<main>
+  <div class="wrap">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span>›</span>
+      <a href="/blog">Blog</a>
+      <span>›</span>
+      <span>Hail Damage Documentation</span>
+    </nav>
+
+    <!-- ARTICLE HEADER -->
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="article-tag">Field Guide</span>
+        <span class="article-meta-dot"></span>
+        <span class="article-date">2026</span>
+        <span class="article-meta-dot"></span>
+        <span class="article-readtime">12 min read</span>
+      </div>
+      <h1 class="article-title">How to Document Hail Damage <em>for an Insurance Claim</em></h1>
+      <p class="article-lede">The difference between a paid claim and a denied one often comes down to documentation. A step-by-step field guide for independent adjusters and roofing contractors.</p>
+      <div class="article-byline">
+        <div class="byline-avatar"><span>A</span></div>
+        <div class="byline-text">
+          <div class="name">Albert Miller</div>
+          <div class="title">Former Independent Adjuster · Founder, SnapToFile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO-COLUMN LAYOUT -->
+    <div class="article-layout">
+
+      <!-- BODY -->
+      <article class="article-body">
+
+        <a href="/blog" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          All articles
+        </a>
+
+        <h2 id="why">Why Documentation Makes or Breaks a Hail Claim</h2>
+        <p>Carriers don't approve claims based on what happened. They approve them based on what you can prove happened. A roof with legitimate hail damage gets denied every day because the field documentation was incomplete, disorganized, or unprofessional.</p>
+        <p>Good documentation does three things:</p>
+        <ul>
+          <li><strong>Establishes that hail actually fell</strong> at that specific location on a specific date</li>
+          <li><strong>Connects the hail event to the observed damage,</strong> not wear, not age, not installation defect</li>
+          <li><strong>Quantifies the damage</strong> well enough that an estimator can scope it without guessing</li>
+        </ul>
+        <p>If your report can do all three, approval becomes straightforward.</p>
+
+        <h2 id="step1">Step 1: Verify the Storm Event Before You Arrive</h2>
+        <p>Before you set foot on the property, confirm the storm data. This protects you and anchors your report.</p>
+        <ul>
+          <li>Pull a hail verification report from a service like CoreLogic, Verisk Weather, or HailTrace for the property address and date of loss</li>
+          <li>Note the reported hail size. Quarter-inch is nuisance, one-inch and above starts causing functional damage to most roofing materials</li>
+          <li>Screenshot or save the report; it goes in your documentation package as exhibit one</li>
+        </ul>
+        <p>If the storm data doesn't show hail at that address on that date, document what you find and write it up honestly.</p>
+
+        <h2 id="step2">Step 2: Gear Up Before You Climb</h2>
+        <p>You don't need expensive equipment. You need the right equipment ready before the inspection starts.</p>
+        <p><strong>What to bring:</strong></p>
+        <ul>
+          <li>Your phone (camera) fully charged</li>
+          <li>A measuring tape or hail size reference card</li>
+          <li>A soapstone or sidewalk chalk for marking test squares</li>
+          <li>A notepad or your documentation app open and ready</li>
+          <li>A tape measure for ridge and eave lengths</li>
+        </ul>
+        <p><strong>Optional camera settings to check:</strong></p>
+        <ul>
+          <li>Location/GPS tagging turned ON, which embeds the property coordinates in every photo</li>
+          <li>Date and time confirmed accurate, as timestamps in metadata matter for date-of-loss disputes</li>
+          <li>HDR, auto-enhance, and live photo mode turned OFF, since you want natural light photos, not processed ones</li>
+        </ul>
+
+        <h2 id="step3">Step 3: Establish the Property Before You Document Damage</h2>
+        <p>Every good report starts with context photos. These prove you were at the right property and give the reviewer a frame of reference before they look at damage.</p>
+        <p><strong>Take these shots first:</strong></p>
+        <ol>
+          <li>Street-level establishing shot, full front of the property with the address visible if possible</li>
+          <li>All four elevations, standing back far enough to capture the full roof slope: front, rear, left side, right side</li>
+          <li>Overhead or drone shot if available, showing the full roof footprint at once</li>
+          <li>Nearby reference objects, like neighboring roofs, fences, metal outbuildings. These become supporting evidence later.</li>
+        </ol>
+        <p>Label these clearly. "Front Elevation" or "Front Slope." To give even more clarity, note the cardinal direction: "Front faces south" in the body or description area.</p>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p>Slope refers to the roof facets. Elevation refers to the sided facets of the home. Keeping these terms consistent in your reports builds credibility with reviewers.</p>
+        </div>
+
+        <h2 id="step4">Step 4: Document the Supporting Evidence First</h2>
+        <p>Here's what a lot of new adjusters get backwards: they head straight for the roof. Start at ground level instead. The soft metals and secondary surfaces tell the story before you ever climb a ladder.</p>
+        <p>Hail hits on gutters, downspouts, AC condenser fins, window screens, and painted wood are almost impossible to fake or confuse with other damage. They corroborate what you find on the roof.</p>
+        <p><strong>Work your way around the property and photograph:</strong></p>
+        <ul>
+          <li><strong>Gutters and downspouts,</strong> looking for circular impact dimples, fresh dents with exposed bare metal. Photograph each elevation's gutters separately.</li>
+          <li><strong>AC condenser unit;</strong> the aluminum fins dent easily. This is one of the best indicators of hail size and density. Get close, get the light right.</li>
+          <li><strong>Window screens;</strong> punctures or tears in screen mesh are clear impact evidence</li>
+          <li><strong>Painted wood surfaces,</strong> including fascia boards, window sills, wood trim. Fresh impacts show raw wood or chipped paint with no weathering</li>
+          <li><strong>Vehicles parked on property at time of loss;</strong> document dents if the owner allows. Note clearly that vehicle documentation is supplementary only.</li>
+          <li><strong>Soft metal roof penetrations,</strong> including plumbing vents, pipe boots, lead flashings. These show hits even when shingles are debatable.</li>
+        </ul>
+        <p>For each item: photograph the full object first (context), then move in tight on individual impacts. Both shots matter.</p>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p>Starting a routine like always beginning at the front and moving right sets up a reliable pattern. When you're stressed for time or overwhelmed on a large loss, you automatically revert to: front, right, rear, left, overviews first, close-ups second. Before you know it the documentation is done and in order. On really large properties, break your photos into folders by elevation or trade.</p>
+        </div>
+
+        <h2 id="step5">Step 5: Document the Roof Surface Systematically</h2>
+        <p>Now you climb. Work one slope at a time, in a consistent pattern. Don't jump around.</p>
+
+        <h3>What you're looking for on asphalt shingles</h3>
+        <p>Functional hail damage (what carriers care about) looks like:</p>
+        <ul>
+          <li><strong>Bruising,</strong> a soft spot in the mat beneath the granules, often with a dark center where granules were knocked away. Press with your thumb; a true bruise has little to no spring-back.</li>
+          <li><strong>Granule displacement;</strong> fresh impacts show bare fiberglass mat. The missing granules will be in the gutters below.</li>
+          <li><strong>Fractured or cracked mat;</strong> on older or more brittle shingles, direct hits crack the fiberglass mat itself</li>
+          <li><strong>Spatter marks,</strong> the mud/debris impact ring around a hit, visible in low-angle light</li>
+        </ul>
+
+        <div class="not-damage">
+          <h4>What is NOT functional hail damage</h4>
+          <ul>
+            <li>Granule loss from foot traffic or age</li>
+            <li>Blistering, a manufacturing defect that looks like impacts to the untrained eye</li>
+            <li>Cracking from thermal cycling</li>
+            <li>Previous repairs</li>
+          </ul>
+        </div>
+
+        <h3>How to photograph roof hits</h3>
+        <ol>
+          <li><strong>Chalk a test square,</strong> marking a 10x10 foot area and count hits within it. Multiple test squares across the roof give you a hit density count, which matters for functional damage thresholds.</li>
+          <li><strong>Low-angle shots;</strong> crouch down and shoot at a low angle across the shingle surface. Use a folder, notepad, or other large object to create full shade for your entire photo. This reveals bruising and spatter marks that disappear in straight-down shots.</li>
+          <li><strong>Close-up with scale reference;</strong> get a tape measure or coin next to individual impacts so the size is documentable</li>
+          <li><strong>Straight-down overview of the test square,</strong> showing hit pattern and density together</li>
+        </ol>
+        <p>Repeat this for every slope. Don't shortcut the rear slope because it's inconvenient; carriers notice missing slopes.</p>
+
+        <h3>On metal roofing</h3>
+        <p>Hail hits on metal leave clean circular dents. Photograph with raking light (low angle, side-lit) to reveal the shadow of each dent. Count and document hit density the same way.</p>
+
+        <h3>On tile roofing</h3>
+        <p>Document cracked, fractured, or displaced tiles. Photograph whole tiles from above, then close-ups of individual cracks. Note whether the crack pattern is consistent with impact (star or radial fracture) versus foot traffic (straight-line fracture).</p>
+
+        <h2 id="step6">Step 6: Photograph the Interior If There's a Water Intrusion Claim</h2>
+        <p>If the homeowner reports interior damage:</p>
+        <ul>
+          <li>Document the stain or damage in context (the whole room or ceiling area)</li>
+          <li>Close-up of the stain or affected material</li>
+          <li>Photograph directly above on the roof and note the corresponding area</li>
+          <li>Note whether the interior damage is consistent with the roof damage location</li>
+        </ul>
+        <p>Don't speculate on causation in photos. Let the images and your written notes do that work.</p>
+
+        <h2 id="step7">Step 7: Organize Everything Before You Leave the Property</h2>
+        <p>The biggest mistake in field documentation is leaving with a camera roll full of unlabeled photos in random order. Organization happens on-site, not later at your desk.</p>
+        <p>For each section of the report, group photos as:</p>
+        <ol>
+          <li>Context/establishing shot</li>
+          <li>Mid-range, showing the damaged component in relation to surrounding area</li>
+          <li>Close-up with damage clearly visible</li>
+        </ol>
+
+        <div class="checklist">
+          <h4>Minimum Photo Checklist: Before You Leave</h4>
+          <ul>
+            <li>Address/property establishing shot</li>
+            <li>All four elevations</li>
+            <li>Gutters, all elevations</li>
+            <li>AC condenser</li>
+            <li>At least two soft metal surfaces</li>
+            <li>Chalk square test with count, each slope</li>
+            <li>Low-angle damage shots, each slope</li>
+            <li>Close-ups with scale reference, each slope</li>
+            <li>Any interior damage (if applicable)</li>
+          </ul>
+        </div>
+
+        <p>If you're missing anything on this list, get it before you come down the ladder.</p>
+
+        <h2 id="step8">Step 8: Write the Report While It's Fresh</h2>
+        <p>Field notes written same-day are dramatically better than ones written three days later. You'll remember details like the hit count in the test square on the north slope and the dent pattern on the condenser, details that evaporate quickly.</p>
+        <p><strong>Your written report should include:</strong></p>
+        <ul>
+          <li>Date of inspection and date of loss</li>
+          <li>Storm verification summary (hail size, source)</li>
+          <li>Property description (roof type, approximate age, pitch, square footage)</li>
+          <li>Supporting evidence summary: what you found on gutters, AC, soft metals</li>
+          <li>Slope-by-slope damage summary with hit counts, damage types observed, and your conclusion on functional damage</li>
+          <li>Photo reference; photos should appear adjacent to the relevant section, not dumped at the end</li>
+        </ul>
+
+        <h2 id="mistakes">Common Mistakes That Get Claims Denied or Disputed</h2>
+        <ul>
+          <li><strong>Missing elevation:</strong> one slope or elevation with no photos reads as "nothing to document"</li>
+          <li><strong>No supporting evidence;</strong> roof photos alone are easier to dispute</li>
+          <li><strong>No scale reference;</strong> impacts without size context are harder to evaluate</li>
+          <li><strong>Blistering misidentified as hail,</strong> a common error that damages your credibility with reviewers who catch it</li>
+          <li><strong>Disorganized photo order;</strong> a 200-photo dump with no structure makes reviewers work harder and like you less</li>
+        </ul>
+
+        <!-- IN-ARTICLE CTA -->
+        <div class="cta-strip">
+          <div class="cta-strip-text">
+            <h3>The right tool makes this <em>faster.</em></h3>
+            <p>Upload your field photos, annotate directly on the images, add your report details, and export a branded, carrier-ready PDF. No login, no app install, works on your phone at the jobsite.</p>
+          </div>
+          <a href="https://snaptofile.com/app" class="cta-strip-btn">Try SnapToFile free →</a>
+        </div>
+
+        <h2 id="summary">Summary</h2>
+        <p>Good hail damage documentation follows a clear sequence: verify the storm, establish the property, document soft metals and supporting evidence, work the roof systematically with test squares and close-ups, and write your notes while they're fresh.</p>
+        <p>A complete, organized report with strong photo evidence is the difference between a smooth claim approval and an uphill dispute. The goal isn't just to document damage; it's to tell a clear, credible story that any reviewer can follow without having been there.</p>
+
+        <div class="section-rule"></div>
+
+        <!-- AUTHOR BIO -->
+        <div class="author-bio">
+          <div class="author-bio-avatar"><span>A</span></div>
+          <div class="author-bio-text">
+            <div class="name">Albert Miller</div>
+            <p>Albert is a former independent insurance adjuster, appraiser, supplementer, and construction specialist with 20 years in the field. He built SnapToFile to give adjusters and contractors a proper documentation tool that works the way they actually work.</p>
+          </div>
+        </div>
+
+      </article>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <h3>Build reports at the <em>jobsite.</em></h3>
+          <p>SnapToFile turns your field photos into a carrier-ready PDF report. No install. No login. Works offline.</p>
+          <a href="https://snaptofile.com/app/pro" class="sidebar-btn">Try Pro Free →</a>
+          <a href="https://snaptofile.com/app" class="sidebar-btn-secondary">Use Free Version</a>
+        </div>
+        <div class="sidebar-toc">
+          <h4>In This Article</h4>
+          <ol>
+            <li><a href="#why">Why Documentation Matters</a></li>
+            <li><a href="#step1">Verify the Storm</a></li>
+            <li><a href="#step2">Gear Up</a></li>
+            <li><a href="#step3">Establish the Property</a></li>
+            <li><a href="#step4">Document Supporting Evidence</a></li>
+            <li><a href="#step5">Document the Roof</a></li>
+            <li><a href="#step6">Interior Photos</a></li>
+            <li><a href="#step7">Organize On-Site</a></li>
+            <li><a href="#step8">Write the Report</a></li>
+            <li><a href="#mistakes">Common Mistakes</a></li>
+          </ol>
+        </div>
+      </aside>
+
+    </div><!-- end article-layout -->
+  </div><!-- end wrap -->
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <div class="foot-brand">Snap<em>ToFile</em></div>
+      <div class="foot-links">
+        <a href="/blog">Blog</a>
+        <a href="/app">Free Tool</a>
+        <a href="/app/pro">Pro</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </div>
+    </div>
+    <p class="foot-copy">© 2026 SnapToFile. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
