@@ -1011,5 +1011,51 @@ body.sel-mode .csel{opacity:1}
   &copy; 2026 SnapToFile. All rights reserved. Unauthorized copying, reproduction, or distribution of this software is strictly prohibited.
 </div>
 
+<!-- Drag-ghost watchdog (mobile drag-to-reorder cleanup, 2026-05-13) -->
+<script>
+(function(){
+  // Removes orphaned .touch-drag-ghost clones that get left behind when a
+  // mobile drag is interrupted (modal opens, scroll preempts, window blurs).
+  // Also clears stale .dragging / .drag-over visual states on photo cards.
+  // Additive — does not modify the existing drag-to-reorder logic.
+  var lastMove = 0;
+  function killGhosts(){
+    var g = document.querySelectorAll('.touch-drag-ghost');
+    for (var i=0; i<g.length; i++) g[i].remove();
+    var d = document.querySelectorAll('.pcard.dragging');
+    for (var j=0; j<d.length; j++) d[j].classList.remove('dragging');
+    var o = document.querySelectorAll('.pcard.drag-over');
+    for (var k=0; k<o.length; k++) o[k].classList.remove('drag-over');
+  }
+  function safeKill(){
+    // Wait a frame so a legitimate touchend handler can finish its own
+    // cleanup first; we only act if a ghost is still there afterward.
+    requestAnimationFrame(function(){
+      if (Date.now() - lastMove > 80) killGhosts();
+      else setTimeout(killGhosts, 250);
+    });
+  }
+  document.addEventListener('touchmove', function(){ lastMove = Date.now(); }, {passive:true, capture:true});
+  document.addEventListener('touchend', safeKill, {passive:true, capture:true});
+  document.addEventListener('touchcancel', safeKill, {passive:true, capture:true});
+  document.addEventListener('pointerup', safeKill, {passive:true, capture:true});
+  document.addEventListener('pointercancel', safeKill, {passive:true, capture:true});
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) killGhosts();
+    else setTimeout(killGhosts, 100);
+  });
+  window.addEventListener('blur', killGhosts);
+  window.addEventListener('pageshow', killGhosts);
+  window.addEventListener('orientationchange', killGhosts);
+  // Safety net: every 1.5s, if a ghost is present but nothing has moved
+  // for >800ms, the drag is definitely abandoned.
+  setInterval(function(){
+    if (document.querySelector('.touch-drag-ghost') && Date.now() - lastMove > 800) {
+      killGhosts();
+    }
+  }, 1500);
+})();
+</script>
+
 </body>
 </html>
