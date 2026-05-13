@@ -1491,6 +1491,72 @@ body.lic-export-only #dz{
   sync();
 })();
 </script>
+
+<!-- Copyright Notice -->
+<div style="text-align:center;padding:12px;font-size:11px;color:#6b6b6b;font-family:'Inter Tight',sans-serif;border-top:1px solid #d9cfb9;margin-top:24px;">
+  &copy; 2026 SnapToFile. All rights reserved. Unauthorized copying, reproduction, or distribution of this software is strictly prohibited.
+</div>
+
+<!-- Drag-ghost watchdog v2 (mobile drag-to-reorder cleanup, 2026-05-13) -->
+<script>
+(function(){
+  // Removes orphaned .touch-drag-ghost clones left behind when a mobile drag
+  // is interrupted (modal opens, scroll preempts, window blurs). Additive only
+  // — does not touch the obfuscated drag-to-reorder logic.
+  var lastMove = 0;
+  function killGhosts(){
+    var g = document.querySelectorAll('.touch-drag-ghost');
+    for (var i=0; i<g.length; i++) g[i].remove();
+    var d = document.querySelectorAll('.pcard.dragging');
+    for (var j=0; j<d.length; j++) d[j].classList.remove('dragging');
+    var o = document.querySelectorAll('.pcard.drag-over');
+    for (var k=0; k<o.length; k++) o[k].classList.remove('drag-over');
+    var p = document.querySelectorAll('.pcard.pressing');
+    for (var m=0; m<p.length; m++) p[m].classList.remove('pressing');
+  }
+  function maybeKill(delay){
+    setTimeout(function(){
+      if (Date.now() - lastMove > 250) killGhosts();
+    }, delay || 300);
+  }
+  document.addEventListener('touchmove',   function(){ lastMove = Date.now(); }, {passive:true, capture:true});
+  document.addEventListener('touchend',    function(){ maybeKill(); }, {passive:true, capture:true});
+  document.addEventListener('touchcancel', function(){ killGhosts(); }, {passive:true, capture:true});
+  document.addEventListener('pointerup',   function(){ maybeKill(); }, {passive:true, capture:true});
+  document.addEventListener('pointercancel', function(){ killGhosts(); }, {passive:true, capture:true});
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) killGhosts(); else setTimeout(killGhosts, 100);
+  });
+  window.addEventListener('blur', killGhosts);
+  window.addEventListener('pageshow', killGhosts);
+  window.addEventListener('orientationchange', killGhosts);
+  // Aggressive safety net: every 700ms, if a ghost is present and nothing has
+  // moved for >450ms, the drag is definitely abandoned.
+  setInterval(function(){
+    if (document.querySelector('.touch-drag-ghost') && Date.now() - lastMove > 450) {
+      killGhosts();
+    }
+  }, 700);
+
+  // Visible deployment indicator: append " · drag-fix" to the build stamp
+  // once it populates, so we can visually confirm this script is live.
+  function tagBuildStamp(){
+    var bs = document.getElementById('bs-value');
+    if (!bs) return false;
+    if (bs.textContent && bs.textContent !== '—' && bs.textContent.indexOf('drag-fix') === -1) {
+      bs.textContent = bs.textContent + ' · drag-fix';
+      return true;
+    }
+    return false;
+  }
+  if (!tagBuildStamp()) {
+    var tries = 0;
+    var iv = setInterval(function(){
+      if (tagBuildStamp() || ++tries > 20) clearInterval(iv);
+    }, 250);
+  }
+})();
+</script>
 </body>
 </html>
 
