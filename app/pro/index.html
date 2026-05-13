@@ -1147,6 +1147,12 @@ body.lic-export-only #dz{
     <span class="act-hint">Click photo to open · Shift+Click to multi-select · Drag to reorder</span>
   </div>
 
+  <!-- Mobile refresh warning — shown by MutationObserver when photos are present -->
+  <div id="mobile-save-notice" style="display:none;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:11px;color:#7c2d12;line-height:1.55;flex-direction:row;align-items:flex-start;gap:8px">
+    <span style="font-size:15px;flex-shrink:0;margin-top:-1px">📱</span>
+    <span><strong>Mobile reminder:</strong> Avoid refreshing — all work exists only in this browser tab. Save your project often via <strong>Save / Open</strong> in the top bar.</span>
+  </div>
+
   <!-- DROPZONE -->
   <div id="dz">
     <svg width="32" height="32" fill="none" stroke="#b5c0a8" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
@@ -1248,8 +1254,17 @@ body.lic-export-only #dz{
     </div>
     <!-- Print to PDF instructions -->
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 14px;margin-top:14px;font-size:11px;color:#166534;line-height:1.6">
-      <strong>💡 To save as PDF:</strong> After clicking Generate, the print dialog will open.<br>
+      <strong>💡 Desktop — to save as PDF:</strong> After clicking Generate, the print dialog will open.<br>
       Set <strong>Destination → Save as PDF</strong> (Chrome/Edge) or <strong>PDF → Save as PDF</strong> (Safari/Firefox).
+    </div>
+    <!-- iPhone / iPad PDF instructions -->
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:11px 14px;margin-top:8px;font-size:11px;color:#7c2d12;line-height:1.75">
+      <strong>📱 iPhone / iPad — to save as PDF:</strong><br>
+      1. Tap <strong>Generate &amp; Print</strong> below — Safari opens a print preview.<br>
+      2. <strong>Pinch outward</strong> on the preview thumbnail — this opens a PDF view.<br>
+      3. Tap the <strong>Share &#x2B06;</strong> button (top right), then <strong>Save to Files</strong>.<br>
+      4. Choose a folder and tap <strong>Save</strong>.<br>
+      <span style="font-size:10px;color:#92400e;display:block;margin-top:5px">⚠ Avoid refreshing this page before exporting — your work isn't backed up on mobile.</span>
     </div>
     <!-- STF save prompt -->
     <div style="background:#f0f1ea;border:1px solid #d6dfd0;border-radius:8px;padding:11px 14px;margin-top:10px;font-size:11px;color:#33432b;line-height:1.55">
@@ -1468,6 +1483,19 @@ body.lic-export-only #dz{
   &copy; 2026 SnapToFile. All rights reserved. Unauthorized copying, reproduction, or distribution of this software is strictly prohibited.
 </div>
 
+<script>
+/* Mobile refresh warning — shows when photos are present on iPhone/iPad/Android.
+   Uses MutationObserver so it works independently of the main app code. */
+(function(){
+  if(!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))return;
+  var notice=document.getElementById('mobile-save-notice');
+  var grid=document.getElementById('pgrid');
+  if(!notice||!grid)return;
+  function sync(){notice.style.display=grid.children.length>0?'flex':'none';}
+  new MutationObserver(sync).observe(grid,{childList:true});
+  sync();
+})();
+</script>
 </body>
 </html>
 
