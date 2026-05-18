@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>How to Structure a Roof Inspection Report That Gets Approved the First Time — SnapToFile</title>
+<meta name="description" content="The structure of a roof inspection report that gets approved on the first pass. Cover page, damage summary, photo organization, and captions that do the work."/>
+<meta property="og:title" content="How to Structure a Roof Inspection Report That Gets Approved the First Time"/>
+<meta property="og:description" content="A practical guide for adjusters, roofing contractors, and restoration pros. Build reports that respect the reviewer's time and tell a clear story."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://snaptofile.com/blog/how-to-structure-a-roof-inspection-report"/>
+<link rel="canonical" href="https://snaptofile.com/blog/how-to-structure-a-roof-inspection-report"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M10 8 H50 L66 24 V72 H10 Z' fill='%231a1a1a'/%3E%3Cpath d='M50 8 V24 H66' stroke='%23f5efe6' stroke-width='3' fill='none'/%3E%3Ccircle cx='37' cy='46' r='14' fill='%234a5c3f'/%3E%3Ccircle cx='37' cy='46' r='5' fill='%23f5efe6'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f5efe6;--cream-deep:#ece4d3;--paper:#fbf7ef;
+  --ink:#1a1a1a;--ink-soft:#2d2d2d;--muted:#6b6b6b;
+  --rule:#d9cfb9;--sage:#4a5c3f;--sage-deep:#33432b;--sage-soft:#8a9678;
+  --rust:#b8542a;--gold:#b08d3a;
+  --serif:'Fraunces','Cormorant Garamond',Georgia,serif;
+  --sans:'Inter Tight',-apple-system,BlinkMacSystemFont,sans-serif;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,40px);position:relative;z-index:2}
+
+/* ── MASTHEAD ── */
+header.masthead{border-bottom:1px solid var(--rule);padding:18px 0;background:var(--cream);position:relative;z-index:3}
+.mast-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.mast-brand{display:inline-flex;align-items:center;gap:11px;font-family:var(--serif);font-weight:900;font-size:clamp(22px,2.6vw,30px);letter-spacing:-.02em;line-height:1;color:var(--ink)}
+.mast-brand-icon{flex-shrink:0;width:34px;height:34px;display:block;transition:transform .25s ease}
+.mast-brand:hover .mast-brand-icon{transform:rotate(-4deg) scale(1.04)}
+.mast-brand em{font-style:italic;font-weight:400;color:var(--sage)}
+.mast-right{display:flex;gap:16px;align-items:center}
+.mast-link{font-size:12px;font-weight:500;color:var(--ink-soft);border-bottom:1px solid transparent;transition:border-color .2s}
+.mast-link:hover{border-bottom-color:var(--ink)}
+.mast-cta-pro{background:var(--ink);color:var(--cream);padding:9px 18px;border-radius:30px;font-size:12px;font-weight:600;letter-spacing:.02em;transition:background .18s,transform .18s}
+.mast-cta-pro:hover{background:var(--sage-deep);transform:translateY(-1px)}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{padding:20px 0 0;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.breadcrumb a{color:var(--muted);border-bottom:1px solid var(--rule);transition:color .15s,border-color .15s}
+.breadcrumb a:hover{color:var(--sage);border-color:var(--sage)}
+.breadcrumb span{color:var(--rule)}
+
+/* ── ARTICLE HEADER ── */
+.article-header{padding:clamp(36px,6vw,72px) 0 clamp(28px,4vw,48px)}
+.article-meta{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.article-tag{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);background:var(--sage);padding:5px 12px;border-radius:30px}
+.article-date{font-size:12px;color:var(--muted);font-weight:500}
+.article-readtime{font-size:12px;color:var(--muted);font-weight:500}
+.article-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--rule)}
+h1.article-title{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5.5vw,64px);line-height:1.05;letter-spacing:-.025em;color:var(--ink);margin-bottom:24px;max-width:820px}
+h1.article-title em{font-style:italic;font-weight:400;color:var(--sage-deep)}
+.article-lede{font-family:var(--serif);font-size:clamp(17px,1.6vw,21px);line-height:1.6;color:var(--ink-soft);max-width:680px;margin-bottom:32px}
+.article-byline{display:flex;align-items:center;gap:14px;padding:20px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.byline-avatar{width:44px;height:44px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.byline-avatar span{font-family:var(--serif);font-size:18px;font-weight:500;color:var(--cream);font-style:italic}
+.byline-text .name{font-size:14px;font-weight:600;color:var(--ink)}
+.byline-text .title{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* ── ARTICLE LAYOUT ── */
+.article-layout{display:grid;grid-template-columns:1fr 280px;gap:clamp(32px,5vw,72px);align-items:start;padding:clamp(32px,5vw,56px) 0}
+@media(max-width:860px){.article-layout{grid-template-columns:1fr}}
+
+/* ── ARTICLE BODY ── */
+.article-body{min-width:0}
+.article-body h2{font-family:var(--serif);font-weight:500;font-size:clamp(22px,2.8vw,32px);letter-spacing:-.02em;line-height:1.15;color:var(--ink);margin:clamp(36px,4vw,56px) 0 16px;padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--rule)}
+.article-body h2:first-child{margin-top:0;padding-top:0;border-top:none}
+.article-body h3{font-family:var(--serif);font-weight:500;font-size:clamp(18px,2vw,23px);letter-spacing:-.015em;color:var(--ink);margin:28px 0 12px}
+.article-body p{font-size:clamp(15px,1.2vw,17px);line-height:1.75;color:var(--ink-soft);margin-bottom:20px}
+.article-body p strong{color:var(--ink);font-weight:600}
+.article-body ul,.article-body ol{margin:0 0 20px 0;padding-left:0;list-style:none}
+.article-body ul li,.article-body ol li{font-size:clamp(15px,1.2vw,17px);line-height:1.7;color:var(--ink-soft);padding:6px 0 6px 24px;position:relative;border-bottom:1px solid var(--rule)}
+.article-body ul li:last-child,.article-body ol li:last-child{border-bottom:none}
+.article-body ul li::before{content:"—";position:absolute;left:0;color:var(--sage);font-weight:600}
+.article-body ol{counter-reset:ol}
+.article-body ol li{counter-increment:ol}
+.article-body ol li::before{content:counter(ol);position:absolute;left:0;color:var(--sage);font-weight:700;font-family:var(--serif);font-size:15px}
+.article-body ul li strong,.article-body ol li strong{color:var(--ink);font-weight:600}
+
+/* checklist */
+.checklist{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:24px 28px;margin:28px 0}
+.checklist h4{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}
+.checklist ul{list-style:none;padding:0;margin:0}
+.checklist ul li{font-size:14px;color:var(--ink-soft);padding:7px 0 7px 28px;position:relative;border-bottom:1px solid var(--rule)}
+.checklist ul li:last-child{border-bottom:none}
+.checklist ul li::before{content:"☐";position:absolute;left:0;color:var(--sage);font-size:16px;line-height:1}
+
+/* tidbit callout */
+.tidbit{background:var(--paper);border-left:3px solid var(--sage);border-radius:0 var(--r) var(--r) 0;padding:18px 22px;margin:24px 0;position:relative}
+.tidbit-label{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);margin-bottom:8px}
+.tidbit p{font-size:14px;line-height:1.65;color:var(--ink-soft);margin:0}
+
+/* not-damage box */
+.not-damage{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:20px 24px;margin:20px 0}
+.not-damage h4{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+.not-damage ul{list-style:none;padding:0;margin:0}
+.not-damage ul li{font-size:14px;color:var(--ink-soft);padding:5px 0 5px 20px;position:relative}
+.not-damage ul li::before{content:"✕";position:absolute;left:0;color:var(--rust);font-size:12px;font-weight:700;line-height:1.4}
+
+/* caption comparison: side-by-side boxes */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0}
+@media(max-width:600px){.compare-grid{grid-template-columns:1fr}}
+.compare-box{padding:18px 22px;border-radius:var(--r);border:1px solid var(--rule)}
+.compare-box.weak{background:var(--cream-deep);border-left:3px solid var(--rust)}
+.compare-box.strong{background:var(--paper);border-left:3px solid var(--sage)}
+.compare-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px}
+.compare-box.weak .compare-label{color:var(--rust)}
+.compare-box.strong .compare-label{color:var(--sage)}
+.compare-text{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.55;color:var(--ink-soft)}
+
+/* section divider */
+.section-rule{height:1px;background:var(--rule);margin:clamp(32px,4vw,48px) 0}
+
+/* ── SIDEBAR ── */
+.sidebar{position:sticky;top:28px}
+.sidebar-card{background:var(--ink);color:var(--cream);border-radius:var(--r);padding:28px 24px;margin-bottom:20px}
+.sidebar-card h3{font-family:var(--serif);font-size:20px;font-weight:500;line-height:1.2;margin-bottom:10px}
+.sidebar-card h3 em{font-style:italic;font-weight:400;color:var(--sage-soft)}
+.sidebar-card p{font-size:13px;line-height:1.6;color:#b0a898;margin-bottom:20px}
+.sidebar-btn{display:block;background:var(--sage);color:var(--cream);text-align:center;padding:12px 16px;border-radius:var(--r);font-size:13px;font-weight:600;letter-spacing:.03em;transition:background .18s,transform .15s}
+.sidebar-btn:hover{background:var(--sage-deep);transform:translateY(-1px)}
+.sidebar-btn-secondary{display:block;text-align:center;padding:10px 16px;border:1px solid #3a3a3a;border-radius:var(--r);font-size:12px;font-weight:500;color:#b0a898;margin-top:10px;transition:border-color .18s,color .18s}
+.sidebar-btn-secondary:hover{border-color:var(--sage-soft);color:var(--cream)}
+.sidebar-toc{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:22px 20px}
+.sidebar-toc h4{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}
+.sidebar-toc ol{list-style:none;padding:0;margin:0;counter-reset:toc}
+.sidebar-toc ol li{counter-increment:toc;padding:6px 0 6px 24px;position:relative;border-bottom:1px solid var(--rule);font-size:12px;line-height:1.4}
+.sidebar-toc ol li:last-child{border-bottom:none}
+.sidebar-toc ol li::before{content:counter(toc);position:absolute;left:0;color:var(--sage);font-weight:700;font-family:var(--serif);font-size:13px}
+.sidebar-toc ol li a{color:var(--muted);transition:color .15s}
+.sidebar-toc ol li a:hover{color:var(--sage)}
+
+/* ── CTA STRIP ── */
+.cta-strip{background:var(--sage);border-radius:var(--r);padding:clamp(28px,4vw,44px) clamp(24px,4vw,48px);margin:clamp(36px,5vw,56px) 0;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cta-strip-text h3{font-family:var(--serif);font-weight:500;font-size:clamp(20px,2.5vw,28px);color:var(--cream);margin-bottom:8px}
+.cta-strip-text h3 em{font-style:italic;font-weight:400}
+.cta-strip-text p{font-size:14px;color:rgba(245,239,230,.75);max-width:480px;line-height:1.6}
+.cta-strip-btn{background:var(--cream);color:var(--sage-deep);padding:14px 28px;border-radius:var(--r);font-size:14px;font-weight:700;letter-spacing:.02em;white-space:nowrap;flex-shrink:0;transition:background .18s,transform .15s}
+.cta-strip-btn:hover{background:var(--paper);transform:translateY(-1px)}
+
+/* ── AUTHOR BIO ── */
+.author-bio{border-top:1px solid var(--rule);padding:clamp(28px,4vw,40px) 0;display:flex;gap:20px;align-items:flex-start}
+.author-bio-avatar{width:56px;height:56px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.author-bio-avatar span{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--cream);font-style:italic}
+.author-bio-text .name{font-family:var(--serif);font-size:18px;font-weight:500;margin-bottom:6px}
+.author-bio-text p{font-size:14px;line-height:1.65;color:var(--muted)}
+
+/* ── BACK TO BLOG ── */
+.back-link{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--sage);border-bottom:1px solid transparent;transition:border-color .15s;margin:0 0 clamp(24px,3vw,36px)}
+.back-link:hover{border-bottom-color:var(--sage)}
+.back-link svg{transition:transform .15s}
+.back-link:hover svg{transform:translateX(-3px)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--rule);padding:clamp(28px,4vw,40px) 0;margin-top:clamp(40px,6vw,72px)}
+.foot-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-brand{font-family:var(--serif);font-weight:700;font-size:18px;color:var(--ink)}
+.foot-brand em{font-style:italic;font-weight:400;color:var(--sage)}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+.foot-links a{font-size:12px;color:var(--muted);transition:color .15s}
+.foot-links a:hover{color:var(--sage)}
+.foot-copy{font-size:11px;color:var(--rule);margin-top:14px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="mast-row">
+      <a href="/" class="mast-brand">
+        <svg class="mast-brand-icon" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+          <path d="M10 8 H50 L66 24 V72 H10 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+          <path d="M50 8 V24 H66" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+          <path d="M50 8 L66 24" stroke="#1a1a1a" stroke-width="2.5"/>
+          <g transform="translate(37 46)">
+            <circle r="15" fill="none" stroke="#4a5c3f" stroke-width="2.8"/>
+            <g stroke="#4a5c3f" stroke-width="2.8" stroke-linecap="round" fill="none">
+              <path d="M 0 -15 L 5 -3"/><path d="M 13 -7.5 L 5 3"/><path d="M 13 7.5 L 0 6"/>
+              <path d="M 0 15 L -5 3"/><path d="M -13 7.5 L -5 -3"/><path d="M -13 -7.5 L 0 -6"/>
+            </g>
+          </g>
+        </svg>
+        Snap<em>ToFile</em>
+      </a>
+      <div class="mast-right">
+        <a href="/blog" class="mast-link">Blog</a>
+        <a href="/app" class="mast-link">Free Tool</a>
+        <a href="/app/pro" class="mast-cta-pro">Try Pro →</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ARTICLE -->
+<main>
+  <div class="wrap">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span>›</span>
+      <a href="/blog">Blog</a>
+      <span>›</span>
+      <span>Roof Inspection Report Structure</span>
+    </nav>
+
+    <!-- ARTICLE HEADER -->
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="article-tag">Report Writing</span>
+        <span class="article-meta-dot"></span>
+        <span class="article-date">2026</span>
+        <span class="article-meta-dot"></span>
+        <span class="article-readtime">6 min read</span>
+      </div>
+      <h1 class="article-title">How to Structure a Roof Inspection Report <em>That Gets Approved the First Time</em></h1>
+      <p class="article-lede">Most denied claims aren't denied because the damage wasn't there. They're denied because the report didn't tell a clear story. Here's the structure that gets approved on the first pass.</p>
+      <div class="article-byline">
+        <div class="byline-avatar"><span>A</span></div>
+        <div class="byline-text">
+          <div class="name">Albert Miller</div>
+          <div class="title">Former Independent Adjuster · Founder, SnapToFile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO-COLUMN LAYOUT -->
+    <div class="article-layout">
+
+      <!-- BODY -->
+      <article class="article-body">
+
+        <a href="/blog" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          All articles
+        </a>
+
+        <h2 id="why">Why Structure Matters More Than Content</h2>
+        <p>You can have every photo a reviewer needs and still get denied if the report is structured poorly. Reviewers work through dozens of files a day. They look for specific things in specific places. If your report makes them hunt, they stop trusting it.</p>
+        <p>A well-structured report does three things:</p>
+        <ul>
+          <li><strong>Puts identifying information</strong> where the reviewer expects to find it</li>
+          <li><strong>Builds the damage story in logical order,</strong> from arrival to interior</li>
+          <li><strong>Makes every photo earn its place</strong> with a caption that connects it to the claim</li>
+        </ul>
+        <p>A reviewer should be able to scan the first page, understand what they're looking at, and predict what's coming next. Predictability is credibility.</p>
+
+        <h2 id="cover">Section 1: The Cover Page</h2>
+        <p>The cover page is the first thing a reviewer sees. It should answer four questions immediately:</p>
+        <ul>
+          <li>Who prepared this report?</li>
+          <li>What property is this?</li>
+          <li>When was the inspection performed?</li>
+          <li>What claim or job is this tied to?</li>
+        </ul>
+        <p>At minimum, your cover page needs:</p>
+        <ul>
+          <li>Your company name, logo, and contact information</li>
+          <li>The property address</li>
+          <li>The date of inspection</li>
+          <li>The claim number or job number</li>
+          <li>The insured's name</li>
+          <li>The date of loss</li>
+        </ul>
+        <p>If you're an independent adjuster, add the carrier name and your adjuster license number. If you're a contractor, add your customer's name and the date you were retained.</p>
+        <p>Keep the cover page clean. No damage photos here. Adding the front overview helps ID the property and goes with the identifying information on the front page. The first impression should be professional, not busy.</p>
+
+        <h2 id="summary">Section 2: The Damage Summary</h2>
+        <p>The damage summary sits below the customer info and above the front overview on the cover page. It's a short written narrative, usually half a page, that tells the reviewer what they're about to see.</p>
+        <p>A good damage summary covers:</p>
+        <ul>
+          <li>A one-line statement of what type of loss this is (hail, wind, water intrusion, impact)</li>
+          <li>The date of loss and how it was verified</li>
+          <li>A brief description of the property type, age, and roofing material</li>
+          <li>A summary of the damage observed, by slope or by component</li>
+          <li>Any access or safety limitations that affected the inspection</li>
+        </ul>
+        <p>This is not the place for opinions or recommendations. State what you observed. Save scope decisions for the estimate.</p>
+        <p>A reviewer who reads the damage summary should know what to expect from the photos before they even start scrolling.</p>
+
+        <h2 id="photos">Section 3: The Photo Documentation</h2>
+        <p>This is where most reports fall apart. Field photos taken in the wrong order, with no captions, no scale references, and no logical grouping. A reviewer flipping through a hundred unlabeled photos is a reviewer reaching for the deny stamp.</p>
+        <p>Organize your photos in this order:</p>
+        <ol>
+          <li><strong>Property identification photos.</strong> Street view of the front of the home, the address number, and any landmark that confirms location. One or two photos, one street overview of the front, and one close enough to see the house numbers.</li>
+          <li><strong>Overview photos.</strong> Each slope of the roof from the ground, then each roof slope from above, either from the roof, a ladder, or drone. These establish the scope of the inspection before you zoom in on damage.</li>
+          <li><strong>Damage photos, slope by slope.</strong> Group damage photos by slope or elevation. Front slope first, then right, back, and left. Within each group, work from wide to tight. A wide shot of the slope, then medium shots of damaged areas, then close-ups with a scale reference. If you end up with too many, at least once you are off the roof you are able to tell which photo was taken on what part of the roof and include or exclude as many photos as you need to fill in the actual photo report.</li>
+          <li><strong>Test square photos.</strong> If you're documenting hail, include test squares on each slope showing hit counts. A ten by ten test square is the standard. Mark up the damage (circle or underline) any hail hits you can find within the test area.</li>
+          <li><strong>Interior photos.</strong> If there's interior damage, document it room by room, starting at the highest point of intrusion and working down.</li>
+          <li><strong>Supporting components.</strong> Gutters, downspouts, soft metals, screens, AC fins, painted surfaces, deck staining, and any other collateral evidence of the storm event.</li>
+        </ol>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p><strong>Hint:</strong> it takes a lot more time to go back out to the property to get additional photos than to take two additional photos while you're still there.</p>
+        </div>
+
+        <p>Every photo needs a caption. A photo without a caption is just a picture. A photo with a caption becomes evidence.</p>
+
+        <h2 id="captions">Section 4: Captions That Do the Work</h2>
+        <p>A good caption tells the reviewer three things:</p>
+        <ul>
+          <li>Where the photo was taken</li>
+          <li>What the photo shows</li>
+          <li>Why it matters to the claim</li>
+        </ul>
+        <p>Compare these two captions:</p>
+
+        <div class="compare-grid">
+          <div class="compare-box weak">
+            <div class="compare-label">✕ Weak caption</div>
+            <div class="compare-text">Roof photo</div>
+          </div>
+          <div class="compare-box strong">
+            <div class="compare-label">✓ Strong caption</div>
+            <div class="compare-text">Front slope. Test square showing eleven hail impacts in a ten by ten area, consistent with the date of loss event verified by HailTrace.</div>
+          </div>
+        </div>
+
+        <p>The second caption does work. The first one does not.</p>
+        <p>Captions don't need to be long. They need to be specific. Use plain language. Avoid jargon that a non-adjuster reviewer might not recognize.</p>
+
+        <h2 id="closing">Section 5: Closing the Report</h2>
+        <p>The closing section is short but important. It wraps the report up and tells the reviewer what to do next. This can either be wrapped into the same text area on SnapToFile's damage summary section, or in the email you send to the carrier.</p>
+        <p>Include:</p>
+        <ul>
+          <li>A brief restatement of what was observed</li>
+          <li>A clear statement of any limitations on the inspection</li>
+          <li>Your signature, license number if applicable, and the date the report was finalized</li>
+          <li>Contact information for follow-up questions</li>
+        </ul>
+        <p>If you're submitting a scope or estimate separately, reference it here. If photos are attached as a supplemental file, note the file name and page count.</p>
+
+        <h2 id="mistakes">Common Mistakes That Trigger Denials</h2>
+        <p>Even well-intentioned reports get sent back for fixable reasons. The most common:</p>
+        <ul>
+          <li>Missing or wrong claim number on the cover page</li>
+          <li>No verification of the date of loss</li>
+          <li>Photos in random order with no slope grouping</li>
+          <li>Captions that say "damage" but don't say where or what kind</li>
+          <li>No scale reference in close-up photos</li>
+          <li>No overview shots, only close-ups</li>
+          <li>Interior damage without exterior damage to explain the intrusion path</li>
+          <li>A damage summary that contradicts what the photos show</li>
+        </ul>
+        <p>Most of these come from rushing the documentation in the field and trying to clean it up at the desk. The fix is upstream: build a consistent field routine so the report writes itself when you get home.</p>
+
+        <h2 id="tools">A Word on Tools</h2>
+        <p>The structure above doesn't depend on any particular software. You can build a report that follows this framework in a Word document, a PDF, or a dedicated tool. What matters is that the structure is consistent, the photos are organized, and the captions do real work.</p>
+        <p>That said, the difference between a tool that gives you a blank canvas and a tool that enforces structure shows up in how long the report takes to produce and how consistent it looks from job to job. SnapToFile was built around this exact framework, with a cover page, damage summary, captioned photos in two-up layout, and a branded PDF export. The goal isn't to make documentation flashy. It's to make doing it the right way the path of least resistance.</p>
+
+        <!-- IN-ARTICLE CTA -->
+        <div class="cta-strip">
+          <div class="cta-strip-text">
+            <h3>Built to enforce <em>this exact structure.</em></h3>
+            <p>Cover page, damage summary, captioned two-up photos, branded PDF export. The framework above is how SnapToFile works out of the box. No login, no app install, works on your phone.</p>
+          </div>
+          <a href="https://snaptofile.com/app" class="cta-strip-btn">Try SnapToFile free →</a>
+        </div>
+
+        <h2 id="bottom-line">The Bottom Line</h2>
+        <p>A report that gets approved on the first pass isn't a longer report or a fancier report. It's a report that respects the reviewer's time. Clear cover page, honest damage summary, photos in logical order with captions that do work, and a clean close.</p>
+        <p>When the structure is right, the content speaks for itself.</p>
+
+        <div class="section-rule"></div>
+
+        <!-- AUTHOR BIO -->
+        <div class="author-bio">
+          <div class="author-bio-avatar"><span>A</span></div>
+          <div class="author-bio-text">
+            <div class="name">Albert Miller</div>
+            <p>Albert is a former independent insurance adjuster, appraiser, supplementer, and construction specialist with 20 years in the field. He built SnapToFile to give adjusters and contractors a proper documentation tool that works the way they actually work.</p>
+          </div>
+        </div>
+
+      </article>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <h3>Build reports at the <em>jobsite.</em></h3>
+          <p>SnapToFile turns your field photos into a carrier-ready PDF report. No install. No login. Works offline.</p>
+          <a href="https://snaptofile.com/app/pro" class="sidebar-btn">Try Pro Free →</a>
+          <a href="https://snaptofile.com/app" class="sidebar-btn-secondary">Use Free Version</a>
+        </div>
+        <div class="sidebar-toc">
+          <h4>In This Article</h4>
+          <ol>
+            <li><a href="#why">Why Structure Matters</a></li>
+            <li><a href="#cover">The Cover Page</a></li>
+            <li><a href="#summary">The Damage Summary</a></li>
+            <li><a href="#photos">Photo Documentation</a></li>
+            <li><a href="#captions">Captions</a></li>
+            <li><a href="#closing">Closing the Report</a></li>
+            <li><a href="#mistakes">Common Mistakes</a></li>
+            <li><a href="#tools">A Word on Tools</a></li>
+          </ol>
+        </div>
+      </aside>
+
+    </div><!-- end article-layout -->
+  </div><!-- end wrap -->
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <div class="foot-brand">Snap<em>ToFile</em></div>
+      <div class="foot-links">
+        <a href="/blog">Blog</a>
+        <a href="/app">Free Tool</a>
+        <a href="/app/pro">Pro</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </div>
+    </div>
+    <p class="foot-copy">© 2026 SnapToFile. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
