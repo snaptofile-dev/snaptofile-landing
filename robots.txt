@@ -1,0 +1,9 @@
+# SnapToFile robots.txt
+# Allows all search engines to crawl all public pages.
+# Blocks API endpoints (Stripe webhooks, license validation, etc.).
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://snaptofile.com/sitemap.xml
