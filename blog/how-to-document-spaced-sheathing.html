@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>How to Document Spaced Sheathing and Get It Approved by the Carrier — SnapToFile</title>
+<meta name="description" content="A field guide to documenting spaced sheathing on a re-roof for insurance claim approval. Attic-phase photos, tear-off documentation, code framing, and the carrier denial patterns to avoid."/>
+<meta property="og:title" content="How to Document Spaced Sheathing and Get It Approved by the Carrier"/>
+<meta property="og:description" content="A field guide for adjusters and roofing contractors. Learn how to document spaced sheathing so the overlay gets approved up front, not fought over mid-job."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://snaptofile.com/blog/how-to-document-spaced-sheathing"/>
+<link rel="canonical" href="https://snaptofile.com/blog/how-to-document-spaced-sheathing"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M10 8 H50 L66 24 V72 H10 Z' fill='%231a1a1a'/%3E%3Cpath d='M50 8 V24 H66' stroke='%23f5efe6' stroke-width='3' fill='none'/%3E%3Ccircle cx='37' cy='46' r='14' fill='%234a5c3f'/%3E%3Ccircle cx='37' cy='46' r='5' fill='%23f5efe6'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f5efe6;--cream-deep:#ece4d3;--paper:#fbf7ef;
+  --ink:#1a1a1a;--ink-soft:#2d2d2d;--muted:#6b6b6b;
+  --rule:#d9cfb9;--sage:#4a5c3f;--sage-deep:#33432b;--sage-soft:#8a9678;
+  --rust:#b8542a;--gold:#b08d3a;
+  --serif:'Fraunces','Cormorant Garamond',Georgia,serif;
+  --sans:'Inter Tight',-apple-system,BlinkMacSystemFont,sans-serif;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,40px);position:relative;z-index:2}
+
+/* ── MASTHEAD ── */
+header.masthead{border-bottom:1px solid var(--rule);padding:18px 0;background:var(--cream);position:relative;z-index:3}
+.mast-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.mast-brand{display:inline-flex;align-items:center;gap:11px;font-family:var(--serif);font-weight:900;font-size:clamp(22px,2.6vw,30px);letter-spacing:-.02em;line-height:1;color:var(--ink)}
+.mast-brand-icon{flex-shrink:0;width:34px;height:34px;display:block;transition:transform .25s ease}
+.mast-brand:hover .mast-brand-icon{transform:rotate(-4deg) scale(1.04)}
+.mast-brand em{font-style:italic;font-weight:400;color:var(--sage)}
+.mast-right{display:flex;gap:16px;align-items:center}
+.mast-link{font-size:12px;font-weight:500;color:var(--ink-soft);border-bottom:1px solid transparent;transition:border-color .2s}
+.mast-link:hover{border-bottom-color:var(--ink)}
+.mast-cta-pro{background:var(--ink);color:var(--cream);padding:9px 18px;border-radius:30px;font-size:12px;font-weight:600;letter-spacing:.02em;transition:background .18s,transform .18s}
+.mast-cta-pro:hover{background:var(--sage-deep);transform:translateY(-1px)}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{padding:20px 0 0;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.breadcrumb a{color:var(--muted);border-bottom:1px solid var(--rule);transition:color .15s,border-color .15s}
+.breadcrumb a:hover{color:var(--sage);border-color:var(--sage)}
+.breadcrumb span{color:var(--rule)}
+
+/* ── ARTICLE HEADER ── */
+.article-header{padding:clamp(36px,6vw,72px) 0 clamp(28px,4vw,48px)}
+.article-meta{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.article-tag{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);background:var(--sage);padding:5px 12px;border-radius:30px}
+.article-date{font-size:12px;color:var(--muted);font-weight:500}
+.article-readtime{font-size:12px;color:var(--muted);font-weight:500}
+.article-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--rule)}
+h1.article-title{font-family:var(--serif);font-weight:500;font-size:clamp(32px,5.5vw,64px);line-height:1.05;letter-spacing:-.025em;color:var(--ink);margin-bottom:24px;max-width:820px}
+h1.article-title em{font-style:italic;font-weight:400;color:var(--sage-deep)}
+.article-lede{font-family:var(--serif);font-size:clamp(17px,1.6vw,21px);line-height:1.6;color:var(--ink-soft);max-width:680px;margin-bottom:32px}
+.article-byline{display:flex;align-items:center;gap:14px;padding:20px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.byline-avatar{width:44px;height:44px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.byline-avatar span{font-family:var(--serif);font-size:18px;font-weight:500;color:var(--cream);font-style:italic}
+.byline-text .name{font-size:14px;font-weight:600;color:var(--ink)}
+.byline-text .title{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* ── ARTICLE LAYOUT ── */
+.article-layout{display:grid;grid-template-columns:1fr 280px;gap:clamp(32px,5vw,72px);align-items:start;padding:clamp(32px,5vw,56px) 0}
+@media(max-width:860px){.article-layout{grid-template-columns:1fr}}
+
+/* ── ARTICLE BODY ── */
+.article-body{min-width:0}
+.article-body h2{font-family:var(--serif);font-weight:500;font-size:clamp(22px,2.8vw,32px);letter-spacing:-.02em;line-height:1.15;color:var(--ink);margin:clamp(36px,4vw,56px) 0 16px;padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--rule)}
+.article-body h2:first-child{margin-top:0;padding-top:0;border-top:none}
+.article-body h3{font-family:var(--serif);font-weight:500;font-size:clamp(18px,2vw,23px);letter-spacing:-.015em;color:var(--ink);margin:28px 0 12px}
+.article-body p{font-size:clamp(15px,1.2vw,17px);line-height:1.75;color:var(--ink-soft);margin-bottom:20px}
+.article-body p strong{color:var(--ink);font-weight:600}
+.article-body ul,.article-body ol{margin:0 0 20px 0;padding-left:0;list-style:none}
+.article-body ul li,.article-body ol li{font-size:clamp(15px,1.2vw,17px);line-height:1.7;color:var(--ink-soft);padding:6px 0 6px 24px;position:relative;border-bottom:1px solid var(--rule)}
+.article-body ul li:last-child,.article-body ol li:last-child{border-bottom:none}
+.article-body ul li::before{content:"—";position:absolute;left:0;color:var(--sage);font-weight:600}
+.article-body ol{counter-reset:ol}
+.article-body ol li{counter-increment:ol}
+.article-body ol li::before{content:counter(ol);position:absolute;left:0;color:var(--sage);font-weight:700;font-family:var(--serif);font-size:15px}
+.article-body ul li strong,.article-body ol li strong{color:var(--ink);font-weight:600}
+
+/* checklist */
+.checklist{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:24px 28px;margin:28px 0}
+.checklist h4{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}
+.checklist ul{list-style:none;padding:0;margin:0}
+.checklist ul li{font-size:14px;color:var(--ink-soft);padding:7px 0 7px 28px;position:relative;border-bottom:1px solid var(--rule)}
+.checklist ul li:last-child{border-bottom:none}
+.checklist ul li::before{content:"☐";position:absolute;left:0;color:var(--sage);font-size:16px;line-height:1}
+
+/* tidbit callout */
+.tidbit{background:var(--paper);border-left:3px solid var(--sage);border-radius:0 var(--r) var(--r) 0;padding:18px 22px;margin:24px 0;position:relative}
+.tidbit-label{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);margin-bottom:8px}
+.tidbit p{font-size:14px;line-height:1.65;color:var(--ink-soft);margin:0}
+
+/* not-damage box */
+.not-damage{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:20px 24px;margin:20px 0}
+.not-damage h4{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+.not-damage ul{list-style:none;padding:0;margin:0}
+.not-damage ul li{font-size:14px;color:var(--ink-soft);padding:5px 0 5px 20px;position:relative}
+.not-damage ul li::before{content:"✕";position:absolute;left:0;color:var(--rust);font-size:12px;font-weight:700;line-height:1.4}
+
+/* section divider */
+.section-rule{height:1px;background:var(--rule);margin:clamp(32px,4vw,48px) 0}
+
+/* ── SIDEBAR ── */
+.sidebar{position:sticky;top:28px}
+.sidebar-card{background:var(--ink);color:var(--cream);border-radius:var(--r);padding:28px 24px;margin-bottom:20px}
+.sidebar-card h3{font-family:var(--serif);font-size:20px;font-weight:500;line-height:1.2;margin-bottom:10px}
+.sidebar-card h3 em{font-style:italic;font-weight:400;color:var(--sage-soft)}
+.sidebar-card p{font-size:13px;line-height:1.6;color:#b0a898;margin-bottom:20px}
+.sidebar-btn{display:block;background:var(--sage);color:var(--cream);text-align:center;padding:12px 16px;border-radius:var(--r);font-size:13px;font-weight:600;letter-spacing:.03em;transition:background .18s,transform .15s}
+.sidebar-btn:hover{background:var(--sage-deep);transform:translateY(-1px)}
+.sidebar-btn-secondary{display:block;text-align:center;padding:10px 16px;border:1px solid #3a3a3a;border-radius:var(--r);font-size:12px;font-weight:500;color:#b0a898;margin-top:10px;transition:border-color .18s,color .18s}
+.sidebar-btn-secondary:hover{border-color:var(--sage-soft);color:var(--cream)}
+.sidebar-toc{background:var(--cream-deep);border:1px solid var(--rule);border-radius:var(--r);padding:22px 20px}
+.sidebar-toc h4{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}
+.sidebar-toc ol{list-style:none;padding:0;margin:0;counter-reset:toc}
+.sidebar-toc ol li{counter-increment:toc;padding:6px 0 6px 24px;position:relative;border-bottom:1px solid var(--rule);font-size:12px;line-height:1.4}
+.sidebar-toc ol li:last-child{border-bottom:none}
+.sidebar-toc ol li::before{content:counter(toc);position:absolute;left:0;color:var(--sage);font-weight:700;font-family:var(--serif);font-size:13px}
+.sidebar-toc ol li a{color:var(--muted);transition:color .15s}
+.sidebar-toc ol li a:hover{color:var(--sage)}
+
+/* ── CTA STRIP ── */
+.cta-strip{background:var(--sage);border-radius:var(--r);padding:clamp(28px,4vw,44px) clamp(24px,4vw,48px);margin:clamp(36px,5vw,56px) 0;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cta-strip-text h3{font-family:var(--serif);font-weight:500;font-size:clamp(20px,2.5vw,28px);color:var(--cream);margin-bottom:8px}
+.cta-strip-text h3 em{font-style:italic;font-weight:400}
+.cta-strip-text p{font-size:14px;color:rgba(245,239,230,.75);max-width:480px;line-height:1.6}
+.cta-strip-btn{background:var(--cream);color:var(--sage-deep);padding:14px 28px;border-radius:var(--r);font-size:14px;font-weight:700;letter-spacing:.02em;white-space:nowrap;flex-shrink:0;transition:background .18s,transform .15s}
+.cta-strip-btn:hover{background:var(--paper);transform:translateY(-1px)}
+
+/* ── AUTHOR BIO ── */
+.author-bio{border-top:1px solid var(--rule);padding:clamp(28px,4vw,40px) 0;display:flex;gap:20px;align-items:flex-start}
+.author-bio-avatar{width:56px;height:56px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.author-bio-avatar span{font-family:var(--serif);font-size:22px;font-weight:500;color:var(--cream);font-style:italic}
+.author-bio-text .name{font-family:var(--serif);font-size:18px;font-weight:500;margin-bottom:6px}
+.author-bio-text p{font-size:14px;line-height:1.65;color:var(--muted)}
+
+/* ── BACK TO BLOG ── */
+.back-link{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--sage);border-bottom:1px solid transparent;transition:border-color .15s;margin:0 0 clamp(24px,3vw,36px)}
+.back-link:hover{border-bottom-color:var(--sage)}
+.back-link svg{transition:transform .15s}
+.back-link:hover svg{transform:translateX(-3px)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--rule);padding:clamp(28px,4vw,40px) 0;margin-top:clamp(40px,6vw,72px)}
+.foot-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-brand{font-family:var(--serif);font-weight:700;font-size:18px;color:var(--ink)}
+.foot-brand em{font-style:italic;font-weight:400;color:var(--sage)}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+.foot-links a{font-size:12px;color:var(--muted);transition:color .15s}
+.foot-links a:hover{color:var(--sage)}
+.foot-copy{font-size:11px;color:var(--rule);margin-top:14px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="mast-row">
+      <a href="/" class="mast-brand">
+        <svg class="mast-brand-icon" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+          <path d="M10 8 H50 L66 24 V72 H10 Z" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+          <path d="M50 8 V24 H66" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+          <path d="M50 8 L66 24" stroke="#1a1a1a" stroke-width="2.5"/>
+          <g transform="translate(37 46)">
+            <circle r="15" fill="none" stroke="#4a5c3f" stroke-width="2.8"/>
+            <g stroke="#4a5c3f" stroke-width="2.8" stroke-linecap="round" fill="none">
+              <path d="M 0 -15 L 5 -3"/><path d="M 13 -7.5 L 5 3"/><path d="M 13 7.5 L 0 6"/>
+              <path d="M 0 15 L -5 3"/><path d="M -13 7.5 L -5 -3"/><path d="M -13 -7.5 L 0 -6"/>
+            </g>
+          </g>
+        </svg>
+        Snap<em>ToFile</em>
+      </a>
+      <div class="mast-right">
+        <a href="/blog" class="mast-link">Blog</a>
+        <a href="/app" class="mast-link">Free Tool</a>
+        <a href="/app/pro" class="mast-cta-pro">Try Pro →</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ARTICLE -->
+<main>
+  <div class="wrap">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span>›</span>
+      <a href="/blog">Blog</a>
+      <span>›</span>
+      <span>Spaced Sheathing Documentation</span>
+    </nav>
+
+    <!-- ARTICLE HEADER -->
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="article-tag">Field Guide</span>
+        <span class="article-meta-dot"></span>
+        <span class="article-date">2026</span>
+        <span class="article-meta-dot"></span>
+        <span class="article-readtime">11 min read</span>
+      </div>
+      <h1 class="article-title">How to Document Spaced Sheathing <em>and Get It Approved by the Carrier</em></h1>
+      <p class="article-lede">An older roof with a spaced deck turns a routine re-roof into a documentation fight. A field guide for adjusters and roofing contractors on getting the overlay approved up front, not battled over mid-job.</p>
+      <div class="article-byline">
+        <div class="byline-avatar"><span>A</span></div>
+        <div class="byline-text">
+          <div class="name">Albert Miller</div>
+          <div class="title">Former Independent Adjuster · Founder, SnapToFile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO-COLUMN LAYOUT -->
+    <div class="article-layout">
+
+      <!-- BODY -->
+      <article class="article-body">
+
+        <a href="/blog" class="back-link">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          All articles
+        </a>
+
+        <h2 id="what">What Spaced Sheathing Actually Is</h2>
+        <p>If you've worked enough older roofs, you've seen it. Pull back the shingles and instead of a solid deck, there are individual boards with gaps between them. That's spaced sheathing. And every time it shows up on a claim, it adds a layer of complexity that turns a straightforward re-roof into a documentation fight.</p>
+        <p>Spaced sheathing, sometimes called skip sheathing or open sheathing, is a roof deck built from individual wood boards, usually 1x4 or 1x6, nailed across the rafters with deliberate gaps between them. Gap widths typically range from 1/4 inch up to about an inch, and most manufacturers require an overlay when gaps consistently measure 3/8 inch and over.</p>
+        <p>It was the standard deck for wood shake and wood shingle roofs for most of the 20th century. The gaps let air circulate under the wood roofing, which kept it from rotting. If you're working on a home built before the late 1970s and the original roof was wood, there's a good chance spaced sheathing is what's underneath.</p>
+        <p>It is not the same as solid sheathing. Solid sheathing means plywood or OSB panels covering the entire deck with no gaps. Modern asphalt shingles, synthetic underlayments, and ice-and-water barriers are all designed and warrantied for solid sheathing, not for spaced boards. That difference is where the claim issues begin.</p>
+
+        <h2 id="why-overlay">Why Spaced Sheathing Triggers an Overlay Requirement</h2>
+        <p>Every major shingle manufacturer publishes installation instructions for their products. Those instructions are not suggestions. They specify the deck type the shingles must be installed on, and for asphalt shingles, that deck is always solid sheathing.</p>
+        <p>If the existing deck is spaced sheathing, the manufacturer's instructions require an overlay before new shingles can be installed. Typically that means a layer of 7/16 inch or 1/2 inch OSB or plywood laid over the existing boards to create a continuous nailable surface.</p>
+        <p>Skip the overlay and three things happen at once. The shingle warranty is void. The underlayment can't seal properly. And the new roof fails inspection.</p>
+        <p>State and local building codes generally recognize manufacturer installation instructions as the minimum standard for a code-compliant roof. In other words, your local building code doesn't have to spell out "you must add an overlay over spaced sheathing." It only has to require that roofs be installed per manufacturer specifications, and the manufacturer requires the overlay.</p>
+        <p>That's the chain of reasoning the documentation needs to support. Spaced sheathing exists, manufacturer requires solid deck, local code requires manufacturer specs, overlay is a code requirement, not an upgrade. The job of your photo report is to prove every link in that chain.</p>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p>This is where a lot of contractors and newer adjusters lose the argument before it starts. They treat the overlay as something they're asking the carrier to pay for. It's not. It's a code-mandated component of putting the roof back together correctly. The framing matters; document it that way and the conversation changes. Almost every homeowner's policy includes some form of code upgrade coverage, and that is the coverage line this falls under. Sometimes it's built into the base policy, sometimes it's an add-on with limits like $10,000 or $20,000.</p>
+        </div>
+
+        <h2 id="pushback">Why Carriers Push Back on These Claims</h2>
+        <p>Carriers deny or reduce spaced sheathing overlay claims for three reasons. They almost always come down to gaps in the documentation, not gaps in the legitimacy of the work.</p>
+        <ul>
+          <li><strong>It's not damage-related.</strong> The reviewer argues the overlay is a betterment, an improvement to the home that goes beyond restoring it to pre-loss condition. This denial sticks when there's no clear evidence that the existing deck won't support a code-compliant re-roof.</li>
+          <li><strong>Insufficient proof of spaced sheathing.</strong> The reviewer is looking at photos that don't clearly show gaps between boards, or that only show one small area. Without unambiguous visual proof of the deck condition across the whole roof, they treat the overlay as speculative.</li>
+          <li><strong>Code or manufacturer requirements not substantiated.</strong> The claim file has photos but no manufacturer installation excerpt and no code reference. There's no paper trail tying the overlay back to a mandatory requirement, so it reads like an optional upgrade the contractor wants paid for.</li>
+        </ul>
+        <p>All three denials are preventable. The fix is the same in every case. Photograph the deck thoroughly, organize the photos so the story tells itself, and pair the photos with the relevant manufacturer page and a local code reference.</p>
+
+        <h2 id="step1">Step 1: Confirm What You're Looking At Before You Document</h2>
+        <p>Before you start shooting photos, take ten seconds to confirm the deck is actually spaced sheathing and not something else that looks similar.</p>
+        <p><strong>Look for:</strong></p>
+        <ul>
+          <li>Individual wood boards running perpendicular to the rafters</li>
+          <li>Consistent gaps between boards, usually 1/4 inch to an inch</li>
+          <li>Board widths of 1x4, 1x6, or occasionally 1x8</li>
+          <li>No plywood or OSB sheets anywhere on the slope</li>
+        </ul>
+
+        <div class="not-damage">
+          <h4>What it isn't</h4>
+          <ul>
+            <li>A few damaged or missing boards in an otherwise solid plywood deck. That's repair documentation, not an overlay claim.</li>
+            <li>Tongue-and-groove decking with tight seams. That's solid wood decking, and most manufacturers accept it without an overlay.</li>
+            <li>Furring strips over existing solid sheathing. Less common, but check what's underneath before you call it spaced sheathing.</li>
+          </ul>
+        </div>
+
+        <p>If you're not sure, photograph it both ways. Wide shot showing the pattern, close-up showing what's under the boards. The reviewer will tell you fast if you mislabeled it, and you'd rather know on the first pass.</p>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p>If the gaps are just 1/4 inch, the deck still requires a double underlayment or double IWS coverage per manufacturer guidelines. That's a smaller scope item than a full overlay, but it's still a documented requirement that has to be supplemented, not absorbed.</p>
+        </div>
+
+        <h2 id="step2">Step 2: Document From the Attic When the Roof Is Still Intact</h2>
+        <p>This is the step that often makes or breaks a clean approval. Carriers want to approve the re-deck before tear-off whenever possible. It saves them from a mid-job scope change, and it gives the homeowner certainty about coverage before the roof comes off. Attic photos are usually enough to get that pre-approval. The carrier will still expect tear-off photos later to confirm what was documented, but the approval can be locked in before the contractor arrives.</p>
+
+        <h3>Gear</h3>
+        <ul>
+          <li><strong>Bright flashlight or headlamp.</strong> A phone flash isn't enough.</li>
+          <li>Phone or camera with the flash on</li>
+          <li>Tape measure or ruler for scale shots</li>
+          <li>Mask if the attic has loose insulation</li>
+        </ul>
+
+        <h3>What you're trying to show</h3>
+        <p>The same four photo categories from the deck documentation apply, just shot from below.</p>
+        <ul>
+          <li><strong>Overview shots.</strong> Wide shots looking up at the underside of the deck from multiple positions in the attic. The reviewer needs to see that the spaced sheathing pattern runs across the whole roof, not just one section near an access hatch.</li>
+          <li><strong>Close-up shots.</strong> Tight on 3 to 5 boards from below, with the gaps between them clearly visible. Frame the shot so the board edges are sharp and the gap lines run cleanly through the photo. The pattern of consistent gaps is what proves the deck is spaced.</li>
+          <li><strong>Measurement shots.</strong> Tape measure held against the underside of the deck showing gap width. Get three to five measurement shots per slope you can access.</li>
+          <li><strong>Context shots.</strong> Photos that anchor what you're looking at to a real location. A rafter tail at the eave, a chimney chase, a roof vent, or a valley framed in the shot tells the reviewer which slope they're looking at.</li>
+        </ul>
+
+        <h3>How to shoot it</h3>
+        <ol>
+          <li>Get the flashlight or headlamp positioned so the light rakes across the underside of the deck from a side angle. Side lighting makes the gap edges and board faces sharp. Straight-on light flattens everything out.</li>
+          <li>Use the camera flash for the close-up board shots. The flash plus the side flashlight gives you clean board detail and crisp gap lines.</li>
+          <li>For measurement shots, hold the tape across two boards with the flashlight lighting both the tape numbers and the gap.</li>
+          <li>Get to every accessible slope. If part of the attic isn't reachable, photograph the obstruction so the reviewer sees why the documentation is partial.</li>
+          <li>Frame at least one shot per slope with a rafter, valley, or vent in view so the slope is identifiable from the photo alone.</li>
+        </ol>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p>If you suspect the home is old enough to have spaced sheathing, or you've already seen the deck condition from a previous visit, bring it up with the field adjuster at the first inspection. They'll tell you how their carrier wants it documented, or you can help get the crucial photos captured on the first go-around so the overlay gets included in the carrier's first estimate. If the adjuster is uncertain whether they can get it approved up front, mention they can list it in their estimate as a PWI (Paid When Incurred) item. That's ideal. The line item is on the estimate, the carrier has acknowledged it, and the payment is triggered when the work is actually performed and documented at tear-off.</p>
+        </div>
+
+        <h2 id="step3">Step 3: Establish the Property and Slope Context</h2>
+        <p>Same rule as any roof documentation. Context shots come first. Take these before you start documenting the deck itself:</p>
+        <ol>
+          <li>Street-level establishing shot with the address visible if possible</li>
+          <li>All four elevations of the home: front, right, rear, left</li>
+          <li>Roof overview from the ground for each slope you'll be documenting</li>
+          <li>Once shingles are off, one wide shot per slope showing the full extent of the spaced sheathing</li>
+        </ol>
+        <p>Label each photo by slope using Front, Right, Back, Left. The PDF report should group photos by slope so the reviewer can follow a clear path through the property.</p>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p>The same routine that works for hail damage works here. Start at the front and move right, every time. By the time you've done it on twenty roofs, you stop missing slopes. The carrier reviewer also starts to recognize the pattern, which makes your reports feel familiar and credible.</p>
+        </div>
+
+        <h2 id="step4">Step 4: Document the Deck Itself</h2>
+        <p>This is the core of the claim. Four photo categories, and every shot you take should fit one of them.</p>
+        <ul>
+          <li><strong>Overview shots.</strong> Wide shots of each slope after tear-off. The reviewer needs to see that the spaced sheathing extends across the whole slope, not just a small area near the eaves.</li>
+          <li><strong>Close-up shots.</strong> Tight on 3 to 5 boards with clear gaps visible. Board edges defined, no ambiguity about what they're looking at. One per slope at minimum.</li>
+          <li><strong>Measurement shots.</strong> Tape measure or ruler with clear scale reference. At minimum, capture gap width between boards. Three to five measurement photos per slope.</li>
+          <li><strong>Context shots.</strong> Photos that anchor what you're looking at to a real location. Slope identification, address tie-in, and fixed features like chimneys, vents, valleys, or skylights that the carrier can match to a satellite image of the property.</li>
+        </ul>
+        <p>When all four categories are present for each affected slope, you've built a record that's hard to dispute.</p>
+
+        <div class="tidbit">
+          <div class="tidbit-label">Field Tip</div>
+          <p>Fascia and flashings are the other supplement to document. An overlay raises the deck height, which means all the roof-to-deck flashings (step flashing at walls, chimney flashings, vent collars) have to be pulled and reinstalled at the new height. The existing fascia board also no longer covers the gap between the new deck and the old fascia, both on rakes and eaves. At minimum, a wide drip edge or sider's edge can be retrofitted if the carrier denies a full fascia supplement. None of this is included in a standard roof claim by default. Photograph the existing flashing details and fascia before tear-off so the supplement has visual support.</p>
+        </div>
+
+        <h2 id="step5">Step 5: Document Existing Deck Damage Separately</h2>
+        <p>This is a step a lot of people skip, and it's the one that converts a clean overlay approval into a full deck replacement approval where warranted. If the existing boards show any of the following, photograph them in addition to the standard deck documentation:</p>
+        <ul>
+          <li>Rotted or punky wood</li>
+          <li>Broken or split boards</li>
+          <li>Fastener pull-through from old nails</li>
+          <li>Insect damage</li>
+          <li>Sagging or out-of-plane sections</li>
+        </ul>
+        <p>These photos go into a separate "deck condition" section of the report. The overlay handles the code requirement. Damaged boards underneath the overlay get documented as a separate scope item.</p>
+
+        <h2 id="step6">Step 6: The Photo Checklist</h2>
+        <p>Run this on every spaced sheathing roof. Total photo count will land somewhere between 40 and 60 depending on the size of the home and the number of accessible slopes.</p>
+
+        <div class="checklist">
+          <h4>Attic Phase (Before Tear-Off)</h4>
+          <ul>
+            <li>Overview of deck underside, each accessible slope</li>
+            <li>Close-up of 3 to 5 boards with gaps visible, each accessible slope</li>
+            <li>3 to 5 gap width measurements from below, each accessible slope</li>
+            <li>Context shot tying photos to a slope (rafter at eave, valley, chimney chase)</li>
+            <li>Any obstructions preventing full attic documentation</li>
+          </ul>
+        </div>
+
+        <div class="checklist">
+          <h4>Ground and Roof Phase</h4>
+          <ul>
+            <li>Address establishing shot, house number visible</li>
+            <li>All four elevations of the home from ground level</li>
+            <li>Roof overview from the ground, each slope</li>
+            <li>Existing fascia and flashing details before tear-off</li>
+          </ul>
+        </div>
+
+        <div class="checklist">
+          <h4>Tear-Off Phase</h4>
+          <ul>
+            <li>Slope overview from the deck, each slope, shingles off</li>
+            <li>Close-up showing 3 to 5 boards with clear gaps, each slope</li>
+            <li>3 to 5 gap width measurements, tape measure visible, each slope</li>
+            <li>Fixed-feature reference shots (chimney, valley, vent with deck visible)</li>
+            <li>Wide context shot showing scale across the full slope length</li>
+            <li>Any existing deck damage (rot, broken boards, fastener pull-through)</li>
+          </ul>
+        </div>
+
+        <p>If you're missing anything on this list, get it before you come down the ladder.</p>
+
+        <h2 id="step7">Step 7: Pair the Photos with the Paperwork</h2>
+        <p>Photos alone won't close the loop. Two documents need to ride along with the photo report.</p>
+        <ul>
+          <li><strong>The manufacturer's installation instructions page</strong> that specifies solid sheathing as the required deck. One page, highlighted at the relevant line. Every major shingle manufacturer publishes these and they're freely available on the manufacturer's website.</li>
+          <li><strong>A reference to the local code section</strong> that adopts manufacturer specifications as the minimum standard. Your AHJ, the authority having jurisdiction, can confirm which section applies in the property's location.</li>
+        </ul>
+        <p>Together with the photo set, those two attachments turn the overlay from "an upgrade the contractor wants" into "a code-required component of the repair." That's the language carriers respond to.</p>
+
+        <h2 id="mistakes">Common Mistakes That Get Spaced Sheathing Claims Denied</h2>
+        <ul>
+          <li><strong>Skipping the attic walkthrough on the first inspection.</strong> Pre-tear-off approval is faster and cleaner than mid-job supplements.</li>
+          <li><strong>No measurement photo.</strong> A reviewer can't approve a code-required component without dimensional documentation.</li>
+          <li><strong>Photos from only one slope.</strong> Reviewers assume what isn't documented isn't there.</li>
+          <li><strong>No manufacturer page attached.</strong> The overlay reads as optional without it.</li>
+          <li><strong>Calling the overlay an upgrade in the written notes.</strong> Word choice matters. It's code-required, not optional.</li>
+          <li><strong>Mixing deck damage shots in with deck-type shots.</strong> Keep them separate so the overlay claim and the damaged-board claim each stand on their own.</li>
+          <li><strong>No fixed-feature reference shots.</strong> Without a chimney or valley in frame somewhere, the reviewer can't tie your photos back to the property.</li>
+          <li><strong>No fascia or flashing photos before tear-off.</strong> The supplement for raised deck height becomes much harder to support after the work is done.</li>
+        </ul>
+
+        <!-- IN-ARTICLE CTA -->
+        <div class="cta-strip">
+          <div class="cta-strip-text">
+            <h3>The right tool makes this <em>faster.</em></h3>
+            <p>Capture photos at the jobsite, annotate measurements directly on the image, organize by slope, and export a branded, carrier-ready PDF. No login, no app install, works on your phone on the roof.</p>
+          </div>
+          <a href="https://snaptofile.com/app/pro" class="cta-strip-btn">Try SnapToFile Pro free →</a>
+        </div>
+
+        <h2 id="summary">Summary</h2>
+        <p>Spaced sheathing overlay claims get approved when the documentation tells a clear story. Confirm the deck type. Document from the attic before tear-off so the carrier can approve the re-deck up front. Establish property and slope context. Document the deck thoroughly after tear-off. Separate deck damage from deck type. Photograph the fascia and flashings before they come off. Pair everything with the manufacturer's installation page and a local code reference.</p>
+        <p>The goal isn't just to prove spaced sheathing exists. It's to make the code requirement so obvious that the reviewer has nothing left to push back on.</p>
+
+        <div class="section-rule"></div>
+
+        <!-- AUTHOR BIO -->
+        <div class="author-bio">
+          <div class="author-bio-avatar"><span>A</span></div>
+          <div class="author-bio-text">
+            <div class="name">Albert Miller</div>
+            <p>Albert is a former independent insurance adjuster, appraiser, supplementer, and construction specialist with 20 years in the field. He built SnapToFile to give adjusters and contractors a proper documentation tool that works the way they actually work.</p>
+          </div>
+        </div>
+
+      </article>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <h3>Build reports at the <em>jobsite.</em></h3>
+          <p>SnapToFile turns your field photos into a carrier-ready PDF report. No install. No login. Works offline.</p>
+          <a href="https://snaptofile.com/app/pro" class="sidebar-btn">Try Pro Free →</a>
+          <a href="https://snaptofile.com/app" class="sidebar-btn-secondary">Use Free Version</a>
+        </div>
+        <div class="sidebar-toc">
+          <h4>In This Article</h4>
+          <ol>
+            <li><a href="#what">What Spaced Sheathing Is</a></li>
+            <li><a href="#why-overlay">Why It Triggers an Overlay</a></li>
+            <li><a href="#pushback">Why Carriers Push Back</a></li>
+            <li><a href="#step1">Confirm What You're Looking At</a></li>
+            <li><a href="#step2">Document From the Attic</a></li>
+            <li><a href="#step3">Establish Property Context</a></li>
+            <li><a href="#step4">Document the Deck</a></li>
+            <li><a href="#step5">Document Deck Damage</a></li>
+            <li><a href="#step6">The Photo Checklist</a></li>
+            <li><a href="#step7">Pair Photos with Paperwork</a></li>
+            <li><a href="#mistakes">Common Mistakes</a></li>
+          </ol>
+        </div>
+      </aside>
+
+    </div><!-- end article-layout -->
+  </div><!-- end wrap -->
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <div class="foot-brand">Snap<em>ToFile</em></div>
+      <div class="foot-links">
+        <a href="/blog">Blog</a>
+        <a href="/app">Free Tool</a>
+        <a href="/app/pro">Pro</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+      </div>
+    </div>
+    <p class="foot-copy">© 2026 SnapToFile. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
