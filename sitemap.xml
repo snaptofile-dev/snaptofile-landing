@@ -33,12 +33,24 @@
   <!-- Blog index -->
   <url>
     <loc>https://snaptofile.com/blog</loc>
-    <lastmod>2026-05-27</lastmod>
+    <lastmod>2026-06-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Blog articles (newest first) -->
+  <url>
+    <loc>https://snaptofile.com/blog/how-to-build-a-roofing-supplement-with-photo-evidence</loc>
+    <lastmod>2026-06-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://snaptofile.com/blog/functional-vs-cosmetic-damage</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   <url>
     <loc>https://snaptofile.com/blog/how-to-document-spaced-sheathing</loc>
     <lastmod>2026-05-27</lastmod>
